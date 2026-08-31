@@ -20,6 +20,36 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
+Active AA-VAE-070 on `e46a9d6719893d500071f6cf5ce744d4dc7f439a`:
+main owns `runners/agent_harness/batch_resume.py`,
+calibration-pilot `run_native_batch.py`,
+`tests/test_agent_harness_batch_resume.py`, calibration-pilot `run_campaign.py`,
+`benchmark-vabench-release-v4/runners/run_benchmarkv4_campaign.py`,
+`tests/test_agent_harness_native_campaign_dispatch.py`, both runner READMEs,
+`plans/batch-resume.md`, current-plan/this register, decision/verification logs,
+`docs/alphaapollo-migration/features/AA-VAE-070-batch-resume.md` and migration
+ledger. `resume_attempt_impl` owns only `runners/agent_harness/attempt_sequence.py`,
+calibration-pilot `run_native_attempts.py`,
+`tests/test_agent_harness_attempt_sequence.py` and
+`tests/test_agent_harness_native_attempts.py`. Base and acceptance are in the
+linked brief. `resume_code_map` and `resume_upstream_research` are read-only
+advisers; no delegated Git, shared docs, benchmark/evaluator, credential, private
+evidence or paid execution authority. Delegates hand back unstaged source/tests
+and RED/GREEN evidence; main performs independent review and local commits.
+`resume_evolution_impl` owns only calibration-pilot
+`run_evolution_campaign.py`, new `evolution_batch.py`, and
+`tests/test_agent_harness_evolution_batch.py`. Preserve the old one-cell path;
+add an explicit opt-in batch path using the shared journal described in the
+brief. No round/agent/final engine changes. Free test fixtures only; hand back
+unstaged changes to main. The main-owned shared batch API is coordinated by
+message; delegates must not edit that module or shared records.
+The attempt writer has handed back; main owns its four files for integration.
+The Evolution writer is continuing a bounded review-fix pass on the same three
+files (frozen runtime identity, complete preflight, safe retry and real-result
+joins). Main additionally owns `.github/workflows/evaluator-closure.yml` and
+`tests/test_agent_harness_ci_gate.py`. `resume_native_review` reviews shared/native
+batch and attempt recovery read-only; no edits, Git, credentials or paid calls.
+
 Closed bounded integration request from audit task
 `01a05640-c83b-7223-8da0-738af106d023`, base
 `dee9ccfeb09cc41baf1982d1ee7882f92aef5d72`: main alone owns

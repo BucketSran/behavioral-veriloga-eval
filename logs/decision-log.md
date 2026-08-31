@@ -1,5 +1,17 @@
 # Decision Log
 
+## 2026-08-31 - Open bounded batch recovery, not trajectory replay
+
+- User explicitly requests implementation informed by existing frameworks.
+  Research upstream recovery patterns; retain existing controllers, readers,
+  immutable records and scoring authority. No new framework dependency.
+- Completed failed candidates remain completed. Only missing cells and proven
+  pre-final infrastructure boundaries may run fresh attempts within the original
+  frozen caps. Unknown side effects and final reservations are never retried.
+- Scope/KPIs and file ownership precede code in `plans/batch-resume.md` and
+  `plans/work-ownership.md`; only free fixtures/clean-room verification are in
+  scope. Existing paid runs/budgets and r53/EVAS remain unchanged.
+
 ## 2026-08-31 - Bind the pilot guard to the frozen manifest cap
 
 - Audit-task handoff requests one precise driver fix and a local commit only.
