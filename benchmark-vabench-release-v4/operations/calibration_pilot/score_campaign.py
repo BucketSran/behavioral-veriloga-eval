@@ -663,6 +663,7 @@ def read_native_cell(
         else [mini_swe_bash_tool_descriptor(allowed_conditions=[condition])]
     )
     extensions = manifest.get("extensions")
+    docs_descriptor = None
     if extensions is not None and (not isinstance(extensions, dict) or not extensions
                                   or not set(extensions) <= {"offline_docs", "public_waveform"}):
         raise ValueError("unsupported native extension manifest")
@@ -672,11 +673,12 @@ def read_native_cell(
         docs = extensions["offline_docs"]
         if (not isinstance(docs, dict)
                 or set(docs) != {"profile", "profile_sha256", "intervention", "tool_name"}
-                or docs["intervention"] != "synthetic-frozen-docs-v1"
+                or docs["intervention"] != ("synthetic-frozen-docs-v1"
+                    if docs["profile"].get("schema_version") == 1 else "reviewed-local-docs-v2")
                 or docs["tool_name"] != "vaevas_docs_search"
                 or docs["profile_sha256"] != corpus_profile_sha256(docs["profile"])):
             raise ValueError("native docs profile mismatch")
-        descriptors.append(docs_tool_descriptor(docs["profile"], condition=condition))
+        docs_descriptor = docs_tool_descriptor(docs["profile"], condition=condition)
         for event in private:
             if (event["event_type"] == "tool_result"
                     and event["payload"]["observation"]["tool_name"] == "vaevas_docs_search"
@@ -707,6 +709,9 @@ def read_native_cell(
         or event["payload"].get("observation", {}).get("tool_name") == "vaevas_public_simulate" for event in private
     ):
         raise ValueError("undeclared native waveform capability")
+    # Preserve the launcher's registration order: Bash, waveform, then docs.
+    if docs_descriptor is not None:
+        descriptors.append(docs_descriptor)
     declared_surface = manifest.get("declared_information_surface")
     if declared_surface is not None and declared_surface != RUNNER.declared_information_surface(
         condition, extensions=extensions,
@@ -761,6 +766,12 @@ def read_native_cell(
         row["model_call_limit"] = limit
     elif outcome.get("model_call_budget") is not None:
         raise ValueError("native model-call budget missing from manifest")
+    if "tool_call_limit" in manifest:
+        tool_limit = manifest["tool_call_limit"]
+        if type(tool_limit) is not int or tool_limit <= 0:
+            raise ValueError("invalid native tool-call limit")
+        expected_budgets["tool_calls"] = tool_limit
+        row["tool_call_limit"] = tool_limit
     if request.get("budget_limits") != expected_budgets:
         raise ValueError("native model-call budget or public waveform budget mismatch")
     if artifact_path is None:

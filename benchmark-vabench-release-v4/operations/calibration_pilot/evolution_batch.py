@@ -7,6 +7,7 @@ from dataclasses import asdict
 import hashlib
 import json
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import result_protocol
@@ -280,8 +281,30 @@ def _validated_config(run_dir: Path, campaign: Mapping[str, Any]) -> tuple[dict,
         command=config["command"], evas_command=config["evas_command"],
         campaign_file_sha256=campaign_sha,
     )
+    extensions = campaign.get("extensions")
+    if extensions is not None:
+        from runners.agent_harness.tools.offline_docs import corpus_profile_sha256, validate_corpus_profile
+        if not isinstance(extensions, dict) or not extensions or not set(extensions) <= {"offline_docs", "public_waveform"}:
+            raise ValueError("unsupported Evolution campaign extensions")
+        corpus = None
+        if "offline_docs" in extensions:
+            profile = extensions["offline_docs"]["profile"]
+            validate_corpus_profile(profile)
+            corpus = SimpleNamespace(
+                profile=profile, profile_sha256=corpus_profile_sha256(profile),
+                intervention="synthetic-frozen-docs-v1" if profile["schema_version"] == 1 else "reviewed-local-docs-v2",
+            )
+        waveform = "public_waveform" in extensions
+        if extensions != engine.evolution_extension_config(
+            docs_corpus=corpus, public_waveform=waveform,
+            public_waveform_max_calls=campaign["per_branch_budgets"]["public_validation_calls"] if waveform else None,
+        ):
+            raise ValueError("Evolution extension profile drift")
+        expected["extensions"] = extensions
+        if waveform:
+            expected["public_validation"].update(mode="isolated_public_waveform", legacy_public_validator_also_runs=False)
     expected["declared_information_surface"] = engine.runner.declared_information_surface(
-        campaign["condition"], evolution=True,
+        campaign["condition"], evolution=True, extensions=extensions,
     )
     if config != expected:
         raise ValueError("Evolution config differs from the frozen attempt campaign")

@@ -1,5 +1,43 @@
 # Verification Log
 
+## 2026-09-01 - AA-VAE-075 stable combined integration
+
+- Actual Docker/EVAS + synthetic documents/model replies and simulated live
+  external HTTP: **34 passed, 87.63 s**. Covers Native docs+waveform+final;
+  Evolution two branches/two rounds, four retrievals/four public waveforms,
+  next-round feedback exposure and selected-only final; live uses no actual key
+  or provider request. Ignored fixture root:
+  `benchmark-vabench-release-v4/reports/combined-tools-check-Q0xTSh/stable-final`.
+- Diagnostic REDs found docs/waveform capability registration order disagreement
+  in native score reading and missing extension-aware Evolution final config
+  reconstruction. Both fixed by reusing existing descriptors/config/readers.
+  The initial live fixture used invalid unquoted synthetic credentials; correcting
+  the fixture exercised the existing literal loader without changing its contract.
+- Independent lower-level guard cap now mirrors all frozen branch rounds.
+  Five rehashed authorization/preflight/campaign/start/budget corruption tests
+  failed as expected before semantic cross-checks, then passed. Insufficient
+  reservation sends zero requests; unknown usage sends one, retains reservation
+  and prevents another branch request. Readback verifies journal arithmetic and
+  all branch counts; actual invoice cost is not claimed.
+- Feature projection requires the actual waveform tool and delegates authority
+  to the existing candidate/profile/input receipt validator, including final
+  round receipts. Ordinary validator success is not waveform evidence. Missing/
+  tampered candidate stores reject; missing private events remain incomplete.
+- Non-Docker combined tests: **31 passed / 3 deselected**. CI contract RED one
+  missing stage, then **21 passed** after source filters/new credential-free
+  Docker stage. Existing stages retained. Compile/diff checks passed; Ruff is
+  unavailable and no configured project-wide typecheck is claimed.
+- Independent final bounded review: no actionable finding. Its focused tests
+  passed **54 / 3 optional skips**, adjacent tests **137 / 5 skips**, syntax
+  passed. Reviewer did not claim unavailable Ruff/LSP/typechecking.
+- First local broad selection: **1,380 passed / 53 optional skips / 1 failed**;
+  the sole failure requires a V3 source fixture intentionally absent from the
+  user's sparse checkout. This is not a new regression; no historical asset is
+  restored or test weakened. A fresh active selection explicitly deselects that
+  named V3 case; hosted full checkout retains it. Navigation/CI: **45 passed**.
+- Hosted exact-source results follow publication. No raw evidence/corpus text,
+  r53, EVAS or old-tree changes.
+
 ## 2026-09-01 - AA-VAE-073 coordinator waveform and receipt repair
 
 - Added the explicit Evolution waveform option using the existing isolated

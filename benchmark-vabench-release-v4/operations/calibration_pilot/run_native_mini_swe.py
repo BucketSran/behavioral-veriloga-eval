@@ -570,6 +570,7 @@ def run_prepared_native_mini_swe(
     episode_backend: str = "native-mini-swe",
     reasoning_proposal_format: str = "native_tool_calls",
     model_call_limit: int | None = None,
+    tool_call_limit: int | None = None,
     docs_corpus=None,
     public_waveform_max_calls: int | None = None,
     environment_observer=None,
@@ -599,6 +600,10 @@ def run_prepared_native_mini_swe(
     accepted_tools = frozenset(tool["function"]["name"] for tool in tools)
     validate_model_call_limit(model_call_limit)
     budget_limits = {} if model_call_limit is None else {"model_calls": model_call_limit}
+    if tool_call_limit is not None:
+        if type(tool_call_limit) is not int or tool_call_limit <= 0:
+            raise ValueError("tool call limit must be a positive integer")
+        budget_limits["tool_calls"] = tool_call_limit
     if public_waveform_max_calls is not None:
         budget_limits["public_validation_calls"] = public_waveform_max_calls
     backend = _backend_profile(episode_backend, reasoning_proposal_format)
@@ -708,6 +713,7 @@ def run_prepared_native_mini_swe(
             "experiment_policy": policy_config,
             "experiment_policy_sha256": runner.experiment_policy_sha256(),
             "max_steps": None,
+            **({"tool_call_limit": tool_call_limit} if tool_call_limit is not None else {}),
             **({"model_call_limit": model_call_limit,
                 "model_calls_before_attempt": context.model_calls_before_attempt}
                if model_call_limit is not None else {}),
@@ -748,7 +754,7 @@ def run_prepared_native_mini_swe(
         if docs_tool is not None:
             manifest["extensions"] = {"offline_docs": {
                 "profile": docs_tool.profile, "profile_sha256": docs_corpus.profile_sha256,
-                "intervention": "synthetic-frozen-docs-v1", "tool_name": "vaevas_docs_search",
+                "intervention": docs_corpus.intervention, "tool_name": "vaevas_docs_search",
             }}
             for name in ("offline_docs.py", "offline_docs_tool.py"):
                 manifest["source_sha256"][name] = _sha_file(REPO / "runners/agent_harness/tools" / name)

@@ -1,6 +1,6 @@
 # vaEVAS Development Work Ownership
 
-Updated: 2026-08-31
+Updated: 2026-09-01
 
 ## Brief, Acceptance, And Scope
 
@@ -46,6 +46,19 @@ other files, real credentials/paid calls, source corpus copying, EVAS/release or
 old-tree writes. `comparison_runner_design` and `live_provider_contract_review`
 remain read-only advisers; an independent reviewer has no writing authority.
 All earlier assignments below are closed historical records, not active grants.
+
+Additional bounded writer `paired_report_impl` owns only calibration-pilot
+`combined_tool_evidence.py` and `tests/test_agent_harness_combined_tool_evidence.py`.
+Implement read-only feature-use projection from existing native/Evolution
+trajectory and sealed public receipts: retrieval, waveform, next-round exposure.
+Main owns its calling/manifest/result integration. No scoring or runtime calls,
+raw content in output, Git, other files or corpus/credential access. Tests use
+synthetic fixtures. Hand back code and validation before root integration.
+
+All AA-VAE-073/074/075 writers have handed back, including the reopened feature
+projection repair. Main now owns all files for stable-tree integration and
+focused publication. Reviewers remain read-only. No delegated edit/Git/paid
+lane is active; the earlier assignment paragraphs are retained for traceability.
 
 AA-VAE-072 starts at `f1c78b3dd7b9b0913a626661158c816c55091667`.
 Main exclusively owns calibration-pilot `comparison_live.py`,

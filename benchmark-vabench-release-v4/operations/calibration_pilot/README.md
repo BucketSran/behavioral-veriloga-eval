@@ -234,12 +234,13 @@ Deterministic providers test connectivity, not model quality. Actual model
 experiments require a named model/service, explicit budget and frozen controls.
 No domain/RAG/waveform tools, SFT/RL or Spectre path are activated here.
 
-## Synthetic docs development API (not a campaign flag)
+## Offline docs development API
 
 `run_prepared_native_mini_swe(..., docs_corpus=corpus)` explicitly adds the
 `vaevas_docs_search` tool to native mini-swe or Reasoning in Agentic/Agent-No-EVAS.
-Build `corpus` through `OfflineDocsCorpus.from_manifest`; only bounded synthetic
-CC0 fixtures are currently accepted. OneShot rejects it before runtime reservation.
+Build `corpus` through `OfflineDocsCorpus.from_manifest`; synthetic v1 remains
+compatible, and reviewed local v2 additionally records provenance, rights and
+contamination review. OneShot rejects it before runtime reservation.
 Omitting the argument preserves the existing Bash-only native path and legacy default.
 
 The corpus profile freezes sources, policy, limits and index identity. It binds
@@ -247,7 +248,8 @@ tool capability, observations, launcher configuration and final evidence joins;
 the controller still owns admission and `tool_call` charging. Single-cell reading
 can verify this intervention, but ordinary aggregation and paired result ledgers
 reject extension rows pending a separately frozen comparison protocol. There is
-no RAG CLI integration, real corpus or automatic online retrieval.
+no automatic online retrieval. The separate combined entrypoint below accepts
+an explicit local corpus; no third-party corpus text is bundled.
 The separate `run_native_evolution(..., docs_corpus=corpus)` API now supports the
 exact `AlphaApollo-Evolution+EVAS` condition ([AA-VAE-065](../../../docs/alphaapollo-migration/features/AA-VAE-065-synthetic-evolution-docs.md)).
 Each NoEVAS generation branch has its own docs tool wrapper. Initial prompts
@@ -273,8 +275,54 @@ receipt/profile/candidate joins, request counts and confirmed execution counts;
 unknown post-executor failures yield a null total and incomplete-count flag.
 This is not a global cap on ordinary Bash EVAS processes. Final replay remains
 post-freeze and never feeds the model. Ordinary aggregation rejects intervention
-rows; campaign/Evolution activation requires a separate matched protocol.
+rows. Evolution's explicit `public_waveform=True` instead runs this executor
+at the coordinator, once per candidate public-validation allowance; generation
+branches remain NoEVAS. Only candidate/profile-bound bounded observations enter
+the next sealed round. The old validator does not run a second time, and final
+scores never enter shared memory. See AA-VAE-073 and the combined protocol below.
 See [AA-VAE-061](../../../docs/alphaapollo-migration/features/AA-VAE-061-native-public-waveform-feedback.md).
+
+## Opt-in combined public-tool acceptance (AA-VAE-075)
+
+`run_combined_tools.py` composes the existing native Reasoning or Evolution
+engine, docs search, isolated public waveform execution, submission freeze and
+one selected final EVAS replay. It does not replace legacy mini-swe or alter the
+six-cell comparison. Reasoning is the harness backend, not a claim that the
+provider's internal thinking mode is enabled. The named live service retains
+the existing reviewed DeepSeek profile and disabled thinking.
+
+- `prepare` freezes a single family/form, corpus profile, runtime IDs, source,
+  rounds/branches and model/tool/public budgets without reading credentials.
+- `inspect` reads that preparation; `run` requires exact manifest hash, cap,
+  currency and an external owner-only credential file. No automatic resume.
+- `report` validates existing receipts without model/tool/freeze/judge reentry;
+  reports actual successful retrieval, waveform use, and Evolution feedback
+  exposure separately from declared capability and task score. Missing evidence
+  is not a model zero. All branches' call and conservative cost counts remain.
+
+Run `.venv/bin/python benchmark-vabench-release-v4/operations/calibration_pilot/run_combined_tools.py --help`
+from the repository root; each subcommand has its own `--help`. Preparation/run
+accept `--docs-root`, `--docs-manifest`, `--evas-command`, and `--output-root`.
+Default Evolution schedule is two branches of the same model for two rounds;
+this is not heterogeneous multi-model evidence. Native uses one branch/round.
+The controller enforces per-round model/tool budgets; the shared provider guard
+also caps each branch across all rounds and retains unknown-cost reservations.
+`--public-calls` is a ceiling: the current coordinator validates each candidate
+once, not repeated retries until the allowance is used.
+
+The provider profile is dated **2026-08-31 UTC** and expires after that UTC day.
+Before a later live run, independently review provider model/rates/decoding,
+update the dated service contract, and freeze a fresh root; do not just edit an
+old manifest or bypass expiry. This implementation authorizes no paid run.
+
+Reviewed v2 corpus permission for local model context does not imply permission
+to send it to an API. Live preparation and launch both check this before keys.
+The recommended veriloga-skills/Cadence materials are not yet imported: source
+pins, allowlist and rights/source-path requirements are recorded in
+[AA-VAE-074](../../../docs/alphaapollo-migration/features/AA-VAE-074-reviewed-local-docs.md).
+All automated combined acceptance uses synthetic documents/provider replies
+with real Docker and EVAS 0.8.7. It proves wiring, not retrieval quality,
+individual-feature benefit, independent hidden stimuli, or a model ranking.
 
 ## Opt-in public validation observations
 
