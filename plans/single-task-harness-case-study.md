@@ -31,7 +31,9 @@ Preserve all frozen r53/EVAS assets, default routing, previous evidence and scor
 Main alone owns this plan, `plans/work-ownership.md`, `plans/current-plan.md`,
 decision/verification logs, the migration README and new
 `docs/alphaapollo-migration/05_单任务代码与轨迹案例_2026-08-31.md`.
-`case_study_code_map` is read-only code/differential advice. No delegated writer,
+`case_study_code_map` is read-only code/differential advice;
+`case_study_review` independently reviews the final notebook and its code claims.
+No delegated writer,
 runtime/schema/test changes, new abstraction, corpus, model API call or training.
 
 ## Evidence and stop boundary
@@ -46,3 +48,16 @@ If hashes/identity fail validation, report the failure without repairing the
 stored evidence or silently substituting another run. Unclear authority or a
 required scoring/runtime change ends this documentation slice for review.
 Exact commands, outcomes, publication and review go in the existing logs.
+
+## Disposition
+
+Documentation/evidence work completed. The production reader, the notebook's
+exact read-only command, source hashes and pre-freeze provider ordering pass;
+stored evidence remains unchanged. Focused harness tests: 41 passed / three
+real-Docker cases deselected; navigation/CI contract tests: 41 passed.
+Independent notebook review found zero required changes. Its verdict is COMMENT
+because LSP/AST tools are unavailable; Markdown/link/secret/diff and structured
+evidence checks substitute for this documentation-only slice.
+Both advisory lanes have returned and have no write assignment. Main owns the
+bounded fork publication and its source-specific hosted verification record.
+No additional runtime or experiment scope is opened by this completed plan.

@@ -17,6 +17,14 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- Completed human-review preparation: [single-task case study plan](single-task-harness-case-study.md)
+  and [Chinese code/evidence walkthrough](../docs/alphaapollo-migration/05_单任务代码与轨迹案例_2026-08-31.md).
+  Existing scripted-provider waveform smoke validated read-only; code boundaries,
+  event sequence, zero-score outcome and legacy/native differences are explicit.
+  Independent review found no required correction; focused gates passed.
+  The next matched experiment protocol remains separate from this case study.
+  No new runtime feature, model API call, evaluator invocation or evidence rewrite.
+
 - Completed overnight request: [engineering closure queue](overnight-engineering-closure.md).
   The user authorized completing current free engineering gaps, not only the
   two waveform slices. Preserve separate gates for real data, paid experiments,

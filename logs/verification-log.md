@@ -1,5 +1,43 @@
 # Verification Log
 
+## 2026-08-31 - Read-only single-task code and trajectory case study
+
+- Scope baseline `87c10cb65e4bd90f95ba9d1e07492e862d3ad6b6`; plan/ownership
+  published separately as `21159e3c0903c9739dd683e49b2d109bc9be0149`.
+  Its exact [Runner Smoke](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33344572484)
+  passed. This is the plan commit's gate, not the later notebook's hosted gate.
+- Existing ignored case: `benchmark-vabench-release-v4/reports/`
+  `overnight-final-integration-01/test_real_waveform_feedback_fr0/waveform-runtime`.
+  Independently reconstruct expected cell from the public r53 release; verify
+  with `score_campaign.read_native_cell` and both trajectory validators. Run
+  the notebook's embedded read-only Python block verbatim: pass. All 34 stored
+  file hashes remain identical before/after; no model or evaluator is rerun.
+- Actual evidence: 25 native events, 23 private capture events, four model
+  requests/responses, two admitted fixed public requests, one confirmed public
+  EVAS execution, one frozen candidate and one final judgment. All eight
+  provider request/response events precede freeze. Three pauses/two resumes
+  include final quiescence. All eight manifest source hashes match current code.
+- Public simulation returns code 0 and an available summary (3501 scanned rows,
+  six signals). Final EVAS is `submitted / behavior_failure / 0.0`, authority
+  `development_only`. This is the intended distinction for a scripted stub;
+  neither paid-model performance nor hidden circuit diagnosis is claimed.
+- Fresh targeted tests:
+  `uv run --locked --extra agentic python -m pytest -q tests/test_agent_harness_mini_swe_differential.py tests/test_agent_harness_waveform_integration.py -k 'not real_waveform' --tb=short`:
+  **41 passed, 3 deselected, 21.07 s**.
+  `uv run --locked --extra agentic python -m pytest -q tests/test_v4_r53_active_entrypoints.py tests/test_agent_harness_ci_gate.py --tb=short`:
+  **41 passed, 0.13 s**. These are distinct selections, not a new full-suite run.
+- Read-only historical mapping verifies preexisting protections in upstream
+  `7b5616dc52195ec275ec6d21c71d7763613702cd`, with Docker-mode and historical
+  replay-rewrite caveats. No EVAS, old-worktree, frozen release, runtime/test,
+  private AlphaApollo, credential, paid execution or training changes.
+- Independent notebook review: zero issues / no requested changes, verdict
+  COMMENT because LSP/AST diagnostics are unavailable. Markdown-only substitutes
+  pass: balanced fences, local links, secret patterns, diff checks and structured
+  evidence checks. No runtime typecheck claim. The dedicated
+  `scripts/check_repo_layout.py` is absent; active-entrypoint tests above supply
+  the available repository/navigation gate. Notebook hosted status is recorded
+  separately after publication, not inferred from the plan commit's green run.
+
 ## 2026-08-31 - Final source hosted GREEN and overnight closeout
 
 - Final runtime SHA `8d782880c72b861822983befc30188165072d78e` passed both

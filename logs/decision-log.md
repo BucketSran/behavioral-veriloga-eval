@@ -1,5 +1,22 @@
 # Decision Log
 
+## 2026-08-31 - Explain one existing failure before opening the next experiment
+
+- Accept the first follow-up as a documentation/evidence case study, not new
+  runtime work or a paid rerun. Use the existing r53 v4-001 native-mini-swe
+  waveform fixture, preserving stored artifacts and its actual zero score.
+- Distinguish artifact completeness, public process success and hidden task
+  correctness. Scripted responses prove feedback delivery, not causal model
+  improvement; the synthetic campaign digest is not formal provenance.
+- Attribute Docker-mode isolation, No-EVAS, submission gates, DefaultAgent
+  logging and snapshot/trusted replay to upstream `7b5616dc52`. Describe native
+  authority decomposition, stricter action handling and evidence joins as later
+  work; do not retroject append-only guarantees onto historical replay files.
+- Publish code links, safe counts and hashes only. Do not upload raw private
+  traces, hidden checker diagnostics or waveform/candidate payloads. Keep this
+  extension case outside ordinary paired aggregation and all final scores out
+  of model feedback. The next protocol/data/paid gates remain separate.
+
 ## 2026-08-31 - Close free engineering work with an explicit morning audit
 
 - Treat AA-VAE-061–066 as six independently reviewable software slices, not a
