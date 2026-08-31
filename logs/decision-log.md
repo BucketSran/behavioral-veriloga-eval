@@ -1,5 +1,22 @@
 # Decision Log
 
+## 2026-08-31 - Keep portable execution failures visible (AA-VAE-067)
+
+- Real Docker integration now reaches the pinned public command. v4-102 DUT
+  public LFSR support triggers EVAS 0.8.7 `dynamic_state_array_access`; preserve
+  its failed observation, nonzero exit and public diagnostic as a negative
+  regression. This is a runtime limitation, not a reason to change sealed
+  r53 support or the evaluator in this contract-only repair.
+- Scripted Evolution family 102 DUT/Testbench terminal states are explicitly
+  `compile_failure`, not the original family 001 `behavior_failure`. Assert
+  those observed statuses without broadening to arbitrary failures or success;
+  preserve selected-candidate binding, single final replay, budgets and final
+  non-reentry. Connectivity PASS is separate from candidate correctness.
+- Keep the old `--agent-scaffold native` sensitivity consumer's schema/mode
+  defect as a separate residual item. It is not default mini-swe or the active
+  native/Evolution validator; do not silently expand this repair into legacy
+  protocol changes. Public behavioral metrics and Evolution ranking stay gated.
+
 ## 2026-08-31 - Repair released portable public contracts without changing scoring
 
 - The user accepted the feedback-path analysis and requested a fix. Repair the

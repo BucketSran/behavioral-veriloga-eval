@@ -100,6 +100,27 @@ def test_waveform_profile_freezes_public_inputs_and_uses_canonical_candidate_has
     assert "final_score" not in executor.profile["allowed_feedback"]
 
 
+def test_portable_waveform_binds_mode_and_executes_without_strict_flag(public_case, docker_processes):  # noqa: F811
+    strict = make_executor(public_case)
+    contract_path = public_case[0].workspace / "task/evas_runtime.json"
+    contract = json.loads(contract_path.read_text())
+    contract.update(schema_version="r53-direct-evas-runtime-v3", compatibility_mode="portable")
+    contract["command"] = contract["command"].removesuffix(" --spectre-strict")
+    contract_path.write_text(json.dumps(contract))
+    portable = make_executor(public_case)
+
+    receipt = portable.validate(candidate_tree_sha256=portable.candidate_tree_sha256())
+
+    assert portable.profile_sha256 != strict.profile_sha256
+    assert portable.profile["checker_identity_sha256"] != strict.profile["checker_identity_sha256"]
+    assert receipt["profile_sha256"] == portable.profile_sha256
+    command = docker_processes["simulations"][0][-1]
+    assert "/usr/local/bin/evas simulate public/task/visible_test.scs" in command
+    assert "--spectre-strict" not in command
+    with pytest.raises(ValueError, match="drift"):
+        strict.validate(candidate_tree_sha256=strict.candidate_tree_sha256())
+
+
 def test_partial_candidate_inspection_is_recoverable_and_binds_real_tree(public_case):  # noqa: F811
     from result_protocol import canonical_sha256
     executor = make_executor(public_case)

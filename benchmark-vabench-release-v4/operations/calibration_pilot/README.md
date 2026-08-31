@@ -189,7 +189,13 @@ public profile with `build_public_validation_profile`, then construct
 capability and budget checks; the adapter does not maintain another budget ledger.
 
 The contract supports fixed r53 DUT/bugfix public simulation and Testbench
-reference-DUT-only commands in Docker. It rejects unsupported contracts, undeclared
+reference-DUT-only commands in Docker, including the already-released portable
+variants for families 102/112. Strict DUT/bugfix uses runtime-v2; portable uses
+runtime-v3 plus `compatibility_mode=portable`. Testbench keeps reference-v1 and
+uses the explicit portable mode only with its exact no-strict command. Unknown
+or mixed schema/mode/command combinations are rejected; a strict simulation
+failure never triggers a portable fallback. No release or EVAS bytes are changed.
+It rejects unsupported contracts, undeclared
 submission files, authority/candidate drift, incomplete invocation evidence,
 resource overflow, and validation after submission/final reservation. A contract
 failure invalidates the adapter; discard the attempt rather than reconstructing
@@ -201,6 +207,16 @@ pre-generation campaign freezing, and exclusive environment use. This does not
 activate a new domain tool or change default mini-swe Bash/campaign execution.
 See [AA-VAE-035](../../../docs/alphaapollo-migration/features/AA-VAE-035-production-public-validation-observation.md)
 for exact code mappings, tests, and remaining boundaries.
+
+Full-release contract coverage and portable native/waveform/Evolution regressions
+are recorded in [AA-VAE-067](../../../docs/alphaapollo-migration/features/AA-VAE-067-r53-portable-public-contracts.md).
+Contract recognition is not full-release simulation or model-quality evidence.
+Evolution next-round inputs reload sealed candidate code and public log receipts;
+the reducer still uses binary `sim_success`, not behavioral correctness. DUT/bugfix
+public contracts declare shared visible replay stimuli with held-out checker
+authority, not an independent hidden stimulus set. Testbench public reference
+execution does not measure final held-out fault detection. Final verdicts remain
+outside model feedback and candidate selection.
 
 ## Build The Campaign
 

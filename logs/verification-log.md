@@ -1,5 +1,77 @@
 # Verification Log
 
+## 2026-08-31 - Portable public-contract compatibility (AA-VAE-067)
+
+- Plan was committed separately as `9d5b5fafdd`. The only production Python
+  change is the fixed command selector in `public_validation.py`, SHA-256
+  `aaad0fe5e6fbb67e918335430d37e6d081e7015f190ffc39316f6ba05b7deab3`.
+  Frozen r53 tasks, EVAS 0.8.7, score/ranking semantics and default legacy routing
+  are unchanged; historical evidence is not rewritten.
+- Vertical TDD: four released portable DUT/bugfix cases first fail, then pass;
+  two Testbench cases first fail, then all six pass. Added malformed-mode tests
+  initially expose three failures, then the new module reports **31 passed**.
+  Its full-release test recognizes all **1,200** public contracts (400 per form,
+  two portable per form), preserving exact command and feedback scope.
+- Final non-Docker regression command:
+  `uv run --locked --extra agentic python -m pytest -q tests/test_agent_harness_public_execution_contract.py tests/test_agent_harness_production_public_validation.py tests/test_agent_harness_native_testbench.py tests/test_agent_harness_public_waveform.py tests/test_agent_harness_waveform_integration.py tests/test_agent_harness_evolution_campaign.py tests/test_agent_harness_native_evolution.py tests/test_agent_harness_ci_gate.py tests/test_v4_r53_active_entrypoints.py --tb=short`:
+  **192 passed, 20 opt-in skips, 41.14 s**. The previous same-selection
+  192/20 run is superseded, not added as distinct coverage.
+- Real Docker gates use `VABENCH_TEST_DOCKER_RUNTIME=1`, scripted public
+  candidates, fresh `--basetemp` and `--junitxml` paths under ignored
+  `benchmark-vabench-release-v4/reports/`. No model/provider API is called.
+  Local image `vabench-agent-runtime:0.8.7` is
+  `sha256:fe44bb54370160ee99bef939ae67a0ab1f51fb3b9a41d3d0c4cf29e7ea38115b`;
+  installed host identity is `evas-sim 0.8.7`, rust-core 0.2.4, ABI 20260718.
+  Initial combined three-node invocation: **14 passed, 3 failed, 512.60 s**,
+  at `r53-portable-smoke.55KdFb/results.xml` (SHA-256
+  `993899886ad84950fb81e80bc51becbcad4e2bf40c7b2b4ff703a3ac1a33faba`).
+  The five waveform feedback -> freeze -> final-score-reader cases all pass
+  there, including portable DUT and Testbench. Passing means connectivity,
+  not public simulation or behavioral success in every case.
+- Initial failures expose incorrect fixture expectations, not a hidden retry:
+  public v4-102 DUT now reaches EVAS, which rejects its public support LFSR's
+  `dynamic_state_array_access`; the test now requires failed/nonzero plus that
+  diagnostic. Evolution family 102 DUT/Testbench return `compile_failure`,
+  not the original family 001 stub's `behavior_failure`; tests assert explicit
+  observed verdicts while retaining all freeze/binding/one-final/non-reentry
+  checks. Neither source/release bytes nor historical artifacts were changed.
+- Fresh final public node
+  `tests/test_agent_harness_production_public_validation.py::test_r53_docker_public_validation_native_trajectory_smoke`:
+  **6 passed, 113.94 s**; five successful public processes plus one checked
+  negative execution, not six simulation successes. Artifact
+  `r53-portable-public-final.IiYg0l/results.xml`, SHA-256
+  `35e8b6cb36575136940a0b36e3cc8b595b19b60cc48d63e0237855ec6d697a59`.
+- Fresh final Evolution node
+  `tests/test_agent_harness_evolution_campaign.py::test_r53_docker_native_evolution_selected_final_only`:
+  **6 passed, 286.77 s**, including all strict and portable cases; artifact
+  `r53-portable-evolution-final.Vef4ww/results.xml`, SHA-256
+  `a4ee04c6a93dffded7a1c9345fe2ebeef476da951ec3f1302c44ee3fa744ec3c`.
+  Together the final public six, original passing waveform five and fresh
+  Evolution six cover **17 distinct integration cases**, not a single fresh
+  17-pass invocation. Four Evolution final verdicts are `behavior_failure`
+  and two are `compile_failure`; all remain development-only scores.
+- Broader local historical selection is **not green**: **27 failed, 1,262
+  passed, 37 skipped, 12 errors, 282.07 s**. Twenty-six failures and 12 errors
+  require intentionally removed compact-checkout assets (r44/r52 release,
+  materialization metadata, V3 solution fixture or public-runtime scripts).
+  The other legacy direct-EVAS timeout test passes alone (**1 passed, 1.07 s**)
+  after a concurrent-load failure. Do not restore old trees, suppress these
+  failures or infer a full local-suite pass; hosted full-checkout evidence will
+  be recorded separately against the pushed source.
+- Ruff 0.12.12 over the six changed Python files: all checks pass. Python
+  compilation, AST parsing and diff checks pass; eight changed Markdown files
+  have balanced fences and 112 valid local links. No LSP/typecheck tool is
+  available; these are narrower checks, not a full typecheck claim.
+  Independent read-only review reports zero blocking findings (COMMENT),
+  including a follow-up on the explicit negative cases. The reviewer separately
+  verifies all 1,200 contracts and rejects injected commands in all 1,200;
+  no private checker/gold content or Docker execution in that review lane.
+- Remaining boundaries: pinned public dynamic-array runtime limitation and
+  old sensitivity `run_campaign.run_public_evas` compatibility remain open.
+  Contract coverage is not full-release simulation success, behavioral
+  feedback, quality improvement or Spectre parity. Raw evidence stays local;
+  source-bound hosted verification/publication is still pending.
+
 ## 2026-08-31 - Portable public-contract repair intake
 
 - Clean behavioral baseline `1c73e519bdaf2a3a3a62953fbc0472ff33a39f6c` equals

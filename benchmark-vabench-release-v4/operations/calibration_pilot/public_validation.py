@@ -34,27 +34,45 @@ TESTBENCH_COMMAND = (
     "&& evas simulate /tmp/vabench-visible/reference/testbench.scs "
     "-o /tmp/vabench-visible/evas-output/reference --spectre-strict"
 )
+PORTABLE_PUBLIC_COMMAND = PUBLIC_COMMAND.removesuffix(" --spectre-strict")
+PORTABLE_TESTBENCH_COMMAND = TESTBENCH_COMMAND.removesuffix(" --spectre-strict")
 
 
 def public_execution_contract(contract: dict) -> tuple[str, str]:
     """Select a pinned public command, never an arbitrary command from metadata."""
+    mode = contract.get("compatibility_mode")
+    if mode not in (None, "portable"):
+        raise ValueError("unsupported public validation contract")
     if (
         contract.get("schema_version") == "r53-direct-evas-runtime-v2"
+        and mode is None
         and contract.get("working_directory") == "runtime_package_root"
         and contract.get("command") == PUBLIC_COMMAND
     ):
         return PUBLIC_COMMAND, "public_simulation_only"
+    if (
+        contract.get("schema_version") == "r53-direct-evas-runtime-v3"
+        and mode == "portable"
+        and contract.get("working_directory") == "runtime_package_root"
+        and contract.get("command") == PORTABLE_PUBLIC_COMMAND
+    ):
+        return PORTABLE_PUBLIC_COMMAND, "public_simulation_only"
+    testbench_command = (
+        PORTABLE_TESTBENCH_COMMAND
+        if mode == "portable"
+        else TESTBENCH_COMMAND
+    )
     expected = {
         "schema_version": "r53-direct-evas-testbench-reference-v1",
         "working_directory": "public_root",
-        "candidate_command": TESTBENCH_COMMAND,
+        "candidate_command": testbench_command,
         "candidate": "submission/testbench.scs",
         "candidate_dut_binding": "./dut",
         "feedback_scope": "reference_dut_only",
         "reference_dut_root": "task/supplied_dut",
     }
     if all(contract.get(key) == value for key, value in expected.items()):
-        return "cd public && " + TESTBENCH_COMMAND, "reference_dut_only"
+        return "cd public && " + testbench_command, "reference_dut_only"
     raise ValueError("unsupported public validation contract")
 
 

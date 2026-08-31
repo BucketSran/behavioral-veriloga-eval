@@ -94,10 +94,17 @@ def bind(public_case):
     return adapter, profile
 
 
+@pytest.mark.parametrize("portable", [False, True])
 def test_real_public_execution_returns_candidate_and_profile_bound_observation(
-    public_case,
+    public_case, portable,
 ):
     environment, context, _ = public_case
+    if portable:
+        contract_path = environment.workspace / "task/evas_runtime.json"
+        contract = json.loads(contract_path.read_text())
+        contract.update(schema_version="r53-direct-evas-runtime-v3",
+                        compatibility_mode="portable", command=COMMAND.removesuffix(" --spectre-strict"))
+        contract_path.write_text(json.dumps(contract))
     adapter, profile = bind(public_case)
     candidate = adapter.candidate_tree_sha256()
 
@@ -445,7 +452,11 @@ def test_controller_records_real_feedback_and_stops_before_second_execution(
     assert "FINAL_PRIVATE_SENTINEL" not in json.dumps(observation.to_document())
 
 
-@pytest.mark.parametrize("task_id,form", [("v4-001", "dut"), ("v4-501", "testbench")])
+@pytest.mark.parametrize("task_id,form", [
+    ("v4-001", "dut"), ("v4-501", "testbench"),
+    ("v4-102", "dut"), ("v4-112", "dut"),
+    ("v4-602", "testbench"), ("v4-612", "testbench"),
+])
 def test_r53_docker_public_validation_native_trajectory_smoke(tmp_path, task_id, form):
     if os.environ.get("VABENCH_TEST_DOCKER_RUNTIME") != "1":
         pytest.skip("opt-in real r53 public EVAS Docker smoke")
@@ -510,7 +521,15 @@ def test_r53_docker_public_validation_native_trajectory_smoke(tmp_path, task_id,
             public_validation_profile=profile,
         )
         observation, events = _controller_smoke(environment, context, adapter, tmp_path)
-        assert observation.status == "succeeded", observation.to_document()
+        if task_id == "v4-102":
+            # The released public LFSR support uses dynamic array access, which
+            # pinned EVAS 0.8.7 rejects. Preserve this negative execution result;
+            # accepting its portable contract must not fabricate simulation success.
+            assert observation.status == "failed", observation.payload["output"]
+            assert "dynamic_state_array_access" in observation.payload["output"]
+            assert observation.payload["returncode"] != 0
+        else:
+            assert observation.status == "succeeded", observation.payload["output"]
         assert observation.payload["feedback_scope"] == (
             "reference_dut_only" if form == "testbench" else "public_simulation_only"
         )

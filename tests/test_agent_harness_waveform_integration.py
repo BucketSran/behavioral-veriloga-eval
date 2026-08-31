@@ -296,18 +296,23 @@ def test_waveform_activation_rejects_before_runtime_reservation(native_case, tmp
 
 
 @pytest.mark.skipif(os.environ.get("VABENCH_TEST_DOCKER_RUNTIME") != "1", reason="explicit Docker opt-in")
-@pytest.mark.parametrize("backend,fmt", [("native-mini-swe", "native_tool_calls"),
-    ("native-reasoning", "native_tool_calls"), ("native-reasoning", "strict_json")])
-def test_real_waveform_feedback_freeze_final_score(tmp_path, backend, fmt):
+@pytest.mark.parametrize("task_id,backend,fmt", [
+    ("v4-001", "native-mini-swe", "native_tool_calls"),
+    ("v4-001", "native-reasoning", "native_tool_calls"),
+    ("v4-001", "native-reasoning", "strict_json"),
+    ("v4-102", "native-mini-swe", "native_tool_calls"),
+    ("v4-602", "native-reasoning", "native_tool_calls"),
+])
+def test_real_waveform_feedback_freeze_final_score(tmp_path, task_id, backend, fmt):
     from scripts import run_v4_r53_clean_room_smoke as smoke
     import score_campaign as scorer
     from run_native_mini_swe import run_prepared_native_mini_swe
     from runners.agent_harness import read_trajectory
     from test_agent_harness_production_public_validation import RELEASE
-    cell = next(cell for cell in smoke.three_arm_cells(RELEASE, "v4-001", "fixture-model") if cell["experimental_arm"] == "Agentic")
+    cell = next(cell for cell in smoke.three_arm_cells(RELEASE, task_id, "fixture-model") if cell["experimental_arm"] == "Agentic")
     runtime = tmp_path / "waveform-runtime"
     runner.export_runtime(cell, RELEASE, runtime, timeout_s=60)
-    artifacts = smoke.public_stub_artifacts(smoke.public_contract(RELEASE, "v4-001"))
+    artifacts = smoke.public_stub_artifacts(smoke.public_contract(RELEASE, task_id))
     write = "\n".join(f"printf %s {shlex.quote(content)} > public/submission/{name}" for name, content in artifacts.items())
     client = Provider(["unused", write, "unused", "vabench-submit"])
     original = client.complete

@@ -17,10 +17,16 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- Active bounded repair: [r53 public contract compatibility](r53-public-contract-compatibility.md).
-  Support the six already-released portable contracts through the fixed public
-  adapter; add full-1,200 contract coverage and preserve fail-closed command
-  selection. No r53/EVAS, candidate ranking, behavioral scoring or paid-run change.
+- Implemented bounded repair: [r53 public contract compatibility](r53-public-contract-compatibility.md)
+  ([AA-VAE-067](../docs/alphaapollo-migration/features/AA-VAE-067-r53-portable-public-contracts.md)).
+  The six released portable contracts are accepted by the fixed public adapter;
+  all 1,200 contracts preserve command/scope and invalid combinations fail closed.
+  Focused gate: 192 passed / 20 skips; three Docker groups cover 17 passing cases,
+  including explicit negative simulation/verdict checks. No blocking review
+  finding; fork publication/hosted verification remains in progress.
+  Known residuals: EVAS 0.8.7 rejects v4-102 public dynamic-array support, and
+  the separate old native sensitivity consumer still lacks r53 compatibility.
+  No r53/EVAS, candidate ranking, behavioral scoring or paid-run change.
 
 - Completed human-review preparation: [single-task case study plan](single-task-harness-case-study.md)
   and [Chinese code/evidence walkthrough](../docs/alphaapollo-migration/05_单任务代码与轨迹案例_2026-08-31.md).

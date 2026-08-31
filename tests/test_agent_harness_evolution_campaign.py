@@ -14,9 +14,9 @@ import pytest
 from scripts import run_v4_r53_clean_room_smoke as smoke
 
 
-def _campaign(tmp_path, form="dut"):
+def _campaign(tmp_path, form="dut", *, family_id="001"):
     campaign = smoke.campaign_builder.build_campaign(
-        smoke.DEFAULT_RELEASE, family_ids=["001"], model_provider="fixture",
+        smoke.DEFAULT_RELEASE, family_ids=[family_id], model_provider="fixture",
         model="placeholder", per_turn_max_tokens=4096, repetitions=1,
         three_arm_g0_g2=True,
     )
@@ -104,16 +104,25 @@ def test_evolution_cli_rejects_credentials_in_roster(tmp_path):
     assert not (tmp_path / "out").exists()
 
 
-@pytest.mark.parametrize("form", ["dut", "bugfix", "testbench"])
-def test_r53_docker_native_evolution_selected_final_only(tmp_path, form):
-    _run_r53_evolution(tmp_path, form)
+@pytest.mark.parametrize("form,family_id,expected_final_status", [
+    ("dut", "001", "behavior_failure"),
+    ("bugfix", "001", "behavior_failure"),
+    ("testbench", "001", "behavior_failure"),
+    ("dut", "102", "compile_failure"),
+    ("bugfix", "112", "behavior_failure"),
+    ("testbench", "102", "compile_failure"),
+])
+def test_r53_docker_native_evolution_selected_final_only(tmp_path, form, family_id, expected_final_status):
+    _run_r53_evolution(tmp_path, form, family_id=family_id, expected_final_status=expected_final_status)
 
 
 def test_r53_docker_synthetic_docs_evolution(tmp_path):
     _run_r53_evolution(tmp_path, "dut", docs_enabled=True)
 
 
-def _run_r53_evolution(tmp_path, form, *, docs_enabled=False):
+def _run_r53_evolution(
+    tmp_path, form, *, docs_enabled=False, family_id="001", expected_final_status="behavior_failure",
+):
     if os.environ.get("VABENCH_TEST_DOCKER_RUNTIME") != "1":
         pytest.skip("opt-in real Docker/EVAS Evolution integration")
     import run_native_evolution as evolution
@@ -121,7 +130,7 @@ def _run_r53_evolution(tmp_path, form, *, docs_enabled=False):
     from runners.agent_harness import backend_profile_sha256
     from test_agent_harness_native_launcher import Provider
 
-    _, original = _campaign(tmp_path, form)
+    _, original = _campaign(tmp_path, form, family_id=family_id)
     cell = {**original, "experimental_arm": "AlphaApollo-Evolution+EVAS"}
     artifacts = smoke.public_stub_artifacts(smoke.public_contract(smoke.DEFAULT_RELEASE, cell["task_id"]))
     clients = []
@@ -172,7 +181,9 @@ def _run_r53_evolution(tmp_path, form, *, docs_enabled=False):
     )
     assert len(clients) == 4
     assert len(run.evolution_result.round_snapshots) == 2
-    assert run.final_judgment.status == "behavior_failure"
+    # These public-only stubs test connectivity, not correct solutions. Preserve
+    # the pinned evaluator's specific failure class instead of calling it success.
+    assert run.final_judgment.status == expected_final_status
     assert run.score_sidecar_receipt
     assert run.final_judgment.submission_tree_sha256 == run.selected_candidate["candidate_tree_sha256"]
     assert len(list((tmp_path / "run").rglob("final_submission"))) == 1
@@ -198,7 +209,8 @@ def _run_r53_evolution(tmp_path, form, *, docs_enabled=False):
         assert prepared["observed_image_id"].startswith("sha256:")
         assert prepared["executable_feedback"] is False
     smoke.write_immutable_json(tmp_path / "evolution-smoke-index.json", {
-        "status": "PASS", "claim_scope": "connectivity_only", "form": form, "branch_count": 2, "rounds": 2,
+        "status": "PASS", "claim_scope": "connectivity_only", "form": form, "family_id": family_id,
+        "final_status": run.final_judgment.status, "branch_count": 2, "rounds": 2,
         "selected_candidate": dict(run.selected_candidate),
         "manifest_sha256": run.manifest_sha256,
         "final_result_sha256": smoke.sha256_file(tmp_path / "run/final-result.json"),
