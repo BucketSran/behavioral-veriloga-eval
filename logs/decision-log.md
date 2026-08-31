@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-08-31 - Compare observed surfaces, not declarations alone
+
+- Hash the complete public export, including a valid empty initial submission,
+  and observe selected live Docker facts before the first model request.
+- Treat model/provider controls and security/image/task inputs as common;
+  preserve named prompt/tool/request differences as workflow differences, not
+  evidence of pure-controller equivalence. Never publish raw prompt or judge data.
+- Supplied snapshots must be self-consistent. Missing/false security checks,
+  non-finite limits, unexpected mounts and changed provider options fail closed.
+
 ## 2026-08-31 - AA-VAE-071 explicit guard controls
 
 - Preserve old pilot defaults (eight logical calls, 120-second request watchdog).

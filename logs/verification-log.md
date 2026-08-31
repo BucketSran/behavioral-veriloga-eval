@@ -1,5 +1,18 @@
 # Verification Log
 
+## 2026-08-31 - AA-VAE-071 observed comparison surfaces
+
+- Public export/request/live Docker leaf was implemented by vertical RED/GREEN;
+  review-fix tracers initially reported **10 failures**. Main additionally
+  reproduced empty-submission-as-missing and tool-result parent-ID omissions.
+- Focused surface tests: **25 passed / 1 opt-in skip**; the same Docker audit
+  also passes in the stable full comparison invocation (**41 passed, 50.34 s**).
+  Common controls include provider options, watchdog, model, token cap, public
+  input/submission hashes and actual Docker security/image/mount observations.
+- Ruff 0.12.12, compilation and whitespace checks pass. Only public hashes and
+  selected observations are projected; no private checker bytes, secrets, raw
+  prompt/tool content or paid calls are added to Git. r53 and EVAS are unchanged.
+
 ## 2026-08-31 - AA-VAE-071 optional guard controls RED/GREEN
 
 - Explicit no-call-cap tracer: RED **1 failed**, then budget suite **25 passed**.
