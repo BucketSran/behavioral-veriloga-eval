@@ -1,6 +1,6 @@
 # vaEVAS AI-Native Harness Evolution Plan
 
-Updated: 2026-08-31
+Updated: 2026-09-01
 
 Completed detail and the original design matrix are preserved in the
 [dated plan snapshot](archive/2026-08-30-harness-plan-snapshot.md).
@@ -17,12 +17,23 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- In progress: [combined public-tool acceptance](combined-tools-acceptance.md),
-  AA-VAE-073/074/075. Add coordinator-owned Evolution waveform sharing,
-  reviewed local corpus ingestion and a separate combined live entrypoint.
-  Existing legacy comparison, r53 and EVAS 0.8.7 remain unchanged. This turn
-  uses synthetic providers only; no keys or paid calls. Main integrates and
-  publishes focused GREEN commits, with exact delegated ownership below.
+- Implemented; publication verification in progress:
+  [combined public-tool acceptance](combined-tools-acceptance.md), AA-VAE-073–075.
+  Evolution coordinator waveform sharing, reviewed local corpus contracts and
+  a separate combined live entrypoint are wired. Stable-tree actual Docker/EVAS
+  with synthetic model replies/external HTTP: **36 passed** after final scope
+  hardening; active local regression **1,380 passed / 53 optional skips**, one
+  absent historical V3 fixture explicitly deselected. Reports require
+  actual docs/waveform use and next-round exposure, not merely enabled flags;
+  candidate/input binding, all-branch costs and one final replay are preserved.
+  Existing legacy comparison, r53 and EVAS 0.8.7 remain unchanged. No actual keys,
+  paid calls or third-party corpus text imported. Main owns integration/Git;
+  delegated writing is closed. Hosted evidence is recorded after publication.
+  Source: `cbfe1e2743` (corpus), `ff17ec4788` (Evolution waveform),
+  `18bcd2a547` (combined wiring), `73b6a4aa8f` (CI), `421e430808` (claim labels).
+  Next activation gates: exact source/rights for real docs, re-review dated
+  provider profile after 2026-08-31 UTC, then a separately budgeted real-model
+  run. These are experimental/activation gates, not missing tool wiring.
 
 - Implemented: [explicit live comparison entrypoint](legacy-native-live-entrypoint.md),
   AA-VAE-072. Reuse AA-VAE-071 with a frozen provider profile and explicit

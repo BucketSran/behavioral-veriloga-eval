@@ -29,6 +29,11 @@ AI-native benchmark、agent harness、trajectory、评分与结果生成链路�
 
 最新修复与扩展：
 
+- [AA-VAE-073：Evolution 波形共享](features/AA-VAE-073-evolution-waveform-sharing.md)、
+  [AA-VAE-074：受控真实语料契约](features/AA-VAE-074-reviewed-local-docs.md)、
+  [AA-VAE-075：联合验收/live 入口](features/AA-VAE-075-combined-tools-live-entrypoint.md)：
+  接通现有工具与引擎，记录实际调用/下一轮反馈；尚未导入第三方正文或运行付费实验。
+
 - [AA-VAE-069：旧/新 mini-swe 对照协议](features/AA-VAE-069-legacy-native-comparison-protocol.md)：
   六单元 blueprint、信息面审计与预算/结果验收；只有免费证据，真实实验尚未启动。
 

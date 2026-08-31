@@ -1,5 +1,23 @@
 # Verification Log
 
+## 2026-09-01 - AA-VAE-073–075 final local handoff
+
+- Final executed source bytes include `421e430808` scope hardening. Actual
+  Docker/EVAS combined selection: **36 passed, 88.71 s**; ignored root
+  `benchmark-vabench-release-v4/reports/combined-tools-check-Q0xTSh/final-scope`.
+  No real credential/provider request or third-party text used. Same-model
+  Evolution branches are not heterogeneous-model evidence.
+- Corpus source `cbfe1e2743`, coordinator waveform `ff17ec4788`, combined source
+  `18bcd2a547`, CI `73b6a4aa8f`, final scope `421e430808`. Focused source reviews
+  have no outstanding actionable finding. Navigation/CI **45 passed**; syntax
+  and diff checks passed. Earlier broad regression and V3 sparse limit below.
+- Fetched upstream/main is fully contained in this fork. Initial origin fetch
+  hit a TLS failure; the read-only retry succeeded. EVAS fork/upstream remote
+  main both resolve to `6cb6fa7a7dac70fc0d4120126d8cf74258e6637b`; its checkout is
+  clean and unchanged. No r53, dependency lock, evaluator or old-worktree edits.
+- Main closes the local implementation/docs slices and publishes only to
+  BucketSran origin/main. Exact-source hosted verification follows.
+
 ## 2026-09-01 - Combined claim label hardening and active local GREEN
 
 - Active local regression on source `18bcd2a547` with CI `73b6a4aa8f`:
