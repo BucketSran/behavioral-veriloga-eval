@@ -12,6 +12,10 @@
 - Preserve all supported evaluation, capture/export, recovery and optional tool
   behavior. No paid calls, dependencies, release/evaluator or old-tree changes.
   Scope, KPI and review sequence: `plans/mainline-scope-cleanup.md`.
+- Implementation is `1f6de2fda9`; the separate maintenance-policy commit keeps
+  AGENTS.md in English, limits the active queue to 150 lines and explicitly
+  separates current maintenance from optional experiments/deferred training.
+  This does not add an execution restriction or change any benchmark protocol.
 
 ## 2026-09-01 - Measure native execution; keep report protocols separate
 

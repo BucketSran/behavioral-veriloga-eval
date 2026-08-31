@@ -145,9 +145,11 @@ code and bound public feedback between rounds. Only the selected candidate is
 finally frozen/scored. Preserve all-branch costs and failure denominators in
 its separate result index; never pool it into single-trajectory results.
 These paths have deterministic integration evidence, not real-model quality
-claims. Domain tools remain reserved and paid pilots need named service/model
-and budget. Details: `docs/alphaapollo-migration/features/AA-VAE-043` through
-`AA-VAE-049` and the calibration README.
+claims. Reviewed offline docs and candidate-bound public waveform feedback are
+implemented opt-in tools; unspecified domain tools remain reserved. Paid pilots
+need a freshly reviewed named service/model and explicit budget. Start with the
+entrypoint map in `benchmark-vabench-release-v4/runners/README.md`; detailed
+commands and protocol boundaries are in the calibration README.
 
 AlphaApollo models a turn as prompt, model output, and environment feedback.
 vaEVAS adopts that separation but strengthens it for auditable evaluation.
@@ -302,6 +304,14 @@ failures or removed from the scheduled set.
   fixtures or evidence indexes.
 - Use existing utilities and schemas before adding abstractions or
   dependencies. Keep changes small, reversible, and owned by one layer.
+- Keep `plans/current-plan.md` as the single concise active queue (at most 150
+  lines); put completed evidence in dated logs/feature notes, not duplicate
+  status tables. Keep default, opt-in experiment and diagnostic entrypoints
+  visibly separate. Do not add another launcher merely to unify their names.
+- Synthetic-only AA-VAE-059/062 training prototypes are retired. Preserve their
+  historical notes and Git recovery points; real SFT/RL or training-data export
+  requires a separate task. This does not retire trajectory capture/safe export.
+  Do not treat every deferred idea as a feature that must be implemented.
 - Follow the repository's Python style: four-space indentation, `snake_case`,
   type hints where useful, and single-purpose functions. Preserve existing
   JSON/YAML formatting unless a canonical formatter is already configured.

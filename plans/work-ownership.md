@@ -2,13 +2,14 @@
 
 Updated: 2026-09-01
 
-## Current cleanup assignment
+## Latest cleanup assignment — closed
 
 Base `5d2a39fe0dde076654e362716456b1a8cedc1547`; scope and acceptance are in
-`mainline-scope-cleanup.md`. Main alone owns the four named training removals,
+`mainline-scope-cleanup.md`. Main alone owned the four named training removals,
 documentation/navigation tests, current plans, logs and Git. `resume_code_map`
-checks dependency closure read-only; `waveform_boundary_review` reviews the
-plan and stable diff read-only. No delegated writer is authorized. All earlier
+verified dependency closure read-only; `waveform_boundary_review` approved the
+plan and stable diff read-only. Both advisers are complete; no delegated writer
+is authorized. Main owns only final records/publication for this slice. All earlier
 assignments below are historical/closed. No paid calls, r53/EVAS or old-tree edits.
 
 ## Brief, Acceptance, And Scope

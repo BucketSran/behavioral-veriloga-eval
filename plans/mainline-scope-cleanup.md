@@ -52,3 +52,12 @@ Main is the sole writer/integrator. Advisers may read and report only. Stop the
 affected change if an unexpected consumer, unrelated edit or behavior change
 appears; do not widen deletion scope. Completion means reduced active surface,
 working retained paths and explicit verification gaps, not new model evidence.
+
+## Outcome
+
+Implemented in `1f6de2fda9` after baseline locks and independent review. Exact
+four-file retirement is recoverable at the base; current-plan is 103 lines.
+Expanded validation: 1,461 passed / 68 optional skips / 1 existing historical
+fixture excluded. Seven CLI help checks and static/navigation checks pass.
+Maintenance rules and ownership closure are recorded separately; detailed
+commands and publication status live in the verification log. No paid calls.

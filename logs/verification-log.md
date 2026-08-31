@@ -1,5 +1,21 @@
 # Verification Log
 
+## 2026-09-01 - Cleanup maintenance-policy closeout
+
+- Scope commit `b27cebb066`; reviewed retirement/navigation implementation
+  `1f6de2fda9`. A second bounded read-only check also found no out-of-scope
+  production edits or stale current-training claim. Both advisers are complete.
+- Final follow-up only codifies English AGENTS maintenance rules and closes
+  current-plan/ownership/verification records. No new runtime work or paid run.
+  Post-closeout navigation/layout repeat: **57 passed**; diff check passes and
+  current-plan remains 103 lines.
+- EVAS working tree is clean and unchanged; its observed origin/main and
+  upstream/main refs match (0/0). Its older local main and checked-out audit
+  branch were not moved. Only behavioral-veriloga-eval is being published.
+- Staged secret scan found only the existing README placeholder
+  `DEEPSEEK_API_KEY='...'`, not a credential. New hosted CI is pending fork
+  publication; local regression evidence and its skips are recorded below.
+
 ## 2026-09-01 - Synthetic retirement and active-scope navigation
 
 - Independent plan review: OKAY. Removed exactly two unused training modules

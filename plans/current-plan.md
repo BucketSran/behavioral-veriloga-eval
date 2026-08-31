@@ -34,19 +34,19 @@ Code and per-feature evidence: [migration ledger](../docs/alphaapollo-migration/
 Corpus activation: [reviewed source scope](veriloga-corpus-activation.md).
 These are implemented capabilities, not a to-do list to rebuild.
 
-## Active maintenance slice
+## Latest completed maintenance slice
 
-[Conservative mainline cleanup](mainline-scope-cleanup.md) is the current task:
+[Conservative mainline cleanup](mainline-scope-cleanup.md) is implemented and verified:
 
-1. Retire the two synthetic-only training modules and their exclusive tests.
-   Preserve recovery links and historical design evidence; keep real trajectory
-   capture/safe export intact.
-2. Consolidate current status here; route operator docs to existing entrypoints.
-   Preserve dated feature notes/audits and avoid new wrappers or dependencies.
-3. Run retained regressions, review independently, commit focused slices and
-   publish only to the fork. Actual closure and skips belong in the verification log.
+1. Retired the two synthetic-only training modules and their exclusive tests.
+   Recovery links and historical evidence remain; real trajectory capture/safe
+   export is unchanged.
+2. Consolidated current status here and documented existing entrypoint tiers.
+   Dated feature notes/audits remain; no new wrapper or dependency was added.
+3. Retained regressions and independent review pass. Focused commits, publication
+   status and explicit skips are recorded in the verification log.
 
-No additional runtime feature is scheduled in this cleanup.
+No implementation remains open in this slice; the next study is a separate decision.
 
 ## Next decision: evidence before more features
 
