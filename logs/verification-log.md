@@ -1,5 +1,43 @@
 # Verification Log
 
+## 2026-08-31 - AA-VAE-071 fork publication and exact-source hosted GREEN
+
+- Six focused commits are published to BucketSran main: `0b2e848969` intake,
+  `e05ca61089` optional guard controls, `b94b45e5bf` observed surfaces,
+  `54616da5e4` read-only results, `df2ecda69c` free coordinator, and
+  `8609747ccbbcd74eaf786de072d58b3b038cb1c4` CI wiring. No upstream push.
+- Exact-source workflows are all successful:
+  [Evaluator Closure](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33395611633),
+  [Runner Smoke](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33395611433),
+  [Public Agent Runtime](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33395611520).
+  Evaluator Closure's full-checkout regression suite: **1,482 passed / 49
+  optional skips, 68.64 s**. All Docker stages and final three-arm clean-room
+  checks passed; the new six-cell/cost-stop stage reports **3 passed, 23.76 s**.
+- This full-checkout result closes the historical-fixture validation gap for
+  the published source; it does not change the local sparse-checkout failure
+  record or restore excluded history. The existing Node action-runtime
+  deprecation warning is non-blocking; no dependency upgrade is included.
+- Independent code and documentation reviews found no remaining blocker.
+  Final documentation/navigation/layout selection: **55 passed / 2 optional
+  skips**. This last follow-up changes documentation only; executed source and
+  source-specific CI links above remain the evidence anchors.
+- Fork source was clean and 0/0 versus origin/main after push; it contains all
+  upstream main commits and is ahead 158. EVAS remains clean on its existing
+  fork audit branch. No raw runtime evidence, key, paid run, r53 or EVAS change.
+
+## 2026-08-31 - AA-VAE-071 committed-source local replay
+
+- Re-ran the full free comparison/surface fixture on committed runtime source
+  `df2ecda69cf63c0de954fe72b6d4915ec6d9cfa4`: **41 passed, 44.06 s**.
+  The manifest now records the actual Git label in addition to source-byte
+  identities. Later CI-only commit `8609747ccb` changes no execution bytes.
+- Local report SHA-256:
+  `faff63c48565e20cf3148479255d0f02b964985981fbd2cc259978c77b99d150`;
+  manifest SHA-256:
+  `0767bbae31b69d627c1e684cfec70c49ede5bb9e9b2c8e9420d53fb0839617c1`.
+  Six frozen/scored scripted candidates, three matched pairs, zero paid requests;
+  raw runtime artifacts remain ignored and are not published.
+
 ## 2026-08-31 - AA-VAE-071 hosted gate wiring
 
 - CI path/step tracer initially failed because all three comparison modules

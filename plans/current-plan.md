@@ -23,10 +23,14 @@ implementation and does not change the phase statuses below.
   Real Docker/EVAS with scripted responses: **41 passed**, including six scored
   cells, three matched surfaces, unknown-cost/admission stops and no reentry.
   Independent follow-up review found no remaining source-level blocker.
-  Active r53/harness gate: **1,380 passed / 46 optional skips**. Full hosted
-  verification and focused fork publication are being closed; the local full
+  Active r53/harness gate: **1,380 passed / 46 optional skips**. Six focused
+  commits are published to fork main through `8609747ccb`; full hosted
+  exact-source Evaluator Closure, Runner Smoke and Public Agent Runtime all
+  passed (**1,482 regression passes / 49 optional skips**, plus all Docker
+  stages). The local full
   historical suite is not GREEN because sparse checkout
-  excludes V3/old-v4/r52/provenance fixtures. Preserve this storage choice.
+  excludes V3/old-v4/r52/provenance fixtures. Preserve this storage choice;
+  the successful hosted full checkout verifies their compatibility separately.
   The [archived native coverage audit](../docs/alphaapollo-migration/experiments/native-toolchain-coverage-20260831.md)
   has one historical real native DUT score out of six native combinations.
   It is separate from this free family001 six-cell fixture and the family029

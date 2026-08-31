@@ -68,8 +68,10 @@ validation. No other file/Git/live writes. Hand back before integration runs.
 Main retains results, coordinator, integration tests, CI and shared records.
 The surface review-fix assignment is now handed back. Main owns all files;
 `comparison_gate_review` reports no remaining source-level blocker after the
-independent second pass. Stable-tree free Docker and full regressions are the
-coordinator's remaining verification/publication work.
+independent second pass. Stable-tree free Docker, active local regressions,
+fork publication and exact-source hosted gates are complete through `8609747ccb`.
+The final documentation-only evidence update remains main-owned; no delegated
+writer or paid/live assignment remains active under this brief.
 
 The AA-VAE-070 and cap-fix local-only handoffs below are historical: publication
 through `e2498952bb` and all three exact-source hosted gates are now complete.

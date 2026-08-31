@@ -3,7 +3,7 @@
 ## Intent and reuse
 
 Continue AA-VAE-069 with a thin, opt-in comparison layer. Reuse the existing
-mini-swe/native runners, DeepSeek reservation guard, immutable publication,
+mini-swe/native runners, DeepSeek reservation guard, immutable local evidence publication,
 frozen-submission verifier and final-receipt reader. The architecture keeps
 controller, environment and final authority separate; it does not import a
 second agent framework or translate legacy evidence into fabricated native logs.
@@ -97,3 +97,11 @@ but is not an independently hidden stimulus set. SFT/RL and Spectre are out of s
 
 See [the engineering plan](../../../plans/legacy-native-comparison-engineering.md)
 and dated verification log for exact commands, source and publication evidence.
+
+Verification checkpoint: local active gate **1,380 passed / 46 optional skips**;
+committed-source real Docker/EVAS fixture **41 passed**. Published source
+`8609747ccb` passes all three hosted workflows; full-checkout regression is
+**1,482 passed / 49 optional skips**, with the new six-cell/censoring stage and
+all prior Docker/final checks GREEN. These are engineering results, not model
+performance. Local historical fixture failures remain explicitly recorded as
+sparse-checkout limitations; excluded history was not restored.
