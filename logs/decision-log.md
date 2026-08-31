@@ -1,5 +1,25 @@
 # Decision Log
 
+## 2026-08-31 - Close local batch recovery with existing authority readers
+
+- Adopt Inspect's persistent batch completion boundary and Harbor's job/trial
+  separation, not their complete runtime or permissive retry/regrade behavior.
+  Standard-library locks/thread pools and existing atomic evidence publication
+  are sufficient; no dependency, provider adapter or scoring engine is added.
+- Native reopens only verified terminal records or sealed pre-final retry
+  boundaries with cumulative call/attempt accounting. Evolution reopens terminal
+  cells; fresh setup retry requires exactly two bound files plus verified zero
+  branch activity/costs. Residual public/final runtime or ambiguous markers block.
+- Independent review exposed loose completed-config/receipt joins and ambiguous
+  setup markers. Rebuild the original engine config and share the production
+  judge's read-only receipt validator; never score again to repair evidence.
+- Freeze and execute the actual public-validation Docker ID as well as the
+  branch ID. The old Docker temporary-path failure did not justify an exporter
+  or EVAS change; remove xfail and use a Docker-visible local reports directory.
+- Keep legacy defaults, r53, EVAS 0.8.7 and the stopped guarded pilot unchanged.
+  Focused local commits and free verification close this implementation; no
+  push, hosted-CI, real-model quality or unrestricted crash-recovery claim.
+
 ## 2026-08-31 - Open bounded batch recovery, not trajectory replay
 
 - User explicitly requests implementation informed by existing frameworks.

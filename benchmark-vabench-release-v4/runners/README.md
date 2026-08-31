@@ -141,8 +141,13 @@ For the opt-in native DUT/bugfix/Testbench three-condition path, add
 `--episode-backend native-mini-swe --comparison-profile executable-feedback-control`
 when creating the campaign and select supported forms explicitly. Keep the
 default `--agent-scaffold mini-swe`; `--agent-scaffold native` is a different,
-legacy sensitivity path. Native runs require fresh outputs and do not support
-resume or post-freeze limit selection. Testbench public feedback is reference-DUT-only.
+legacy sensitivity path. New native runs require fresh outputs. To reopen a
+batch created with AA-VAE-070, repeat its exact command with `--resume`:
+completed cells are verified/reused, missing cells get fresh runtimes, and only
+sealed eligible attempt boundaries can continue. This never resumes a partial
+conversation or final replay. Source/config/image/roster drift and unknown
+in-flight evidence block scheduling; post-freeze limit selection is unsupported.
+Testbench public feedback is reference-DUT-only.
 Native score aggregation uses
 `--episode-backend native-mini-swe --campaign /absolute/path/campaign.json
 --judge-kind final_trusted_replay` and reads existing terminal evidence instead
@@ -156,9 +161,14 @@ uses `--native-max-attempts` (default one), never score-driven retries.
 `score_campaign.py --ledger-output /absolute/new-ledger.json` optionally writes
 a separate safe record/paired-coverage/claim ledger outside generation evidence.
 
-Multi-model Evolution has a separate one-cell entrypoint,
+Multi-model Evolution has a separate entrypoint (one cell by default),
 `operations/calibration_pilot/run_evolution_campaign.py`; it is not another
 single-trajectory backend flag. Its roster, round limits, public validation and
 selection are frozen separately, and its final result must not be folded into
 the single-trajectory ledger. See the calibration README for dry-run and roster
-examples. Domain tools and real model quality experiments remain separate gates.
+examples. Its explicit `--batch` path accepts repeated `--cell` selections and
+`--resume` for completed-cell reuse/missing-cell scheduling. It does not restore
+partial Evolution rounds. Both batch paths retain `.batch/` manifests, receipts
+and append-only full-denominator indexes under their run root; they require a
+local POSIX filesystem. Historical outputs without this contract cannot be
+adopted. Domain tools and real model quality experiments remain separate gates.

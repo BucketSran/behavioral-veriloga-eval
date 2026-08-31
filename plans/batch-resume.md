@@ -49,6 +49,20 @@ the stopped paid pilot and its historical fee authorization unchanged.
 
 ## Evidence
 
-Implementation and validation pending. Upstream citations and final commands
-will be recorded in the feature note and verification log, not treated as
-evidence that vaEVAS has implemented upstream guarantees.
+Implemented and independently reviewed. Native/attempt focused gate: 82 passed;
+Evolution/native-episode focused gate: 64 passed / 2 optional skips. Three
+actual Docker/EVAS cross-process tests reopen completed cells without provider,
+credential loading or judge reentry; nine task-form/three-condition/Evolution
+regressions pass. Exact full-suite counts and commands are in the verification
+log. Upstream citations are design provenance, not evidence that vaEVAS has
+implemented every upstream guarantee.
+
+Evolution setup retries are stricter than a generic infrastructure retry: only
+bound setup/terminal files and verified zero-start/cost evidence may remain.
+Any public-validation/final runtime or unknown lifecycle artifact blocks retry.
+Canonical config reconstruction reuses the existing engine builder; completed
+score receipt reads reuse the existing production final-judge verifier.
+
+No release/evaluator change, paid experiment, credential read or Git push was
+performed. This closes local batch recovery, not arbitrary crash restoration,
+historical-output adoption, fee-budget replay or distributed checkpointing.

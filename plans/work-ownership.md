@@ -20,7 +20,7 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
-Active AA-VAE-070 on `e46a9d6719893d500071f6cf5ce744d4dc7f439a`:
+AA-VAE-070 integration on `e46a9d6719893d500071f6cf5ce744d4dc7f439a`:
 main owns `runners/agent_harness/batch_resume.py`,
 calibration-pilot `run_native_batch.py`,
 `tests/test_agent_harness_batch_resume.py`, calibration-pilot `run_campaign.py`,
@@ -49,6 +49,23 @@ files (frozen runtime identity, complete preflight, safe retry and real-result
 joins). Main additionally owns `.github/workflows/evaluator-closure.yml` and
 `tests/test_agent_harness_ci_gate.py`. `resume_native_review` reviews shared/native
 batch and attempt recovery read-only; no edits, Git, credentials or paid calls.
+Both implementation writers are now handed back. Main owns all integration
+files, including `run_native_evolution.py` for the test-confirmed missing public
+validation image-ID binding (no reducer/selection/score policy change). The old
+setup-failure xfail did not reproduce on the final handed-back fixture; it is
+removed, not accepted as a CI substitute or grounds for an export-engine edit.
+Main also owns `native_episode.py` for extracting its existing sidecar-receipt
+verification into a read-only helper shared by live judging and batch recovery.
+The independent review's 12 new adversarial cases are RED before this repair;
+no second judge or alternative scoring implementation is authorized.
+`resume_evolution_review` independently reviews the three Evolution batch files
+read-only; `resume_evolution_setup_map` investigates the real Docker setup failure
+read-only. No delegated implementation, Git, private evidence or paid execution.
+Both source reviews are complete: shared/native has no remaining required
+correction, and Evolution re-review is APPROVE after the config/receipt/setup
+fixes. The setup diagnosis confirmed a Docker-invisible macOS temporary path,
+not an export defect. All advisory/writer assignments are closed; main owns
+only final local tests, records and focused commits. No push is opened here.
 
 Closed bounded integration request from audit task
 `01a05640-c83b-7223-8da0-738af106d023`, base

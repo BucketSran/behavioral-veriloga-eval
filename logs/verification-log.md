@@ -1,5 +1,120 @@
 # Verification Log
 
+## 2026-08-31 - AA-VAE-070 local integration and independent review closure
+
+- Focused local history starts with plan `04ced7379c`, shared journal
+  `d09f74cb85`, native attempt recovery `c1d79ac4a1`, native campaign wiring
+  `bb31bb37d2`, shared final-receipt verification `8af7412c30`, and Evolution
+  recovery `7555cbdcce` (focused batch gate **30 passed / 1 skipped, 9.46 s**).
+  CI gate is `250d30a723`; final CI/navigation/layout selection is **65 passed,
+  1.47 s**. Source commits remain local; no hosted workflow was triggered.
+  Only source/tests/sanitized docs are staged; generated runtime evidence is not.
+- Final shared journal gate: **15 passed, 0.22 s**; native attempt/integration:
+  **82 passed, 5.57 s**. Limits 2 and 5 remain cumulative across interruption.
+  Native wrapper/CI/navigation: **63 passed / 2 optional skips, 9.62 s**.
+- Independent native review: no remaining required correction after retryable
+  terminal selection and stray-attempt fixes. Independent Evolution review
+  initially requested changes: missing canonical config/receipt binding and
+  ambiguous setup markers. Twelve new adverse cases reproduced **12 failures**;
+  the fixes reuse the engine config builder and existing final receipt reader.
+  Re-review: **APPROVE**, zero required corrections; independently **62 passed /
+  2 skipped**. Two later interrupted-publication/prefix cases bring main's
+  focused Evolution/native-episode gate to **64 passed / 2 skipped, 27.16 s**.
+  A recovered terminal before batch receipt now correctly reports reuse.
+- Extra Evolution attempts: unrostered directory/unsafe predecessor RED
+  **4 failed / 2 passed**, then six pass; frozen cap overflow and full-denominator
+  corrupt-receipt regressions each RED then GREEN. Frozen public Docker ID wiring
+  was **2 failed** before the adapter fix. No export/scoring-policy change.
+- First full harness/navigation/layout run: **4 failed / 1,220 passed / 39 skipped**.
+  All four failures were new fixtures patching an obsolete runner-module alias
+  after existing integration tests reloaded it. Patch the batch's actual
+  dependency; the reproducing selection is **25 passed / 2 skipped, 18.05 s**.
+  Next full run: **1,224 passed / 39 skipped, 160.72 s**. Final consolidated
+  command `uv run --locked --extra agentic python -m pytest -q
+  tests/test_agent_harness_*.py tests/test_v4_r53_active_entrypoints.py
+  tests/test_evas_output_cleanup.py tests/test_task_count_filters.py --tb=short`:
+  **1,226 passed / 39 skipped, 152.39 s**, including both later boundary cases.
+- Latest actual cross-process gate:
+  `VABENCH_TEST_DOCKER_RUNTIME=1 uv run --locked --extra agentic python -m pytest -q
+  tests/test_agent_harness_native_campaign_dispatch.py::test_r53_docker_native_batch_reuses_scored_cell_without_provider
+  tests/test_agent_harness_evolution_batch.py::test_r53_docker_evolution_batch_resume
+  --basetemp benchmark-vabench-release-v4/reports/aa070-batch-final-v2-20260831 --tb=short`:
+  **3 passed, 41.14 s**. Native mini-swe, Reasoning and Evolution each use a
+  scripted provider, real r53 export/Docker/freeze/EVAS 0.8.7, then a new Python
+  process with provider/key/judge entrypoints forbidden. Completed zero-score
+  cell bytes are unchanged; no second final replay is used for recovery.
+- Batch manifest / cell-receipt SHA-256 pairs for that ignored evidence root:
+  Native mini-swe (`test_r53_docker_native_batch_r0/run/.batch/`):
+  `2713317b08f132b20d9e6e5c9cbb7bf8b8ae0675e3f3ac47b79bc37fb6a8fc93` /
+  `544d95312d0f1cd470822ebd3de87c50825d2b74d1e65ed39020b032fa50e14f`;
+  Reasoning (`test_r53_docker_native_batch_r1/run/.batch/`):
+  `a8eab0840383381380f3e8a4ee6d711021e03f820d21898d0705cafd5724d769` /
+  `b46e1f6988e15b5612d69b99df128935d495b957a1826fe1118b3fd50ecfbbc6`;
+  Evolution (`test_r53_docker_evolution_batc0/batch/.batch/`):
+  `f769b184f47e77307ebc9fe7338053512dd81bbfd86fd6af7fa331847c75f375` /
+  `28fd977b4b04e6212fe1cfda76f8fbe5d70c54216da204e089c0d1099f0718bc`.
+- Actual regression gate (same flags):
+  `tests/test_agent_harness_native_campaign_smoke.py::test_r53_docker_all_native_three_arm_campaign`
+  plus `tests/test_agent_harness_evolution_campaign.py::test_r53_docker_native_evolution_selected_final_only`,
+  `--basetemp benchmark-vabench-release-v4/reports/aa070-form-final-20260831`:
+  **9 passed, 397.59 s**. Covers three forms/three arms/two native policies,
+  retry configuration and selected-only Evolution final scoring; not model quality.
+- The old Evolution xfail was removed. Independent diagnosis reproduced Docker
+  bind-source invisibility under macOS host temp paths despite local task files
+  existing. Repo-local ignored basetemp passes; no exporter/EVAS repair was made.
+- Ruff 0.12.12 (offline), Python compilation and diff checks pass. No configured
+  full mypy/pyright/LSP check is available; these are not full typechecking claims.
+  The dedicated `scripts/check_repo_layout.py` is absent; current layout,
+  cleanup, active-entrypoint and CI contract tests provide the repository gate.
+  No real credential, paid API, private AlphaApollo/raw historical evidence,
+  release/evaluator mutation, push or hosted-CI execution occurred.
+  Final EVAS status is clean at `6cb6fa7a7dac70fc0d4120126d8cf74258e6637b`;
+  no changed path is under the sealed r53 release.
+
+## 2026-08-31 - AA-VAE-070 batch recovery: staged implementation evidence
+
+- Base: clean behavioral main `e46a9d6719893d500071f6cf5ce744d4dc7f439a`
+  (previous local cap fix); live fork main `dee9ccfeb09cc41baf1982d1ee7882f92aef5d72`,
+  upstream `7b5616dc52195ec275ec6d21c71d7763613702cd`. No fetch/merge/push or
+  upstream write was required. EVAS remains clean/read-only at `6cb6fa7a7d`.
+- Bounded official-source research: Inspect Eval Sets / Handling Errors and
+  Harbor Core Concepts. Reused persistent completion/trial-layer design;
+  implementation reuses stdlib locking/concurrency and existing result-store
+  atomic publication/evidence readers. No added dependency or copied source.
+- Shared journal tracer RED: missing module (collection error). First
+  completion-reuse tracer GREEN, then drift/tamper/process-lock/index tests.
+  Unrostered runtime regression RED **1 failed / 1 passed**, then final shared
+  gate `uv run --locked --extra agentic python -m pytest -q
+  tests/test_agent_harness_batch_resume.py --tb=short`: **14 passed, 0.44 s**.
+- Native wrapper cross-process dry-run tracer rejected old native `--resume`
+  before implementation; it then passed. Expanded shared/dispatch gate reached
+  **30 passed / 2 optional skips, 5.18 s**. A later concurrent run correctly
+  rejected source drift while the Evolution writer changed hashed source;
+  stable-tree integration will be rerun, not exempted from the hash contract.
+- Native direct-resume prior-source regression RED: **1 failed, 0.64 s**
+  because a client was created before corrupted prior evidence was rejected.
+  Entry preflight now runs first; Native completed/prefix readers share one
+  semantic evidence helper. Native/attempt integration gate: **74 passed**.
+- Independent native review found two recovery implementation blockers:
+  retryable-last selection accepted as terminal, and stray later attempts
+  ignored. Six regression cases reproduced **4 failed / 2 passed**. Position
+  semantics, row-shape validation and exact directory rosters now reject both;
+  attempt/native/integration gate **80 passed, 5.90 s**. Two additional interrupted
+  prefix tests preserve original model-call limits 2 and 5 (**2 passed**).
+- Actual native Docker/EVAS reuse: `VABENCH_TEST_DOCKER_RUNTIME=1 uv run
+  --locked --extra agentic python -m pytest -q
+  tests/test_agent_harness_native_campaign_dispatch.py::test_r53_docker_native_batch_reuses_scored_cell_without_provider
+  --basetemp benchmark-vabench-release-v4/reports/aa070-native-resume-20260831c
+  --tb=short`: **2 passed, 21.28 s**, native mini-swe and Reasoning. Scripted
+  providers, real r53 export/Docker/freeze/EVAS0.8.7 score sidecars; second
+  invocation has no client creation and does not change cell evidence bytes.
+  Earlier run exposed legitimate exported `public/public -> .`; confined links
+  are now hashed without following cycles, outside/broken links still reject.
+- Ruff 0.12.12 (cached/offline) passes for shared/native/attempt code and tests.
+  Subsequent Evolution repair and final gates/review are recorded above;
+  these intermediate counts are not a hosted-CI claim.
+  No credential read, paid API, private-project access or r53/EVAS edits.
+
 ## 2026-08-31 - Pilot manifest-cap binding: free RED/GREEN
 
 - Intake: clean behavioral main and live BucketSran origin/main both at

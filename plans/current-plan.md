@@ -17,12 +17,15 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- Active: [batch-level recovery](batch-resume.md), AA-VAE-070. Add verified
+- Implemented: [batch-level recovery](batch-resume.md), AA-VAE-070. Add verified
   terminal-cell reuse and missing-cell scheduling to native/Evolution; preserve
   frozen configuration, attempt/call accounting and final no-reentry. Main owns
-  integration; upstream research and repository mapping are read-only. No paid
+  integration; independent source reviews are complete. No paid
   run, keys, r53/EVAS mutation or historical evidence adoption. Acceptance and
-  test-first execution sequence are in the linked brief.
+  test-first execution sequence are in the linked brief. Native and Evolution
+  cross-process reuse and real task-form regressions pass; final full gate is
+  1,226 passed / 39 skipped. Local closure does not imply hosted CI, publication
+  or real-model quality evidence.
 
 - Completed bounded repair (audit-task handoff, base `dee9ccfeb0`): pass the frozen
   pilot manifest's `cap` into the existing `DeepSeekPilotBudget`. Main owns only

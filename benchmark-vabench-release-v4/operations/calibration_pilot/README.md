@@ -63,6 +63,41 @@ not a mixture of backend identities in one result table. Native fresh-attempt
 recovery is opt-in with `--native-max-attempts` (default one): it recovers only
 eligible infrastructure failures before terminal activity, not wrong answers.
 
+### Batch-level recovery (AA-VAE-070)
+
+For native campaigns, create a fresh run through the normal wrapper; reopening
+it uses the same command and output root plus `--resume`. The frozen campaign
+and `.batch/manifest.json` must match source bytes, ordered cells, model/backend,
+runtime options, budgets and observed Docker IDs. Completed terminal cells
+(including zero scores and unscored failures) reuse verified evidence without
+model or judge calls. Only missing cells or fully sealed eligible native
+attempt prefixes may execute; the original attempt/call caps still apply.
+
+The Evolution entrypoint below adds an explicit `--batch` option with repeated
+`--cell ORIGINAL_AGENTIC_CELL_ID`, `--batch-max-attempts N` (default one) and
+`--resume`. Each cell owns fresh `attempt-NNNN` directories. Retry is restricted
+to a verified setup failure containing only a bound `setup-request.json` and
+terminal result with zero-start/cost evidence. Even residual public-validation
+or final runtime directories block automatic retry; partially run Evolution
+rounds are not restored. Final results never feed the next attempt.
+Evolution results remain separate from the single-trajectory score ledger.
+
+Both paths use an exclusive local-process lock, immutable terminal receipts
+and append-only `.batch/index-NNNNNN.json` snapshots retaining the full roster.
+They reject source/config/roster/image drift, changed terminal evidence and
+unknown in-flight state before provider creation. Native roots live under the
+wrapper's `run/`; Evolution batch roots are `--output-root` directly. Batch
+records are private operational evidence, not reviewer-safe exports. A dry-run
+is a separate frozen batch and cannot be converted into real execution.
+
+This is not arbitrary checkpoint recovery, distributed scheduling, or an
+invoice-budget guarantee. Use local POSIX filesystems with `flock`, hard links
+and `fsync`; do not delete locks/receipts or force-adopt old outputs. The guarded
+DeepSeek pilot still has no resume path and its fee guard is unchanged.
+The legacy conversation `--resume` and single-cell native no-reentry contract
+are unchanged. See [AA-VAE-070](../../../docs/alphaapollo-migration/features/AA-VAE-070-batch-resume.md)
+for upstream rationale, code map and tests.
+
 The campaign wrapper also accepts `--native-model-call-limit N` for either
 native backend, with N a positive integer. Omission adds no model-call limit;
 eight is only the named DeepSeek pilot's default, not a harness or r53 rule.
@@ -199,7 +234,8 @@ It rejects unsupported contracts, undeclared
 submission files, authority/candidate drift, incomplete invocation evidence,
 resource overflow, and validation after submission/final reservation. A contract
 failure invalidates the adapter; discard the attempt rather than reconstructing
-it to retry. Cross-process recovery remains unimplemented.
+it to retry. AA-VAE-070 recovers only outer batch/eligible sealed attempt
+boundaries; it does not reconstruct this adapter mid-invocation.
 
 Feedback is public process diagnostics, not a task pass/score. Profiles fingerprint
 observed runtime inputs; the coordinator still owns sealed-release provenance,
@@ -528,7 +564,7 @@ different runtimes does not mean the attempts are identical.
 `evidence/bound-final-test/` reserves terminal execution before the judge starts.
 Once reserved, scoring and generation entrypoints reject in-place retry/reentry,
 including after an infrastructure failure. Do not remove this directory to
-resume a run. An explicit infrastructure-retry coordinator is a future slice.
+resume a run. AA-VAE-070 cannot retry a reserved final replay either.
 The score is `development_only`; no Spectre equivalence, model-quality claim,
 complete dependency fingerprint, or native typed trajectory is implied.
 
@@ -609,8 +645,8 @@ infrastructure failures retain `score=null`.
 
 Native attempts cannot resume in place, including through the old campaign
 entry point after a pre-scoring failure. A crash or publication failure keeps
-the runtime reserved. Explicit retry orchestration, aggregate ledgers, complete
-raw trace archives and the production public-tool dispatch are still pending.
+the runtime reserved. Later campaign retry/ledger/archive/public-dispatch
+additions are documented above; AA-VAE-070 adds only outer batch recovery.
 The caller retains environment cleanup responsibility on preflight rejection;
 the controller owns normal cleanup after it starts.
 
@@ -665,7 +701,7 @@ or competing prefixes. Recovered candidates remain
 `submission_protocol_compliant=false`, and the formal scorer treats them as not
 submitted.
 
-Long agentic episodes checkpoint the public conversation, cumulative provider
+Legacy agentic episodes checkpoint the public conversation, cumulative provider
 output tokens, tool events, and current submission after every model and tool action.
 `--resume` continues the same episode after an infrastructure interruption;
 it does not reset the wall-time episode budget, create another sample, or grant another
@@ -743,8 +779,9 @@ automatically discover or rescore native runtimes.
 
 See `docs/alphaapollo-migration/features/AA-VAE-039-native-campaign-evidence-bridge.md`.
 That dated mixed-backend slice is preserved as regression evidence. Native
-three-condition support is now available via the separate opt-in below;
-retries and real-model comparisons remain open. R53 and EVAS 0.8.7 are unchanged.
+three-condition support and bounded infrastructure retries are now available
+via the separate opt-in below; real-model comparisons remain separately gated.
+R53 and EVAS 0.8.7 are unchanged.
 
 ### Opt-in all-native three-form campaign
 
