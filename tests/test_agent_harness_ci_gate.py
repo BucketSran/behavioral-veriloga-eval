@@ -5,6 +5,15 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "evaluator-closure.yml"
 
 
+def test_evaluator_closure_gates_combined_tools_with_synthetic_http_only():
+    workflow = WORKFLOW.read_text()
+    for name in ("run_combined_tools.py", "combined_tool_evidence.py"):
+        assert workflow.count(f'"benchmark-vabench-release-v4/operations/calibration_pilot/{name}"') == 2
+    assert "tests/test_agent_harness_combined_tools.py \\" in workflow
+    assert "tests/test_agent_harness_combined_tool_evidence.py \\" in workflow
+    assert "r53-combined-tools-fixture" in workflow
+
+
 def test_evaluator_closure_gates_legacy_native_comparison_and_cost_stops():
     workflow = WORKFLOW.read_text()
     for name in ("run_legacy_native_comparison.py", "comparison_results.py", "comparison_surface.py"):

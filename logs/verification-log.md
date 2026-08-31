@@ -1,5 +1,14 @@
 # Verification Log
 
+## 2026-09-01 - AA-VAE-075 credential-free combined CI gate
+
+- Runtime/evidence integration is committed as `18bcd2a547`. Add both new
+  runtime modules to push/PR source filters and a real-Docker combined stage
+  exercising all Native/Evolution/live-fixture cases. Earlier gates remain.
+- Workflow contract: **21 passed**; active entrypoint + workflow checks:
+  **45 passed**. No CI key, provider call, new dependency or release/image
+  version change. Hosted full checkout is pending fork publication.
+
 ## 2026-09-01 - AA-VAE-075 stable combined integration
 
 - Actual Docker/EVAS + synthetic documents/model replies and simulated live
