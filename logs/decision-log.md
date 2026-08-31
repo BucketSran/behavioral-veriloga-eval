@@ -1,5 +1,18 @@
 # Decision Log
 
+## 2026-08-31 - Compose public tools without changing score authority
+
+- AA-VAE-073/074/075 follows the user's combined acceptance request. Evolution
+  waveform feedback belongs to the existing coordinator validator, not branch
+  Bash authority; share only sealed bounded public receipts at round barriers.
+- Reuse the deterministic retriever with an explicit reviewed corpus mode.
+  The suggested public skill repository has no discovered license; do not
+  vendor it or assume Cadence API-context rights. Source pins and operator
+  review are auditable assertions, not automatic legal/contamination proof.
+- Add a separate opt-in combined live entrypoint using existing engines and
+  shared fee guard. No actual paid execution this turn, no modification of the
+  immutable legacy/native comparison, r53 bytes or EVAS 0.8.7.
+
 ## 2026-08-31 - Separate live preparation, operator assertion and observed cost
 
 - AA-VAE-072 reuses the existing DeepSeek guard/SSE client, literal credential

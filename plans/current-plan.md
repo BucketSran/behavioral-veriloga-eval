@@ -17,6 +17,13 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- In progress: [combined public-tool acceptance](combined-tools-acceptance.md),
+  AA-VAE-073/074/075. Add coordinator-owned Evolution waveform sharing,
+  reviewed local corpus ingestion and a separate combined live entrypoint.
+  Existing legacy comparison, r53 and EVAS 0.8.7 remain unchanged. This turn
+  uses synthetic providers only; no keys or paid calls. Main integrates and
+  publishes focused GREEN commits, with exact delegated ownership below.
+
 - Implemented: [explicit live comparison entrypoint](legacy-native-live-entrypoint.md),
   AA-VAE-072. Reuse AA-VAE-071 with a frozen provider profile and explicit
   manifest/cap launch assertion; prepare/inspect/run/report remain separate.

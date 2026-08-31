@@ -20,6 +20,33 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
+AA-VAE-073/074/075 starts at `025276c6fc8acef2ef4377498d667494065baa4a`.
+Follow `combined-tools-acceptance.md`. Main owns new calibration-pilot
+`run_combined_tools.py`, its exact tests, shared CLI/native integration hooks,
+schemas outside the two assigned leaves, CI, docs/plans/logs and Git.
+
+`resume_evolution_impl` owns only calibration-pilot `run_native_evolution.py`
+and `tests/test_agent_harness_evolution_waveform.py`. Reuse existing waveform
+executor and receipt rehydration; propose any other shared-file change to main.
+Acceptance: absent option preserves old behavior; candidate/profile-bound bounded
+waveform feedback crosses only the next-round barrier, charged once; corruption,
+final-feedback and late-candidate changes fail closed. No selection/scorer change.
+
+`synthetic_training_adapter_impl` owns only
+`runners/agent_harness/tools/offline_docs.py`,
+`runners/agent_harness/tools/offline_docs_tool.py`, and new
+`tests/test_agent_harness_reviewed_docs.py`. Implement the reviewed-v2 leaf
+contract while preserving synthetic-v1 and tool boundaries. Main approves the
+schema/interface before writing. Acceptance includes rights/remote-use gates,
+provenance/hash/path validation and deterministic compatible retrieval.
+
+Both delegates use vertical TDD, are not alone in this worktree, must not revert
+others, and return unstaged edits before stable-tree integration. No Git/index,
+other files, real credentials/paid calls, source corpus copying, EVAS/release or
+old-tree writes. `comparison_runner_design` and `live_provider_contract_review`
+remain read-only advisers; an independent reviewer has no writing authority.
+All earlier assignments below are closed historical records, not active grants.
+
 AA-VAE-072 starts at `f1c78b3dd7b9b0913a626661158c816c55091667`.
 Main exclusively owns calibration-pilot `comparison_live.py`,
 `run_legacy_native_comparison.py`, `tests/test_agent_harness_comparison_live.py`,
