@@ -20,6 +20,17 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
+Current activation at `30d1efa956`: main owns the static corpus manifest,
+authorization/usage notes, its regression tests and shared records/Git under
+`plans/veriloga-corpus-activation.md`. `corpus_source_review` is a read-only
+public-source adviser. The user has now authorized veriloga-skills reference
+use; the earlier no-ingestion handoff below is historical. No paid run,
+delegated writer, evaluator/release or old-worktree mutation is authorized.
+Activation source `7313f98507` is committed after independent review and local
+GREEN. Both read-only advisers are complete; main closes the documentation and
+fork publication slice. Downloaded reference files remain local/ignored, with
+no delegated edit or paid lane active.
+
 AA-VAE-073/074/075 starts at `025276c6fc8acef2ef4377498d667494065baa4a`.
 Follow `combined-tools-acceptance.md`. Main owns new calibration-pilot
 `run_combined_tools.py`, its exact tests, shared CLI/native integration hooks,

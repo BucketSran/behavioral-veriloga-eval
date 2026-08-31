@@ -17,6 +17,17 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
+- Activated: [authorized Verilog-A reference corpus](veriloga-corpus-activation.md),
+  an AA-VAE-074 follow-up. User contributor authorization resolves project use.
+  Four general files at `7c5d3f03a162ee8131103e9551eee842424360bb` are present
+  locally and pass exact-byte plus deterministic source-retrieval tests; public
+  manifest/authorization/tests reuse reviewed-v2 without runtime changes.
+  Cadence was not found and is omitted as requested. Focused adjacent checks:
+  **146 passed / 5 optional Docker skips**. No paid request, no full combined
+  score on these real docs, no EVAS/r53 change or model-quality claim.
+  Activation source is `7313f98507`; independent review found no actionable
+  issue. Actual-source gate is 8/8. Hosted CI is separate from local acceptance.
+
 - Implemented and published; exact-source hosted gates passed:
   [combined public-tool acceptance](combined-tools-acceptance.md), AA-VAE-073–075.
   Evolution coordinator waveform sharing, reviewed local corpus contracts and
@@ -27,14 +38,15 @@ implementation and does not change the phase statuses below.
   actual docs/waveform use and next-round exposure, not merely enabled flags;
   candidate/input binding, all-branch costs and one final replay are preserved.
   Existing legacy comparison, r53 and EVAS 0.8.7 remain unchanged. No actual keys,
-  paid calls or third-party corpus text imported. Main owns integration/Git;
+  paid calls or third-party corpus text imported in that earlier slice.
+  Main owns integration/Git;
   delegated writing is closed. Seven focused commits through `6ac7482d4b`
   are on fork main; Evaluator Closure, Runner Smoke and Public Agent Runtime
   all passed. Hosted full checkout: **1,557 passed / 56 optional skips**;
   new combined Docker/live-fixture stage: **36 passed**. See verification log.
   Source: `cbfe1e2743` (corpus), `ff17ec4788` (Evolution waveform),
   `18bcd2a547` (combined wiring), `73b6a4aa8f` (CI), `421e430808` (claim labels).
-  Next activation gates: exact source/rights for real docs, re-review dated
+  Real-doc activation is addressed above. Next gates: re-review dated
   provider profile after 2026-08-31 UTC, then a separately budgeted real-model
   run. These are experimental/activation gates, not missing tool wiring.
 

@@ -70,8 +70,10 @@ unknown；`transport_reservations` 才是已观测的可能收费尝试。锁内
 需要先复核并更新服务费率/模型/解码契约，再冻结全新运行，而不是改旧 manifest
 或绕过时效检查。本轮不更新服务价格、不读取实际密钥、不启动付费调用。
 
-真实语料也尚未导入。veriloga-skills 的建议章节、固定 commit/hash、许可待确认，
-以及 Cadence 确切路径/使用权要求见 [AA-VAE-074](AA-VAE-074-reviewed-local-docs.md)。
+用户后续明确授权后，veriloga-skills 四份固定参考已作为本地 reviewed-v2 语料接入，
+清单与原有 `--docs-root/--docs-manifest` 用法见
+[AA-VAE-074](AA-VAE-074-reviewed-local-docs.md)。Cadence 未找到，按用户要求省略。
+此轮只验证语料加载/检索，没有用真实资料重新执行组合评分或付费模型实验。
 外部上下文权限在 live prepare/run 两处检查；本地许可不自动赋予 API 发送权限。
 
 ## 验证记录

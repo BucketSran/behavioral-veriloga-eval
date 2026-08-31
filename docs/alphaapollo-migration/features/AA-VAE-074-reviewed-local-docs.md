@@ -34,9 +34,11 @@ bounded lexical retriever，不引入向量数据库、联网爬虫或第二套 
 [Arcadia-1/veriloga-skills](https://github.com/Arcadia-1/veriloga-skills)
 在本次审查时固定到
 [`7c5d3f03a162ee8131103e9551eee842424360bb`](https://github.com/Arcadia-1/veriloga-skills/commit/7c5d3f03a162ee8131103e9551eee842424360bb)。
-GitHub 仓库元数据 `license=null`，根目录未找到 LICENSE；暂不复制正文到本库，
-也不据“开源可见”自动批准向模型服务发送。取得适用授权后，优先只选下列通用语言
-资料，记录确切版本；不要整库导入。
+初次审查时 GitHub 仓库元数据 `license=null`，根目录未找到 LICENSE。随后用户明确
+说明参与该 skill 的开发，并允许本项目直接使用；因此本项目的资料使用不再被
+缺少公开 LICENSE 阻塞。2026-09-01 已接入下列四份通用资料，正文保留本地，
+Git 保存 [清单与使用方法](../../../benchmark-vabench-release-v4/operations/calibration_pilot/corpora/veriloga-skills/README.md)
+及绑定哈希的授权记录。采用 `LicenseRef-User-Authorized`，不捏造公开许可证。
 
 | 固定路径（位于 `veriloga/references/`） | 原始字节 SHA-256 |
 | --- | --- |
@@ -49,9 +51,9 @@ GitHub 仓库元数据 `license=null`，根目录未找到 LICENSE；暂不复�
 EVAS/OpenVAF 工作流；示例电路可能与 benchmark 解答重合，不能因“不含 hidden”
 就宣称无污染。`SKILL.md` 即使另行审查后作为资料使用，也不能作为运行指令加载。
 
-Cadence 文档同理：需要确切本地路径、版本和适用使用权；当前工作目录的文件名
-检查未找到其原文。本次未恢复历史归档、未导入其正文、未向 API 发送文档内容。
-许可证未知、授权证据缺失或外部使用未批准时，不创建可用于 live 的语料清单。
+Cadence 按用户要求“存在则考虑，不存在就不调用”：新旧 vaEVAS 目录中均未找到
+可识别的手册文件，已省略；不恢复历史归档，不另行下载。此轮没有向模型 API
+发送任何文档。veriloga-skills 的项目授权不扩展到 Cadence。
 
 ## reviewed v2 的填写要求
 
@@ -72,3 +74,15 @@ Cadence 文档同理：需要确切本地路径、版本和适用使用权；当
 被无意改变的问题；新增完整 payload 校验和旧 descriptor 哈希断言。复审通过：
 35 passed / 2 optional skips（reviewed、offline docs、docs integration）。
 这证明语料接入契约，不证明真实语料的检索质量、无污染或模型分数提升。
+
+后续实际激活复用以上代码，**没有增加新 runtime 或检索框架**：
+`corpora/veriloga-skills/manifest.json` 固定四份原文与授权证据，
+`tests/test_agent_harness_veriloga_corpus.py` 检查清单、授权字节、源 hash 拒绝，
+并提供不联网的真实本地语料测试；CI 对 corpus-only 改动也触发原有门槛。
+四份原文共 6,357 bytes，四个不带 section filter 的查询均返回预期第一来源。
+corpus profile 为 `cab9aae2f52c0308fdafad357a5e4186d9dc36a395d59b57b2b73dba01d26fe9`。
+相邻 corpus/combined/CI/layout 回归 **146 passed / 5 optional Docker skips**。
+
+限制：通用语言资料不等于 EVAS 0.8.7 支持清单；现有检索只返回文档前 600 字符，
+不能保证显示命中的后半部分知识。此轮证明可用的固定输入与确定性来源检索，
+不证明新语料上的完整评分链路、检索收益、无污染或模型效果；没有付费运行。
