@@ -1,5 +1,47 @@
 # Verification Log
 
+## 2026-08-31 - AA-VAE-072 free live-transport integration and review
+
+- Intake `f1c78b3dd7` was clean/synced with BucketSran main; fetched upstream
+  still has zero commits missing from fork (fork ahead 159). Scope/intake is
+  committed separately as `304db929b1`. No EVAS/r53 or old-tree mutation.
+- Vertical RED evidence: missing module **1 failed**; launch gate **6 failed**;
+  rehashed budget drift **1 failed**; live-as-free accounting and unbound
+  launch receipts **3 failed**; missing CLI **1 failed**; output-cap drift
+  admitted to HTTP **1 failed**; missing CI wiring **1 failed**. Minimal fixes
+  reuse existing guard/transport/coordinator/readers rather than duplicate them.
+- First actual Docker/live-entrypoint fixture selection: **19 passed / 1 failed,
+  58.29 s**. CLI prepare incorrectly unpacked EVAS identity as a tuple; use the
+  existing helper's dict return. Focused prepare recheck: **1 passed, 0.62 s**.
+- Stable combined real Docker/EVAS invocation:
+  `VABENCH_TEST_DOCKER_RUNTIME=1 .venv/bin/python -m pytest -q
+  tests/test_agent_harness_comparison_live.py
+  tests/test_agent_harness_workflow_comparison.py
+  tests/test_agent_harness_comparison_surface.py --basetemp
+  benchmark-vabench-release-v4/reports/comparison-live-stable-qIqlw4/pytest --tb=short`
+  reports **62 passed, 117.60 s**. External metadata/curl responses are synthetic;
+  actual keys, provider requests and paid charges are zero in this verification.
+  The live-path full fixture has six scored cells/three matched surfaces and 12
+  synthetic transport reservations. Insufficient cap and unknown cost retain
+  all six rows, zero/one HTTP callbacks respectively, and reject reentry.
+- Full live fixture report SHA-256:
+  `58580d2724dac07fe67adf55fecf91575184b4ab6038af47285a7cde5e88603e`;
+  manifest SHA-256:
+  `efe6fc9f6317a0ffaae257ae372da1f71c81d59feeeb4943b2b491937e749cbb`.
+  Local uncommitted-source tests bind source bytes; exact committed hosted
+  verification is recorded after publication, not inferred from these tests.
+- Focused source gate: **104 passed / 8 Docker skips**. Navigation/layout/CI:
+  **75 passed / 2 skips**; independent scoped review **43 passed / 6 skips**,
+  zero required findings. Ruff 0.12.12, compilation and whitespace checks pass.
+  No local LSP/typechecker is available; do not claim typecheck approval.
+- Final active r53/harness/result/legacy/layout regression selection:
+  **1,398 passed / 50 optional skips, 188.64 s**. Historical sparse-excluded
+  fixtures remain excluded locally; full-checkout hosted compatibility follows.
+- Nonblocking review note: `request_observed` precedes monetary admission, so
+  documentation explicitly distinguishes prepared payloads from reserved or
+  captured HTTP attempts. Raw fixtures remain ignored. Live results report
+  unknown invoice counts, not zero-paid fixture labels.
+
 ## 2026-08-31 - AA-VAE-071 fork publication and exact-source hosted GREEN
 
 - Six focused commits are published to BucketSran main: `0b2e848969` intake,

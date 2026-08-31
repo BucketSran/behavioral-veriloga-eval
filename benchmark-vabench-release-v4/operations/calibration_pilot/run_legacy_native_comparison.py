@@ -30,9 +30,9 @@ BACKENDS = ("legacy", "native-mini-swe")
 JUDGE_COMMAND = shlex.join([sys.executable, str(Path(__file__).parent / "trusted_replay_adapter.py")])
 
 
-def _comparison_campaign():
+def _comparison_campaign(*, live=False):
     campaign = build_campaign(
-        DEFAULT_RELEASE, family_ids=["001"], model_provider="free-comparison-fixture",
+        DEFAULT_RELEASE, family_ids=["001"], model_provider="deepseek" if live else "free-comparison-fixture",
         model=MODEL, per_turn_max_tokens=MAX_OUTPUT_TOKENS, repetitions=1, three_arm_g0_g2=True,
     )
     cells = [row for row in campaign["cells"] if row["experimental_arm"] == "Agentic"]
@@ -51,7 +51,7 @@ def _execution_config(backend, controls, evas_identity):
 
 
 def freeze_comparison(root: Path, *, image_id: str, code_commit: str,
-                      evas_identity: dict, currency="CNY", cap="5.00") -> dict:
+                      evas_identity: dict, currency="CNY", cap="5.00", provider_profile=None) -> dict:
     """Derive, never modify, the dated protocol; reserve a fresh fixture root."""
     if not re.fullmatch(r"sha256:[0-9a-f]{64}", image_id):
         raise ValueError("comparison requires a resolved Docker image ID")
@@ -63,7 +63,10 @@ def freeze_comparison(root: Path, *, image_id: str, code_commit: str,
     if (blueprint["release_manifest_sha256"] != file_sha256(DEFAULT_RELEASE / "MANIFEST.json")
             or blueprint["live_authorized"] is not False):
         raise ValueError("comparison protocol/release drift")
-    campaign = _comparison_campaign()
+    if provider_profile is not None:
+        from comparison_live import validate_provider_profile
+        validate_provider_profile(provider_profile, currency=currency, cap=cap)
+    campaign = _comparison_campaign(live=provider_profile is not None)
     cells = campaign["cells"]
     root.mkdir(parents=True, mode=0o700, exist_ok=False)
     bindings = {}
@@ -98,12 +101,28 @@ def freeze_comparison(root: Path, *, image_id: str, code_commit: str,
                    "output_peak_per_million": str(RATES[currency][1]),
                    "pricing_date": "2026-08-30", "model_call_limit": None},
     }
+    if provider_profile is not None:
+        manifest.update(schema_version="vaevas-workflow-comparison-live-v1",
+                        evidence_scope="real_model_workflow_comparison",
+                        claim_scope="small_sample_workflow_comparison",
+                        provider_profile=deepcopy(provider_profile))
     _atomic_once(root / "comparison-manifest.json", manifest)
     return manifest
 
 
 def execute_comparison(root: Path, manifest: dict, *, evas_command: str, scripted_response) -> dict:
     """Execute free response fixtures only; no live provider or credential API."""
+    if "provider_profile" in manifest:
+        raise ValueError("live preparation requires the explicit live entrypoint")
+    if not callable(scripted_response):
+        raise ValueError("comparison requires an explicit scripted response callback")
+    return _execute_comparison(root, manifest, evas_command=evas_command,
+                               client_factory=lambda **kwargs: _ScriptedComparisonClient(
+                                   **kwargs, scripted_response=scripted_response))
+
+
+def _execute_comparison(root: Path, manifest: dict, *, evas_command: str, client_factory) -> dict:
+    """Shared schedule/runner implementation; public entrypoints own transport."""
     from comparison_results import read_backend_cell
     from comparison_surface import observe_environment, snapshot_public_runtime, snapshot_request
     from final_replay import EpisodeContext, build_final_test_profile
@@ -111,8 +130,12 @@ def execute_comparison(root: Path, manifest: dict, *, evas_command: str, scripte
 
     _validate_frozen(root, manifest)
     runner.validate_pinned_evas_identity(evas_command, manifest["evas_identity"])
-    if not callable(scripted_response):
-        raise ValueError("comparison requires an explicit scripted response callback")
+    authorization_hash = None
+    preflight_hash = None
+    if "provider_profile" in manifest:
+        from comparison_live import validate_live_authorization, validate_provider_preflight
+        authorization_hash = validate_live_authorization(root, manifest)
+        preflight_hash = validate_provider_preflight(root, manifest)
     # Exclusive creation is also the no-reentry boundary after any interruption.
     with os.fdopen(os.open(root / "execution.jsonl", os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600), "w") as progress:
         def record(event, **fields):
@@ -178,9 +201,9 @@ def execute_comparison(root: Path, manifest: dict, *, evas_command: str, scripte
                         )
                         row["started"] = True
                         record("cell_started", comparison_cell_id=row["comparison_cell_id"])
-                        client = _ScriptedComparisonClient(
+                        client = client_factory(
                             budget=budget, cell_id=row["comparison_cell_id"],
-                            scripted_response=scripted_response, request_observer=request_observer,
+                            request_observer=request_observer,
                         )
                         runner.run_cell_preserving_failure(cell, args, client)
                         if row["backend"] == "legacy":
@@ -239,6 +262,8 @@ def execute_comparison(root: Path, manifest: dict, *, evas_command: str, scripte
             "manifest_sha256": file_sha256(root / "comparison-manifest.json"),
             "budget_sha256": file_sha256(root / "budget.jsonl"),
             "execution_sha256": file_sha256(root / "execution.jsonl"),
+            **({"authorization_sha256": authorization_hash, "preflight_sha256": preflight_hash}
+               if authorization_hash else {}),
         })
     report = read_comparison(root)
     _atomic_once(root / "comparison-report.json", report)
@@ -248,18 +273,34 @@ def execute_comparison(root: Path, manifest: dict, *, evas_command: str, scripte
 def _validate_frozen(root, manifest, *, current_source=True):
     if json.loads(_source_path(root, "comparison-manifest.json").read_text()) != manifest:
         raise ValueError("frozen comparison manifest mismatch")
+    budget = manifest["budget"]
+    currency, cap = budget["currency"], Decimal(budget["cap"])
+    if (currency not in RATES or not cap.is_finite() or not 0 < cap <= RATES[currency][2]
+            or budget != {"currency": currency, "cap": str(cap),
+                          "input_peak_per_million": str(RATES[currency][0]),
+                          "output_peak_per_million": str(RATES[currency][1]),
+                          "pricing_date": "2026-08-30", "model_call_limit": None}):
+        raise ValueError("comparison budget differs from supported guard")
     blueprint = json.loads(BLUEPRINT.read_text())
     controls = {**blueprint["controls"], "image_id_for_live_run": manifest["controls"]["image_id_for_live_run"]}
-    if (manifest["schema_version"] != "vaevas-workflow-comparison-v1"
+    live = manifest["schema_version"] == "vaevas-workflow-comparison-live-v1"
+    if live:
+        from comparison_live import validate_provider_profile
+        validate_provider_profile(manifest["provider_profile"], currency=manifest["budget"]["currency"],
+                                  cap=manifest["budget"]["cap"])
+    elif "provider_profile" in manifest:
+        raise ValueError("free fixture cannot carry a live provider profile")
+    if (manifest["schema_version"] not in {"vaevas-workflow-comparison-v1", "vaevas-workflow-comparison-live-v1"}
             or manifest["controls"] != controls or manifest["model"] != MODEL
-            or manifest["live_authorized"] is not False or manifest["evidence_scope"] != "free_fixture_not_real_model"
+            or manifest["live_authorized"] is not False
+            or manifest["evidence_scope"] != ("real_model_workflow_comparison" if live else "free_fixture_not_real_model")
             or manifest["blueprint_sha256"] != file_sha256(BLUEPRINT)
             or manifest["release_manifest_sha256"] != file_sha256(DEFAULT_RELEASE / "MANIFEST.json")
             or (current_source and manifest["source_identity"] != source_identity(ROOT))):
         raise ValueError("frozen comparison manifest/source/protocol drift")
     if len(manifest["schedule"]) != 6 or set(manifest["campaigns"]) != set(BACKENDS):
         raise ValueError("comparison schedule mismatch")
-    expected_campaign = _comparison_campaign()
+    expected_campaign = _comparison_campaign(live=live)
     for backend, binding in manifest["campaigns"].items():
         if binding["path"] != f"{backend}/campaign.json" or file_sha256(_source_path(root, binding["path"])) != binding["sha256"]:
             raise ValueError("comparison campaign drift")
@@ -361,6 +402,12 @@ def read_comparison(root: Path) -> dict:
     manifest = json.loads(_source_path(root, "comparison-manifest.json").read_text())
     _validate_frozen(root, manifest, current_source=False)
     execution = json.loads(_source_path(root, "comparison-execution.json").read_text())
+    live = "provider_profile" in manifest
+    if live:
+        from comparison_live import validate_live_authorization, validate_provider_preflight
+        if (execution.get("authorization_sha256") != validate_live_authorization(root, manifest)
+                or execution.get("preflight_sha256") != validate_provider_preflight(root, manifest)):
+            raise ValueError("comparison live launch receipt drift")
     for key, relative in (("manifest_sha256", "comparison-manifest.json"),
                           ("budget_sha256", "budget.jsonl"), ("execution_sha256", "execution.jsonl")):
         if execution[key] != file_sha256(_source_path(root, relative)):
@@ -419,5 +466,10 @@ def read_comparison(root: Path) -> dict:
             paired.update(complete=False, score_delta=None, guard_upper_bound_delta=None, elapsed_s_delta=None)
     report.update(surface_pairs=surfaces, evidence_scope=manifest["evidence_scope"],
                   score_authority="development_only", manifest_sha256=execution["manifest_sha256"],
-                  budget_sha256=execution["budget_sha256"], paid_requests=0)
+                  budget_sha256=execution["budget_sha256"], paid_requests=None if live else 0)
+    if live:
+        events = [json.loads(line) for line in (root / "budget.jsonl").read_text().splitlines()]
+        report.update(authorization_sha256=execution["authorization_sha256"],
+                      preflight_sha256=execution["preflight_sha256"],
+                      potentially_billable_attempts=sum(event["event"] == "reserved" for event in events))
     return report
