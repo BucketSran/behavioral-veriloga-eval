@@ -16,7 +16,7 @@ import os
 from pathlib import Path
 import re
 from typing import Any
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 
 import run_campaign as runner
 
@@ -84,48 +84,54 @@ class _ProductionFinalJudge:
             episode_context=self.context,
         )
         receipt = replay["score_sidecar_receipt"]
-        digest = receipt["sha256"]
-        if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
-            raise ValueError("invalid sidecar receipt digest")
-        expected = {
-            "path": f"evidence/score-sidecars/{digest}.json",
-            "episode_id": self.context.episode_id,
-            "attempt_id": self.context.attempt_id,
-            "task_id": self.context.task_id,
-            "submission_tree_sha256": submission.tree_sha256,
-            "final_profile_sha256": final_test_profile_sha256(self.profile),
-            "final_profile_input_identity_sha256": profile_input_identity_sha256(
-                profile_sha256=final_test_profile_sha256(self.profile),
-                input_kind="frozen_submission_tree",
-                input_sha256=submission.tree_sha256,
-                attempt_id=self.context.attempt_id,
-                task_id=self.context.task_id,
-            ),
-        }
-        if any(receipt.get(key) != value for key, value in expected.items()):
-            raise ValueError("sidecar receipt identity mismatch")
-        path = self.runtime / expected["path"]
-        if any(part.is_symlink() for part in (path, path.parent, path.parent.parent)):
-            raise ValueError("sidecar receipt must not reference a symlink")
-        payload = path.read_bytes()
-        if hashlib.sha256(payload).hexdigest() != digest:
-            raise ValueError("sidecar receipt content mismatch")
-        sidecar = json.loads(payload)
-        structured = sidecar["structured_result"]
-        judgment = FinalJudgment(
-            structured["status"],
-            sidecar["judge"]["engine"],
-            structured["score"],
-            submission.tree_sha256,
-        )
-        validate_score_sidecar_authority(
-            score_sidecar=sidecar,
-            final_test_profile=self.profile,
-            judgment=judgment,
-            submission=submission,
+        judgment, sidecar = read_final_score_receipt(
+            runtime=self.runtime, context=self.context, profile=self.profile,
+            receipt=receipt, submission=submission,
         )
         self.sidecar, self.receipt = sidecar, deepcopy(receipt)
         return judgment
+
+
+def read_final_score_receipt(
+    *, runtime: Path, context: EpisodeContext, profile: Mapping[str, Any],
+    receipt: Mapping[str, Any], submission: FrozenSubmission,
+) -> tuple[FinalJudgment, dict[str, Any]]:
+    """Verify an existing final receipt without executing or repairing a judge."""
+    digest = receipt["sha256"]
+    if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+        raise ValueError("invalid sidecar receipt digest")
+    expected = {
+        "path": f"evidence/score-sidecars/{digest}.json",
+        "episode_id": context.episode_id,
+        "attempt_id": context.attempt_id,
+        "task_id": context.task_id,
+        "submission_tree_sha256": submission.tree_sha256,
+        "final_profile_sha256": final_test_profile_sha256(profile),
+        "final_profile_input_identity_sha256": profile_input_identity_sha256(
+            profile_sha256=final_test_profile_sha256(profile),
+            input_kind="frozen_submission_tree",
+            input_sha256=submission.tree_sha256,
+            attempt_id=context.attempt_id,
+            task_id=context.task_id,
+        ),
+    }
+    if any(receipt.get(key) != value for key, value in expected.items()):
+        raise ValueError("sidecar receipt identity mismatch")
+    path = runtime / expected["path"]
+    if any(part.is_symlink() for part in (path, path.parent, path.parent.parent, runtime / "evidence", runtime)):
+        raise ValueError("sidecar receipt must not reference a symlink")
+    payload = path.read_bytes()
+    if hashlib.sha256(payload).hexdigest() != digest:
+        raise ValueError("sidecar receipt content mismatch")
+    sidecar = json.loads(payload)
+    structured = sidecar["structured_result"]
+    judgment = FinalJudgment(
+        structured["status"], sidecar["judge"]["engine"], structured["score"], submission.tree_sha256,
+    )
+    validate_score_sidecar_authority(
+        score_sidecar=sidecar, final_test_profile=profile, judgment=judgment, submission=submission,
+    )
+    return judgment, sidecar
 
 
 def run_native_episode(
