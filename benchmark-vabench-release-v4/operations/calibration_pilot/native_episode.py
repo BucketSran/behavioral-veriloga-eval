@@ -37,6 +37,7 @@ from runners.agent_harness import (
 from runners.agent_harness.contracts import Environment, Policy
 from runners.agent_harness.authority_profiles import episode_public_profile_sha256
 from runners.agent_harness.result_store import write_immutable_scored_result
+from runners.agent_harness.phase_timing import timed_phase
 
 
 @dataclass(frozen=True)
@@ -58,6 +59,7 @@ class _ProductionFinalJudge:
         self.sidecar = None
         self.receipt = None
 
+    @timed_phase("final_judge")
     def judge(self, submission: FrozenSubmission) -> FinalJudgment:
         # Translate the controller-owned freeze, never refreeze the live candidate.
         observed = runner.RESULT_PROTOCOL.hash_test_tree(

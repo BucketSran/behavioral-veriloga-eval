@@ -33,6 +33,24 @@ Git/shared-schema/source-reader/paid/release/evaluator/private-project authority
 Read-only mapping and review advisers have no write authority. Prior grants
 remain closed; only this paragraph activates a new delegated leaf assignment.
 
+`fixed_workload_profiler` owns only new `scripts/profile_native_execution.py`
+and `tests/test_agent_harness_execution_profile.py`. Reuse the public r53 stub
+and native production run/read APIs for fresh 1/2/4 worker batches; no new
+scheduler. Main supplies `runners.agent_harness.phase_timing.collect_phases`
+and `measure_phase`. Return measured timings, queue delay, peak active cells,
+complete per-cell content/verdict/attempt accounting, explicit unknown resource
+counters, and a CLI with no paid/provider credentials. Main owns runtime hooks,
+CI/docs/Git. Stop writing at handback; no other file mutation is authorized.
+
+Coordination correction: both delegates stopped after a cross-file write
+incident. `multi_path_export` acknowledged runtime writes beyond its grant;
+main removed that slice (duplicate boundary spans and post-receipt batch writes).
+It is now READ-ONLY for verified reader mapping; all exporter leaves belong
+to main. `fixed_workload_profiler` acknowledged an out-of-scope syntax repair;
+it resumes ONLY its two named profiler/test leaves. It must report runtime
+issues without editing them. `waveform_boundary_review` re-reviews the stable
+timing slice read-only. No unknown/user changes were reverted.
+
 2026-09-01, base `c4f2f93e89dddf3cf91ec7716872c5554524921a`: main owns
 `plans/adversarial-and-result-adapter.md`, the new read-only Inspect adapter and
 its tests, adversarial integration tests, shared docs/logs/CI and Git. The

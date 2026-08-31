@@ -43,6 +43,7 @@ from runners.agent_harness.proposals import (  # noqa: E402
 )
 from runners.agent_harness.evidence_export import build_reviewer_evidence_export  # noqa: E402
 from runners.agent_harness.trajectory import read_trajectory  # noqa: E402
+from runners.agent_harness.phase_timing import measure_phase, timed_phase  # noqa: E402
 from runners.agent_harness.budget import (  # noqa: E402
     model_call_budget_text, validate_model_call_limit,
 )
@@ -210,6 +211,7 @@ class _RecordedClient:
         self.model = client.model
         self.calls = 0
 
+    @timed_phase("model")
     def complete(self, messages, max_tokens, tools, *, timeout_s=None):
         self.calls += 1
         capture_supported = getattr(self.client, "supports_transport_capture", False) is True
@@ -256,6 +258,7 @@ class _RecordedEnvironment(MiniSweBashEnvironmentBridge):
         self.docs_tool = docs_tool
         self.waveform_tool = waveform_tool
 
+    @timed_phase("tool")
     def step(self, action, capability):
         self.record("tool_request", action.to_document())
         self._legacy_environment.private_output_sink = lambda capture: self.record(
@@ -677,7 +680,8 @@ def run_prepared_native_mini_swe(
                 structured_evas_feedback=True,
             )
             try:
-                environment.preflight()
+                with measure_phase("setup"):
+                    environment.preflight()
             except (OSError, subprocess.TimeoutExpired) as exc:
                 if time.monotonic() >= deadline:
                     raise RuntimeError("agent deadline exhausted during startup") from exc
@@ -995,7 +999,8 @@ def run_prepared_native_mini_swe(
     finally:
         if environment is not None and run is None:
             try:
-                environment.close()
+                with measure_phase("cleanup"):
+                    environment.close()
             except Exception as exc:
                 record("launcher_cleanup_failed", {"error_type": type(exc).__name__})
         with trace_path.open("rb") as handle:

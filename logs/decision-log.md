@@ -1,5 +1,17 @@
 # Decision Log
 
+## 2026-09-01 - Keep phase profiling outside authoritative evidence
+
+- Enable timing explicitly with a worker-local collector; keep legacy/default
+  execution, deadline budgets and retry/final ownership unchanged.
+- Instrument each operation once at its actual boundary. Native client/tool
+  hooks must not overlap generic policy/dispatch wrappers of the same name.
+- Store performance diagnostics outside frozen run/receipt trees. Do not teach
+  the score reader to trust a new mutable phase file or mutate a completed
+  batch tree after its receipt. Queue timing belongs to the profiling runner.
+- No Inspect scheduling migration or resource-control rewrite until measured
+  fixed-workload results justify one. No paid performance pilot in this slice.
+
 ## 2026-09-01 - Separate adversarial coverage from framework efficiency
 
 - The user approved adversarial end-to-end tests and a read-only results adapter,

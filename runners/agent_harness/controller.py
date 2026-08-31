@@ -17,6 +17,7 @@ from .contracts import (
     TrajectorySink,
 )
 from .proposals import ProposalNormalizationError
+from .phase_timing import measure_phase
 from .state import (
     AgentAction,
     CandidateEpisodeResult,
@@ -284,7 +285,8 @@ class EpisodeController:
                 return candidate_result
 
             phase = "submission_freeze"
-            frozen_submission = self._environment.freeze_submission()
+            with measure_phase("freeze"):
+                frozen_submission = self._environment.freeze_submission()
             if (
                 frozen_submission.tree_sha256
                 != expected_sha256
@@ -877,7 +879,8 @@ class EpisodeController:
 
         cleanup_incident: Incident | None = None
         try:
-            self._environment.close()
+            with measure_phase("cleanup"):
+                self._environment.close()
         except Exception as exc:
             cleanup_incident = Incident(
                 category="sandbox_cleanup_failure",

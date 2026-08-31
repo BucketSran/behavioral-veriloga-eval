@@ -2770,7 +2770,13 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
             return previous
     conversation_path = runtime / "evidence" / "conversation_checkpoint.json"
     if not (args.resume and conversation_path.is_file()):
-        export_runtime(cell, args.release, runtime, timeout_s=args.setup_timeout_s)
+        if getattr(args, "episode_backend", "legacy") in {"native-mini-swe", "native-reasoning"}:
+            from runners.agent_harness.phase_timing import measure_phase
+
+            with measure_phase("export"):
+                export_runtime(cell, args.release, runtime, timeout_s=args.setup_timeout_s)
+        else:
+            export_runtime(cell, args.release, runtime, timeout_s=args.setup_timeout_s)
         prepared_observer = getattr(args, "_prepared_runtime_observer", None)
         if prepared_observer is not None:
             prepared_observer(runtime)

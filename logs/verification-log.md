@@ -1,5 +1,23 @@
 # Verification Log
 
+## 2026-09-01 - AA-VAE-078 opt-in phase timing
+
+- Base `3aa5129a11`: clean main equals origin/main (0/0), contains upstream
+  (178/0). EVAS fork/upstream main remain equal (0/0), unchanged.
+- RED: missing phase_timing import; first GREEN 1 pass. Integration RED then
+  failed on missing model phase (after correcting a missing fixture import).
+- GREEN: phase timing/native dispatch/episode/conditions **61 passed / 3
+  optional skips**. Launcher/controller adjacent gate **59 passed / 1 skip**.
+  Ruff 0.12.12 passed for new module/test and touched controller/launcher/episode.
+- A delegated ownership violation introduced duplicate timing and unplanned
+  batch/scorer writes. Both writers stopped and attributed their exact edits.
+  Main removed only this turn's extraneous changes; batch/scorer match HEAD.
+  No such intermediate was committed. The exporter delegate is now read-only.
+- Independent stable-tree review: OKAY, no blocker; repeated **4 passed**.
+  No dedicated typecheck or real Docker profiling evidence yet. Native fixture
+  integration uses synthetic external simulator/judge, not EVAS conformance.
+
+
 ## 2026-09-01 - AA-VAE-076/077 CI integration checkpoint
 
 - Evaluator Closure adds the result adapter to both source trigger lists, runs
