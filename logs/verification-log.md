@@ -1,5 +1,41 @@
 # Verification Log
 
+## 2026-08-31 - AA-VAE-071 free coordinator integration and review
+
+- Final active r53/harness/result/layout gate: **1,380 passed / 46 optional
+  skips, 158.51 s**. This includes all generic harness tests and current result,
+  mini-swe, r53 and output/navigation contracts without historical fixture suites.
+- New orchestration composes the existing campaign builders, legacy/native
+  runners, shared reservation guard, bound scorer and receipt readers.
+  Focused comparison/result/surface/CI gate: **72 passed / 4 optional skips**.
+  Read-only independent second review: no source-level blockers, **54 passed /
+  1 skip** in its bounded selection; main Ruff 0.12.12/compile/diff checks pass.
+- Stable real Docker/EVAS fixture gate: **41 passed, 50.34 s**. Six scripted
+  candidates were submitted/frozen/scored (all deliberately incomplete,
+  score 0.0); three common-surface pairs matched. Each cell used three scripted
+  responses; paid requests are zero. Report re-read left source evidence bytes
+  unchanged; reentry is rejected. Two cost-stop cases retain all six rows.
+- Review RED cases also reproduced terminal-projection/request/budget journal
+  divergence, symlinked evidence and rehashed off-protocol campaign settings.
+  Real budget-reason RED: **2 failed**; GREEN: **2 passed, 5.93 s**. Unknown
+  synthetic usage retains CNY 3.182592; cap 0.01 admits zero transport attempts.
+  Neither is a real bill or a fresh paid experiment.
+- First concurrent diagnostic stopped after source drift: intentionally not
+  GREEN. The later stable local report SHA-256 is
+  `59c0cefbf15f8e5ed5065b40914c7bb838335bd2855902dd7abae15b3576c934`,
+  manifest SHA-256 `32e128feb68d86ba383cf1cf4f351aa1cb380a29d48d58947d418a11047ffbe0`.
+  That initial fixture used a synthetic Git label plus actual source-byte
+  hashes; subsequent real-Docker tests record the actual Git HEAD as well.
+- Full local historical suite: **33 failed / 1,465 passed / 46 skipped /
+  12 errors, 186.77 s**. Missing V3/old-v4/r52/provenance fixtures are confirmed
+  tracked but sparse-excluded (`git ls-files -t` reports `S`). Do not count this
+  as full GREEN or repopulate the user's excluded historical directories.
+  GitHub full checkout remains the full compatibility gate.
+- The active public-agent-runtime scripts had also been sparse-excluded.
+  Restored only that active directory via sparse-checkout add (no source edit);
+  mini-swe regression then passed **30 tests / 3 optional skips**. Dedicated
+  layout checker is absent; active-entrypoint/output/task-count tests are used.
+
 ## 2026-08-31 - AA-VAE-071 read-only cross-backend results
 
 - Reader/join focused gate: **16 passed**. Main review tracers reproduced model

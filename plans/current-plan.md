@@ -17,14 +17,22 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- Active free follow-up: [legacy/native comparison engineering gates](legacy-native-comparison-engineering.md).
-  Archive the [independent native coverage audit](../docs/alphaapollo-migration/experiments/native-toolchain-coverage-20260831.md),
-  then implement common spending admission, read-only cross-backend joins and
-  observed public-input/environment audits with existing components. No paid
-  launch, benchmark/evaluator change or historical budget reuse. The audit has
-  one real native DUT submission/score out of six native combinations; it is
-  distinct from the unstarted six-cell legacy/native comparison and from the
-  earlier stopped family029 pilot. Main owns integration and fork publication.
+- Implemented free [legacy/native comparison engineering gates](legacy-native-comparison-engineering.md),
+  AA-VAE-071: shared spending admission, immutable six-cell schedule, observed
+  public-input/environment/request audit, and read-only cross-backend joins.
+  Real Docker/EVAS with scripted responses: **41 passed**, including six scored
+  cells, three matched surfaces, unknown-cost/admission stops and no reentry.
+  Independent follow-up review found no remaining source-level blocker.
+  Active r53/harness gate: **1,380 passed / 46 optional skips**. Full hosted
+  verification and focused fork publication are being closed; the local full
+  historical suite is not GREEN because sparse checkout
+  excludes V3/old-v4/r52/provenance fixtures. Preserve this storage choice.
+  The [archived native coverage audit](../docs/alphaapollo-migration/experiments/native-toolchain-coverage-20260831.md)
+  has one historical real native DUT score out of six native combinations.
+  It is separate from this free family001 six-cell fixture and the family029
+  paid pilot. No new paid call, benchmark/evaluator change or budget reuse.
+  Next live gate: an explicit transport adapter plus newly frozen named
+  service/model/rates/decoding and fee authority, followed by a fresh comparison.
 
 - Publication correction: all nine commits through `e2498952bb` are on
   BucketSran main. Exact-source Evaluator Closure, Runner Smoke and Public Agent
@@ -64,10 +72,10 @@ implementation and does not change the phase statuses below.
   Source `8ccb616fe7` is published to fork/main; both exact-source hosted
   workflows pass (1,348 regression passes / 42 skips and all existing Docker
   stages). Protocol preparation is closed; the live-study gates below stay open.
-  Before live launch: shared legacy/native spending-guard integration, read-only
-  cross-backend result join, complete exported/public image audit and new frozen
-  model/decoding/fee authorization. Blueprint is not an executable campaign;
-  all six cells are not_started. This is workflow, not pure-controller attribution.
+  The original real-study blueprint stays unstarted and immutable. AA-VAE-071
+  separately implements/tests its free launch gates; live adapter and new frozen
+  model/rates/decoding/fee authorization remain. This is a workflow comparison,
+  not pure-controller attribution.
 
 - Completed bounded repair: [legacy native r53 compatibility](legacy-native-r53-contract-compatibility.md)
   ([AA-VAE-068](../docs/alphaapollo-migration/features/AA-VAE-068-legacy-native-r53-contracts.md)).

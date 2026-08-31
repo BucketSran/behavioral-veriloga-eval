@@ -572,6 +572,7 @@ def run_prepared_native_mini_swe(
     model_call_limit: int | None = None,
     docs_corpus=None,
     public_waveform_max_calls: int | None = None,
+    environment_observer=None,
 ) -> native_episode.NativeEpisodeRun:
     """Run an exclusively owned fresh exported native tri-form cell.
 
@@ -676,6 +677,8 @@ def run_prepared_native_mini_swe(
                 if time.monotonic() >= deadline:
                     raise RuntimeError("agent deadline exhausted during startup") from exc
                 raise runner.SandboxStartupError("transient sandbox preflight failure") from exc
+            if environment_observer is not None:
+                environment_observer(environment)
             _, submitted, _, _ = mini.load_mini_swe()
             environment.bind_submitted_exception(submitted)
         prompt = _native_prompt_path(runtime, condition).read_text()

@@ -1644,6 +1644,7 @@ def run_mini_swe_episode(
     usage_parser: Callable[..., dict[str, Any]],
     response_metadata: Callable[[dict[str, Any]], dict[str, Any]],
     trajectory_path: Path,
+    environment_observer: Callable[[Any], None] | None = None,
 ) -> dict[str, Any]:
     DefaultAgent, Submitted, FormatError, observation_formatter = load_mini_swe()
     started = time.monotonic()
@@ -1665,6 +1666,8 @@ def run_mini_swe_episode(
     )
     try:
         environment.preflight()
+        if environment_observer is not None:
+            environment_observer(environment)
         environment.bind_submitted_exception(Submitted)
         model = VaBenchMiniModel(
             client,

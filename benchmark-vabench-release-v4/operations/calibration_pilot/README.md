@@ -1,5 +1,35 @@
 # V4 Calibration Pilot
 
+## Free legacy/native workflow comparison
+
+`run_legacy_native_comparison.py` is an opt-in **scripted-response Python API**,
+not a paid CLI or a replacement for the default legacy runner. It derives the
+AA-VAE-069 family001 six-cell schedule (DUT/bugfix/Testbench, legacy/native-mini-swe),
+observes actual public exports/Docker isolation/requests, and reuses one shared
+spending guard and existing freeze/final readers. `read_comparison(root)` checks
+existing evidence only: no model, re-freeze, repair or second final judge.
+
+Run the free Docker/EVAS fixture from the repository root after building the
+pinned public images and installing the locked agentic dependencies:
+
+```bash
+comparison_test_root=$(mktemp -d benchmark-vabench-release-v4/reports/comparison-check-XXXXXX)
+VABENCH_TEST_DOCKER_RUNTIME=1 .venv/bin/python -m pytest -q \
+  tests/test_agent_harness_workflow_comparison.py \
+  tests/test_agent_harness_comparison_surface.py \
+  --basetemp "$comparison_test_root/pytest"
+```
+
+The synthetic response path does not load keys or send HTTP. Shared cost values
+test conservative reservation arithmetic, not real invoices. It preserves every
+scheduled row on insufficient funds/unknown costs and blocks reentry. Matched
+score/cost/time deltas require valid paired surface evidence. Unknown scores are
+null, not zero. EVAS results remain development-only; these scripted fixtures
+do not reproduce a model baseline. A real comparison still needs a separately
+reviewed live transport adapter and a new frozen model/rates/decoding/fee profile.
+See `docs/alphaapollo-migration/features/AA-VAE-071-comparison-engineering-gates.md`
+for code mapping, tests and claim boundaries.
+
 ## Opt-in budgeted DeepSeek engineering pilot
 
 `run_deepseek_pilot.py` composes the existing native harness for the predeclared

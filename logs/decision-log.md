@@ -1,5 +1,23 @@
 # Decision Log
 
+## 2026-08-31 - Compose a free six-cell coordinator before a live adapter
+
+- AA-VAE-071 exposes scripted responses only; its transport subclass never
+  invokes the inherited network closure. Real Docker/tool/freeze/EVAS work is
+  exercised, with no credential loading or new paid authority. Preserve the
+  immutable AA-VAE-069 protocol and all old runner/pilot defaults.
+- Validate frozen source/campaign identity before starting each cell. Bind
+  terminal rows and request surfaces to the append-only journal, and reconcile
+  cost/call fields against the shared guard journal. Any budget stop prevents
+  later generation; all six dispositions survive. Read-only report generation
+  cannot reenter the model, refreeze or rejudge; surface mismatch blocks deltas.
+- Freeze one final profile before legacy generation and use the existing bound
+  scorer once. Native final authority is unchanged. Reuse three optional
+  export/live-environment hooks rather than copy either agent loop.
+- A live transport adapter, current model/rates/decoding contract and new fee
+  approval remain explicit follow-ups. No baseline replication, pure-controller
+  effect, Spectre equivalence, independent hidden-stimulus or training claim.
+
 ## 2026-08-31 - Join existing legacy and native evidence without rejudging
 
 - Keep backend-specific original evidence. A small legacy envelope binds the

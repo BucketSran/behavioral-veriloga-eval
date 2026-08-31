@@ -2539,6 +2539,7 @@ def run_mini_swe_agentic_cell(
             usage_parser=provider_output_usage,
             response_metadata=provider_response_metadata,
             trajectory_path=trajectory_path,
+            environment_observer=getattr(args, "_environment_observer", None),
         )
     except ProviderContextWindowExceeded as exc:
         result.update(
@@ -2770,6 +2771,9 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
     conversation_path = runtime / "evidence" / "conversation_checkpoint.json"
     if not (args.resume and conversation_path.is_file()):
         export_runtime(cell, args.release, runtime, timeout_s=args.setup_timeout_s)
+        prepared_observer = getattr(args, "_prepared_runtime_observer", None)
+        if prepared_observer is not None:
+            prepared_observer(runtime)
     if getattr(args, "episode_backend", "legacy") in {"native-mini-swe", "native-reasoning"}:
         if args.dry_run:
             result = {
@@ -2816,6 +2820,7 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
             campaign_file_sha256=getattr(args, "campaign_file_sha256", None),
             episode_context=attempt_context,
             episode_backend=args.episode_backend,
+            environment_observer=getattr(args, "_environment_observer", None),
             reasoning_proposal_format=getattr(args, "reasoning_proposal_format", "native_tool_calls"),
             model_call_limit=getattr(args, "native_model_call_limit", None),
         )

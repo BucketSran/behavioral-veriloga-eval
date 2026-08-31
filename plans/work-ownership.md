@@ -42,6 +42,35 @@ contents or environment secret values. No shared files, runner hooks, Git,
 credentials, paid execution, or other writer files. Main wires these APIs.
 Read-only adviser `comparison_runner_design` owns no files.
 
+Active bounded writer `comparison_results_impl` owns only
+`benchmark-vabench-release-v4/operations/calibration_pilot/comparison_results.py`
+and `tests/test_agent_harness_comparison_results.py`, intake `e2498952bb`.
+Implement read-only legacy/native evidence readers and complete six-row,
+three-pair projections by vertical RED/GREEN. Main supplies/seals a
+`evidence/comparison-legacy-final.json` after the existing bound scorer runs
+once; the reader reuses the existing frozen-submission and final-receipt
+validators. No generation/freeze/judge/repair execution, shared files, docs,
+Git, credentials, paid calls or other writer files. Return unstaged code and
+verification evidence; main owns the integration receipt schema and hooks.
+
+Both AA-VAE-071 leaf writers have handed back and stopped editing. Main now
+owns all comparison files and three opt-in lifecycle-hook changes in
+`run_campaign.py`, `mini_swe_vabench.py`, and `run_native_mini_swe.py`.
+`comparison_gate_review` reviews read-only; main runs integration on a stable
+tree. Source drift during the first concurrent diagnostic correctly retained
+the remaining unstarted rows; do not reuse that incomplete diagnostic as GREEN.
+
+Review-fix assignment on `e05ca61089`: `comparison_surface_impl` again owns
+only `comparison_surface.py` and `tests/test_agent_harness_comparison_surface.py`.
+Preserve the coordinator's empty-submission hash repair; use vertical TDD for
+provider-option matching, finite numeric controls, and fail-closed observation
+validation. No other file/Git/live writes. Hand back before integration runs.
+Main retains results, coordinator, integration tests, CI and shared records.
+The surface review-fix assignment is now handed back. Main owns all files;
+`comparison_gate_review` reports no remaining source-level blocker after the
+independent second pass. Stable-tree free Docker and full regressions are the
+coordinator's remaining verification/publication work.
+
 The AA-VAE-070 and cap-fix local-only handoffs below are historical: publication
 through `e2498952bb` and all three exact-source hosted gates are now complete.
 
