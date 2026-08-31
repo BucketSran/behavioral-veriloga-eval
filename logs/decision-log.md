@@ -1,5 +1,16 @@
 # Decision Log
 
+## 2026-08-31 - Join existing legacy and native evidence without rejudging
+
+- Keep backend-specific original evidence. A small legacy envelope binds the
+  existing final request/receipt; never synthesize a native trajectory or
+  regenerate a missing verdict during read-only aggregation.
+- Completed records require terminal evidence even when score is null.
+  Budget-censored, unstarted and explicitly incomplete rows remain visible;
+  task/model/image/receipt mismatches block the affected comparison.
+- Pair by frozen task identity. Distinguish protective fee upper bounds and
+  end-to-end elapsed time from invoice cost and model-only latency.
+
 ## 2026-08-31 - Compare observed surfaces, not declarations alone
 
 - Hash the complete public export, including a valid empty initial submission,

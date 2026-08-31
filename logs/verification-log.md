@@ -1,5 +1,20 @@
 # Verification Log
 
+## 2026-08-31 - AA-VAE-071 read-only cross-backend results
+
+- Reader/join focused gate: **16 passed**. Main review tracers reproduced model
+  drift (**1 failure**), missing completed evidence / wrong evidence identity
+  (**4 failures**), and missing envelope/request hashes and paired accounting
+  (**2 failures**), then passed after minimal repairs.
+- Legacy reads verify existing generation hashes, complete scheduled cell,
+  frozen submission, predeclared profile, bound request and immutable final
+  receipt. Native reads reuse the existing native validator. Neither reader
+  executes a model, freeze or judge; unmatched/incomplete scores stay null.
+- Three pairs retain task identity and guard-cost/end-to-end elapsed deltas;
+  missing observations are not imputed. Independent follow-up review found no
+  required correction; focused/static checks pass. Full type/LSP coverage is
+  unavailable locally and is not claimed.
+
 ## 2026-08-31 - AA-VAE-071 observed comparison surfaces
 
 - Public export/request/live Docker leaf was implemented by vertical RED/GREEN;
