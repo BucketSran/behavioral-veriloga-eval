@@ -395,6 +395,131 @@ def test_native_attempt_sequence_retries_provider_transport_with_fresh_runtime_a
     assert len(runner.calls) == 2
 
 
+def test_native_attempt_sequence_resume_reuses_completed_selection_without_client(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _Runner(["pass"])
+    _install(monkeypatch, runner)
+    first = attempts.run_native_attempt_sequence(
+        cell=_cell(),
+        args=_args(tmp_path),
+        client_factory=lambda: _Client("first"),
+        retry_policy=_policy(),
+    )
+    assert len(runner.calls) == 1
+
+    reread_runner = _Runner([])
+    _install(monkeypatch, reread_runner)
+    resumed = attempts.run_native_attempt_sequence(
+        cell=_cell(),
+        args=_args(tmp_path),
+        client_factory=lambda: pytest.fail("completed native resume must not create a client"),
+        retry_policy=_policy(),
+        resume=True,
+    )
+
+    assert resumed == first
+    assert reread_runner.calls == []
+
+
+def test_native_attempt_resume_preflight_validates_existing_prefix_without_client(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _Runner(["pass"])
+    _install(monkeypatch, runner)
+    attempts.run_native_attempt_sequence(
+        cell=_cell(),
+        args=_args(tmp_path),
+        client_factory=lambda: _Client("first"),
+        retry_policy=_policy(),
+    )
+
+    root = tmp_path / "campaign" / "cell-001"
+    validation = attempts.validate_native_attempt_resume(
+        root,
+        _cell(),
+        campaign_file_sha256=CAMPAIGN_SHA,
+        expected_retry_policy=_policy(),
+    )
+
+    assert validation["complete"] is True
+    assert validation["resumable"] is False
+    assert validation["attempt_count"] == 1
+    assert validation["attempts"][0]["attempt_id"] == "cell-001-attempt-0001"
+
+
+def test_native_attempt_sequence_resume_continues_after_retryable_receipt(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = _interrupted_native_prefix(tmp_path, monkeypatch)
+    policy = _policy(max_attempts=2)
+
+    validation = attempts.validate_native_attempt_resume(
+        root,
+        _cell(),
+        campaign_file_sha256=CAMPAIGN_SHA,
+        expected_retry_policy=policy,
+    )
+    assert validation["complete"] is False
+    assert validation["next_attempt_id"] == "cell-001-attempt-0001-retry-0001"
+
+    resumed_runner = _Runner(["pass"])
+    _install(monkeypatch, resumed_runner)
+    resumed = attempts.run_native_attempt_sequence(
+        cell=_cell(),
+        args=_args(tmp_path),
+        client_factory=lambda: _Client("second"),
+        retry_policy=policy,
+        resume=True,
+    )
+
+    assert resumed["status"] == "passed"
+    assert resumed["attempt_count"] == 2
+    assert [call["context"].attempt_id for call in resumed_runner.calls] == [
+        "cell-001-attempt-0001-retry-0001"
+    ]
+
+
+def _interrupted_native_prefix(tmp_path, monkeypatch):
+    from runners.agent_harness import attempt_sequence as sequence
+    original_reserve = sequence._reserve_attempt_runtime
+
+    def interrupt_before_next(root, attempt_id):
+        if "-retry-" in attempt_id:
+            raise KeyboardInterrupt("process stopped after sealed first receipt")
+        return original_reserve(root, attempt_id)
+
+    _install(monkeypatch, _Runner(["provider_transport"]))
+    with monkeypatch.context() as patch:
+        patch.setattr(sequence, "_reserve_attempt_runtime", interrupt_before_next)
+        with pytest.raises(KeyboardInterrupt):
+            attempts.run_native_attempt_sequence(
+                cell=_cell(), args=_args(tmp_path), client_factory=lambda: _Client("first"),
+                retry_policy=_policy())
+    return tmp_path / "campaign" / "cell-001"
+
+
+def test_native_resume_validates_prior_source_before_creating_next_client(tmp_path, monkeypatch):
+    root = _interrupted_native_prefix(tmp_path, monkeypatch)
+    marker = root / "cell-001-attempt-0001/runtime/cell-001/marker.txt"
+    marker.write_text(marker.read_text() + "\nchanged")
+    clients = []
+    _install(monkeypatch, _Runner(["pass"]))
+
+    def client():
+        clients.append(True)
+        return _Client("second")
+
+    with pytest.raises(ValueError, match="source hash"):
+        attempts.run_native_attempt_sequence(
+            cell=_cell(), args=_args(tmp_path), client_factory=client,
+            retry_policy=_policy(), resume=True)
+    assert clients == []
+
+
 def test_native_attempt_sequence_retries_typed_sandbox_startup_only(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

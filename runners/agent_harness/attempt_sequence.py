@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 import hashlib
 import json
@@ -145,6 +145,24 @@ class AttemptSequenceResult:
         return len(self.attempts)
 
 
+@dataclass(frozen=True, slots=True)
+class AttemptSequenceResumeState:
+    output_root: Path
+    policy_sha256: str
+    attempts: tuple[AttemptRecord, ...]
+    selected_attempt_id: str | None
+    selection_sha256: str | None
+    next_context: EpisodeContext | None
+
+    @property
+    def complete(self) -> bool:
+        return self.selected_attempt_id is not None
+
+    @property
+    def terminal_selection_missing(self) -> bool:
+        return self.selected_attempt_id is None and self.next_context is None
+
+
 ExecuteAttempt = Callable[[EpisodeContext, Path], AttemptOutcome | Mapping[str, Any]]
 
 
@@ -154,6 +172,7 @@ def run_attempt_sequence(
     output_root: Path,
     retry_policy: RetryPolicy,
     execute: ExecuteAttempt,
+    resume: bool = False,
 ) -> AttemptSequenceResult:
     """Run fresh attempts until a terminal selection can be written."""
     if not isinstance(initial_context, EpisodeContext):
@@ -171,19 +190,55 @@ def run_attempt_sequence(
     ):
         raise AttemptSequenceError("initial_context must describe a root attempt")
 
-    root = _reserve_output_root(output_root)
     policy_document = retry_policy.to_document()
     policy_sha256 = _canonical_sha256(policy_document)
-    sequence_request = {
-        "schema_version": "vaevas-attempt-sequence-request-v1",
-        "initial_context": _context_document(initial_context),
-        "retry_policy_sha256": policy_sha256,
-        "retry_policy": policy_document,
-    }
-    sequence_request_sha256 = _write_receipt(root / "request.json", sequence_request)
+    sequence_request = _sequence_request_document(
+        initial_context=initial_context,
+        retry_policy=retry_policy,
+        policy_sha256=policy_sha256,
+    )
+    sequence_request_sha256 = _canonical_sha256(sequence_request)
 
     attempts: list[AttemptRecord] = []
-    context = initial_context
+    if resume:
+        state = read_attempt_sequence_resume_state(
+            output_root=output_root,
+            initial_context=initial_context,
+            retry_policy=retry_policy,
+        )
+        attempts = list(state.attempts)
+        if state.complete:
+            assert state.selected_attempt_id is not None
+            assert state.selection_sha256 is not None
+            return AttemptSequenceResult(
+                output_root=state.output_root,
+                policy_sha256=policy_sha256,
+                attempts=tuple(attempts),
+                selected_attempt_id=state.selected_attempt_id,
+                selection_sha256=state.selection_sha256,
+            )
+        root = state.output_root
+        context = state.next_context
+        if context is None:
+            selection_sha256 = _write_selection(
+                root=root,
+                sequence_request_sha256=sequence_request_sha256,
+                policy_sha256=policy_sha256,
+                attempts=attempts,
+            )
+            return AttemptSequenceResult(
+                output_root=root,
+                policy_sha256=policy_sha256,
+                attempts=tuple(attempts),
+                selected_attempt_id=attempts[-1].context.attempt_id,
+                selection_sha256=selection_sha256,
+            )
+    else:
+        root = _reserve_output_root(output_root)
+        _write_receipt(root / "request.json", sequence_request)
+        context = initial_context
+    if context is None:
+        raise AttemptSequenceError("attempt sequence has no resumable context")
     while True:
         attempt_dir, runtime = _reserve_attempt_runtime(root, context.attempt_id)
         request = {
@@ -256,8 +311,94 @@ def run_attempt_sequence(
                 _context_document(context), outcome.evidence,
             ))
 
+    selection_sha256 = _write_selection(
+        root=root,
+        sequence_request_sha256=sequence_request_sha256,
+        policy_sha256=policy_sha256,
+        attempts=attempts,
+    )
+    return AttemptSequenceResult(
+        output_root=root,
+        policy_sha256=policy_sha256,
+        attempts=tuple(attempts),
+        selected_attempt_id=attempts[-1].context.attempt_id,
+        selection_sha256=selection_sha256,
+    )
+
+
+def read_attempt_sequence_resume_state(
+    *,
+    output_root: Path,
+    initial_context: EpisodeContext,
+    retry_policy: RetryPolicy,
+) -> AttemptSequenceResumeState:
+    """Validate an existing sequence and report whether it is complete or resumable."""
+    if not isinstance(initial_context, EpisodeContext):
+        raise TypeError("initial_context must be an EpisodeContext")
+    if not isinstance(output_root, Path):
+        raise TypeError("output_root must be a Path")
+    if not isinstance(retry_policy, RetryPolicy):
+        raise TypeError("retry_policy must be a RetryPolicy")
+    root = _validated_existing_root(output_root)
+    policy_document = retry_policy.to_document()
+    policy_sha256 = _canonical_sha256(policy_document)
+    sequence_request = _read_receipt(root / "request.json")
+    expected_request = _sequence_request_document(
+        initial_context=initial_context,
+        retry_policy=retry_policy,
+        policy_sha256=policy_sha256,
+    )
+    if sequence_request != expected_request:
+        raise AttemptSequenceError("attempt sequence request drift")
+    sequence_request_sha256 = _canonical_sha256(sequence_request)
+    if (root / "selection.json").exists() or (root / "selection.json").is_symlink():
+        if not verify_attempt_sequence_receipts(root):
+            raise AttemptSequenceError("attempt sequence receipts failed verification")
+        selection = _read_receipt(root / "selection.json")
+        attempts = _load_attempt_records_from_selection(
+            root=root,
+            initial_context=_context_document(initial_context),
+            policy=retry_policy,
+            selection=selection,
+            sequence_request_sha256=sequence_request_sha256,
+            policy_sha256=policy_sha256,
+        )
+        return AttemptSequenceResumeState(
+            output_root=root,
+            policy_sha256=policy_sha256,
+            attempts=attempts,
+            selected_attempt_id=str(selection["selected_attempt_id"]),
+            selection_sha256=_canonical_sha256(selection),
+            next_context=None,
+        )
+    attempts, next_context = _load_attempt_prefix(
+        root=root,
+        initial_context=initial_context,
+        policy=retry_policy,
+        sequence_request_sha256=sequence_request_sha256,
+        policy_sha256=policy_sha256,
+    )
+    return AttemptSequenceResumeState(
+        output_root=root,
+        policy_sha256=policy_sha256,
+        attempts=attempts,
+        selected_attempt_id=None,
+        selection_sha256=None,
+        next_context=next_context,
+    )
+
+
+def _write_selection(
+    *,
+    root: Path,
+    sequence_request_sha256: str,
+    policy_sha256: str,
+    attempts: list[AttemptRecord],
+) -> str:
+    if not attempts:
+        raise AttemptSequenceError("attempt sequence has no attempts")
     selected = attempts[-1]
-    selection = {
+    return _write_receipt(root / "selection.json", {
         "schema_version": "vaevas-attempt-selection-v1",
         "sequence_request_sha256": sequence_request_sha256,
         "retry_policy_sha256": policy_sha256,
@@ -272,15 +413,7 @@ def run_attempt_sequence(
         "selected_attempt_id": selected.context.attempt_id,
         "selected_attempt_receipt_sha256": selected.attempt_receipt_sha256,
         "selection_reason": "last_terminal_attempt",
-    }
-    selection_sha256 = _write_receipt(root / "selection.json", selection)
-    return AttemptSequenceResult(
-        output_root=root,
-        policy_sha256=policy_sha256,
-        attempts=tuple(attempts),
-        selected_attempt_id=selected.context.attempt_id,
-        selection_sha256=selection_sha256,
-    )
+    })
 
 
 def verify_attempt_sequence_receipts(output_root: Path) -> bool:
@@ -334,7 +467,8 @@ def verify_attempt_sequence_receipts(output_root: Path) -> bool:
         if selection.get("retry_policy_sha256") != sequence_request.get("retry_policy_sha256"):
             return False
         attempts = selection.get("attempt_receipts")
-        if not isinstance(attempts, list) or not attempts:
+        if (not isinstance(attempts, list) or not attempts
+                or any(not isinstance(row, Mapping) for row in attempts)):
             return False
         selected_id = selection.get("selected_attempt_id")
         selected_receipt_sha256 = selection.get("selected_attempt_receipt_sha256")
@@ -344,152 +478,306 @@ def verify_attempt_sequence_receipts(output_root: Path) -> bool:
             return False
         if selection.get("selection_reason") != "last_terminal_attempt":
             return False
+        records = _load_attempt_records_from_selection(
+            root=root,
+            initial_context=initial_context,
+            policy=policy,
+            selection=selection,
+            sequence_request_sha256=sequence_request_sha256,
+            policy_sha256=str(sequence_request["retry_policy_sha256"]),
+        )
         seen_ids: set[str] = set()
-        previous_attempt_id: str | None = None
-        previous_failure_category: str | None = None
-        previous_model_calls = initial_context.get("model_calls_before_attempt", 0)
-        for index, row in enumerate(attempts):
+        for row, record in zip(attempts, records, strict=True):
             if not isinstance(row, Mapping):
                 return False
             if not _has_exact_keys(row, {"attempt_id", "receipt_sha256", "outcome_sha256"}):
                 return False
-            attempt_id = row.get("attempt_id")
-            if not isinstance(attempt_id, str) or attempt_id in seen_ids:
+            if row.get("attempt_id") != record.context.attempt_id:
                 return False
-            if not _valid_sha256(row.get("receipt_sha256")):
+            if row.get("attempt_id") in seen_ids:
                 return False
-            if not _valid_sha256(row.get("outcome_sha256")):
+            seen_ids.add(record.context.attempt_id)
+            if row.get("receipt_sha256") != record.attempt_receipt_sha256:
                 return False
-            if not _valid_path_segment(attempt_id):
+            if row.get("outcome_sha256") != record.outcome_sha256:
                 return False
-            seen_ids.add(attempt_id)
-            attempt_dir = root / attempt_id
-            if not _is_confined_directory(attempt_dir, root):
-                return False
-            request = _read_receipt(attempt_dir / "request.json")
-            attempt = _read_receipt(attempt_dir / "attempt.json")
-            if request.get("schema_version") != "vaevas-attempt-request-v1":
-                return False
-            if attempt.get("schema_version") != "vaevas-attempt-receipt-v1":
-                return False
-            if not _has_exact_keys(
-                request,
-                {
-                    "schema_version",
-                    "sequence_request_sha256",
-                    "retry_policy_sha256",
-                    "context",
-                    "runtime_path",
-                },
+            if (
+                record.context.attempt_id == selected_id
+                and row.get("receipt_sha256") != selected_receipt_sha256
             ):
                 return False
-            if not _has_exact_keys(
-                attempt,
-                {
-                    "schema_version",
-                    "sequence_request_sha256",
-                    "retry_policy_sha256",
-                    "request_sha256",
-                    "context",
-                    "runtime_path",
-                    "outcome",
-                    "outcome_sha256",
-                    "retry_decision",
-                },
-            ):
-                return False
-            request_context = _validated_context_document(
-                request.get("context"), expected=initial_context,
-            )
-            attempt_context = _validated_context_document(
-                attempt.get("context"), expected=initial_context,
-            )
-            if request_context != attempt_context:
-                return False
-            if request_context.get("model_calls_before_attempt", 0) != previous_model_calls:
-                return False
-            if request_context["attempt_id"] != attempt_id:
-                return False
-            if not _expected_lineage(
-                context=request_context,
-                initial_context=initial_context,
-                previous_attempt_id=previous_attempt_id,
-                previous_failure_category=previous_failure_category,
-                expected_retry_index=index,
-            ):
-                return False
-            runtime_path = request.get("runtime_path")
-            if runtime_path != attempt.get("runtime_path"):
-                return False
-            if not isinstance(runtime_path, str) or not _valid_relative_path(runtime_path):
-                return False
-            runtime = root / runtime_path
-            if not _is_confined_directory(runtime, attempt_dir):
-                return False
-            if attempt.get("sequence_request_sha256") != sequence_request_sha256:
-                return False
-            if request.get("sequence_request_sha256") != sequence_request_sha256:
-                return False
-            if request.get("retry_policy_sha256") != sequence_request.get("retry_policy_sha256"):
-                return False
-            if attempt.get("retry_policy_sha256") != sequence_request.get("retry_policy_sha256"):
-                return False
-            if attempt.get("request_sha256") != _canonical_sha256(request):
-                return False
-            outcome = _validated_outcome_document(attempt.get("outcome"))
-            if "model_calls" in request_context["budget_limits"]:
-                try:
-                    previous_model_calls = _model_calls_after(request_context, outcome["evidence"])
-                except AttemptSequenceError:
-                    if not (
-                        outcome.get("failure_category") == "unresolved_callback_exception"
-                        and outcome.get("failure_phase") == "unresolved"
-                        and outcome.get("primary_outcome") == "infrastructure_failure"
-                        and outcome.get("terminal_reason") == "model_call_accounting_unknown"
-                        and outcome.get("score_present") is False
-                    ):
-                        return False
-            if attempt.get("outcome_sha256") != _canonical_sha256(outcome):
-                return False
-            if row.get("receipt_sha256") != _canonical_sha256(attempt):
-                return False
-            if row.get("outcome_sha256") != attempt.get("outcome_sha256"):
-                return False
-            decision = attempt.get("retry_decision")
-            if not _valid_retry_decision(decision):
-                return False
-            next_row_attempt_id = None
-            if index + 1 < len(attempts):
-                next_row = attempts[index + 1]
-                if not isinstance(next_row, Mapping):
-                    return False
-                next_row_attempt_id = next_row.get("attempt_id")
-                if not isinstance(next_row_attempt_id, str):
-                    return False
-            computed_decision = _retry_decision(
-                outcome=AttemptOutcome.from_value(outcome),
-                policy=policy,
-                current_attempt_count=index + 1,
-                next_attempt_id=(
-                    next_row_attempt_id
-                    if next_row_attempt_id is not None
-                    else _retry_attempt_id_from_index(initial_context["attempt_id"], index + 1)
-                ),
-            )
-            if dict(decision) != computed_decision:
-                return False
-            if computed_decision["retry_allowed"]:
-                if next_row_attempt_id != computed_decision["next_attempt_id"]:
-                    return False
-            elif index + 1 < len(attempts):
-                return False
-            if attempt_id == selected_id and row.get("receipt_sha256") != selected_receipt_sha256:
-                return False
-            previous_attempt_id = attempt_id
-            previous_failure_category = outcome.get("failure_category")
         return selected_id in seen_ids
     except (OSError, TypeError, ValueError, AttemptSequenceError, json.JSONDecodeError):
         return False
+
+
+def _sequence_request_document(
+    *,
+    initial_context: EpisodeContext,
+    retry_policy: RetryPolicy,
+    policy_sha256: str,
+) -> dict[str, Any]:
+    return {
+        "schema_version": "vaevas-attempt-sequence-request-v1",
+        "initial_context": _context_document(initial_context),
+        "retry_policy_sha256": policy_sha256,
+        "retry_policy": retry_policy.to_document(),
+    }
+
+
+def _load_attempt_records_from_selection(
+    *,
+    root: Path,
+    initial_context: Mapping[str, Any],
+    policy: RetryPolicy,
+    selection: Mapping[str, Any],
+    sequence_request_sha256: str,
+    policy_sha256: str,
+) -> tuple[AttemptRecord, ...]:
+    rows = selection["attempt_receipts"]
+    if (not isinstance(rows, list) or not rows or len(rows) > policy.max_attempts
+            or any(not isinstance(row, Mapping) or not _has_exact_keys(
+                row, {"attempt_id", "receipt_sha256", "outcome_sha256"}) for row in rows)):
+        raise AttemptSequenceError("invalid selection attempt roster")
+    records: list[AttemptRecord] = []
+    previous_attempt_id: str | None = None
+    previous_failure_category: str | None = None
+    previous_model_calls = initial_context.get("model_calls_before_attempt", 0)
+    for index, row in enumerate(rows):
+        next_attempt_id = None
+        if index + 1 < len(rows):
+            next_attempt_id = rows[index + 1]["attempt_id"]
+        record, previous_model_calls = _load_attempt_record(
+            root=root,
+            attempt_id=row["attempt_id"],
+            initial_context=initial_context,
+            policy=policy,
+            sequence_request_sha256=sequence_request_sha256,
+            policy_sha256=policy_sha256,
+            previous_attempt_id=previous_attempt_id,
+            previous_failure_category=previous_failure_category,
+            previous_model_calls=previous_model_calls,
+            expected_retry_index=index,
+            expected_next_attempt_id=next_attempt_id,
+        )
+        if (record.retry_decision["retry_allowed"] is not (index + 1 < len(rows))
+                or record.retry_decision["next_attempt_id"] != next_attempt_id):
+            raise AttemptSequenceError("selection must end at the first non-retry terminal receipt")
+        records.append(record)
+        previous_attempt_id = record.context.attempt_id
+        previous_failure_category = record.outcome.failure_category
+    _validate_sequence_entries(root, records)
+    return tuple(records)
+
+
+def _validate_sequence_entries(root: Path, records: Sequence[AttemptRecord]) -> None:
+    allowed = {"request.json", "selection.json", *(record.context.attempt_id for record in records)}
+    if any(path.name not in allowed for path in root.iterdir()):
+        raise AttemptSequenceError("sequence contains unrostered attempt activity")
+
+
+def _load_attempt_prefix(
+    *,
+    root: Path,
+    initial_context: EpisodeContext,
+    policy: RetryPolicy,
+    sequence_request_sha256: str,
+    policy_sha256: str,
+) -> tuple[tuple[AttemptRecord, ...], EpisodeContext | None]:
+    initial_document = _context_document(initial_context)
+    records: list[AttemptRecord] = []
+    attempt_id = initial_context.attempt_id
+    previous_attempt_id: str | None = None
+    previous_failure_category: str | None = None
+    previous_model_calls = initial_document.get("model_calls_before_attempt", 0)
+    index = 0
+    while (root / attempt_id).exists() or (root / attempt_id).is_symlink():
+        attempt_dir = root / attempt_id
+        if (
+            not (attempt_dir / "request.json").is_file()
+            or not (attempt_dir / "attempt.json").is_file()
+        ):
+            raise AttemptSequenceError("partial attempt cannot be resumed")
+        record, previous_model_calls = _load_attempt_record(
+            root=root,
+            attempt_id=attempt_id,
+            initial_context=initial_document,
+            policy=policy,
+            sequence_request_sha256=sequence_request_sha256,
+            policy_sha256=policy_sha256,
+            previous_attempt_id=previous_attempt_id,
+            previous_failure_category=previous_failure_category,
+            previous_model_calls=previous_model_calls,
+            expected_retry_index=index,
+            expected_next_attempt_id=_retry_attempt_id_from_index(
+                initial_context.attempt_id,
+                index + 1,
+            ),
+        )
+        records.append(record)
+        if not record.retry_decision["retry_allowed"]:
+            _validate_sequence_entries(root, records)
+            return tuple(records), None
+        previous_attempt_id = record.context.attempt_id
+        previous_failure_category = record.outcome.failure_category
+        attempt_id = str(record.retry_decision["next_attempt_id"])
+        index += 1
+    if records:
+        _validate_sequence_entries(root, records)
+        last = records[-1]
+        context = last.context.next_attempt(
+            attempt_id=str(last.retry_decision["next_attempt_id"]),
+            reason=str(last.outcome.failure_category),
+        )
+        if "model_calls" in context.budget_limits:
+            context = replace(context, model_calls_before_attempt=previous_model_calls)
+        return tuple(records), context
+    raise AttemptSequenceError("partial attempt sequence has no attempts")
+
+
+def _load_attempt_record(
+    *,
+    root: Path,
+    attempt_id: str,
+    initial_context: Mapping[str, Any],
+    policy: RetryPolicy,
+    sequence_request_sha256: str,
+    policy_sha256: str,
+    previous_attempt_id: str | None,
+    previous_failure_category: str | None,
+    previous_model_calls: int,
+    expected_retry_index: int,
+    expected_next_attempt_id: str | None,
+) -> tuple[AttemptRecord, int]:
+    if not _valid_path_segment(attempt_id):
+        raise AttemptSequenceError("invalid attempt_id")
+    attempt_dir = root / attempt_id
+    if not _is_confined_directory(attempt_dir, root):
+        raise AttemptSequenceError("attempt directory escaped output root")
+    request_path = attempt_dir / "request.json"
+    attempt_path = attempt_dir / "attempt.json"
+    if not request_path.is_file() or not attempt_path.is_file():
+        raise AttemptSequenceError("partial attempt cannot be resumed")
+    request = _read_receipt(request_path)
+    attempt = _read_receipt(attempt_path)
+    if request.get("schema_version") != "vaevas-attempt-request-v1":
+        raise AttemptSequenceError("invalid attempt request schema")
+    if attempt.get("schema_version") != "vaevas-attempt-receipt-v1":
+        raise AttemptSequenceError("invalid attempt receipt schema")
+    if not _has_exact_keys(
+        request,
+        {
+            "schema_version",
+            "sequence_request_sha256",
+            "retry_policy_sha256",
+            "context",
+            "runtime_path",
+        },
+    ) or not _has_exact_keys(
+        attempt,
+        {
+            "schema_version", "sequence_request_sha256", "retry_policy_sha256",
+            "request_sha256", "context", "runtime_path", "outcome", "outcome_sha256",
+            "retry_decision",
+        },
+    ):
+        raise AttemptSequenceError("attempt receipt contains unknown or missing keys")
+    request_context = _validated_context_document(
+        request.get("context"),
+        expected=initial_context,
+    )
+    attempt_context = _validated_context_document(
+        attempt.get("context"),
+        expected=initial_context,
+    )
+    if request_context != attempt_context:
+        raise AttemptSequenceError("attempt context mismatch")
+    if request_context.get("model_calls_before_attempt", 0) != previous_model_calls:
+        raise AttemptSequenceError("model-call lineage mismatch")
+    if request_context["attempt_id"] != attempt_id:
+        raise AttemptSequenceError("attempt identity mismatch")
+    if not _expected_lineage(
+        context=request_context,
+        initial_context=initial_context,
+        previous_attempt_id=previous_attempt_id,
+        previous_failure_category=previous_failure_category,
+        expected_retry_index=expected_retry_index,
+    ):
+        raise AttemptSequenceError("attempt lineage mismatch")
+    runtime_path = request.get("runtime_path")
+    if runtime_path != attempt.get("runtime_path"):
+        raise AttemptSequenceError("runtime path mismatch")
+    if not isinstance(runtime_path, str) or not _valid_relative_path(runtime_path):
+        raise AttemptSequenceError("runtime path is invalid")
+    runtime = root / runtime_path
+    if not _is_confined_directory(runtime, attempt_dir):
+        raise AttemptSequenceError("runtime directory escaped attempt")
+    if request.get("sequence_request_sha256") != sequence_request_sha256:
+        raise AttemptSequenceError("sequence request hash mismatch")
+    if attempt.get("sequence_request_sha256") != sequence_request_sha256:
+        raise AttemptSequenceError("sequence request hash mismatch")
+    if (
+        request.get("retry_policy_sha256") != policy_sha256
+        or attempt.get("retry_policy_sha256") != policy_sha256
+    ):
+        raise AttemptSequenceError("retry policy hash mismatch")
+    request_sha256 = _canonical_sha256(request)
+    if attempt.get("request_sha256") != request_sha256:
+        raise AttemptSequenceError("attempt request hash mismatch")
+    outcome = _validated_outcome_document(attempt.get("outcome"))
+    next_model_calls = previous_model_calls
+    if "model_calls" in request_context["budget_limits"]:
+        try:
+            next_model_calls = _model_calls_after(request_context, outcome["evidence"])
+        except AttemptSequenceError as exc:
+            if not (
+                outcome.get("failure_category") == "unresolved_callback_exception"
+                and outcome.get("failure_phase") == "unresolved"
+                and outcome.get("primary_outcome") == "infrastructure_failure"
+                and outcome.get("terminal_reason") == "model_call_accounting_unknown"
+                and outcome.get("score_present") is False
+            ):
+                raise exc
+    if attempt.get("outcome_sha256") != _canonical_sha256(outcome):
+        raise AttemptSequenceError("outcome hash mismatch")
+    decision = attempt.get("retry_decision")
+    if not _valid_retry_decision(decision):
+        raise AttemptSequenceError("retry decision is invalid")
+    computed_decision = _retry_decision(
+        outcome=AttemptOutcome.from_value(outcome),
+        policy=policy,
+        current_attempt_count=expected_retry_index + 1,
+        next_attempt_id=expected_next_attempt_id
+        or _retry_attempt_id_from_index(initial_context["attempt_id"], expected_retry_index + 1),
+    )
+    if dict(decision) != computed_decision:
+        raise AttemptSequenceError("retry decision mismatch")
+    context = _context_from_document(request_context)
+    record = AttemptRecord(
+        context=context,
+        runtime_path=runtime,
+        request_sha256=request_sha256,
+        outcome=AttemptOutcome.from_value(outcome),
+        outcome_sha256=str(attempt["outcome_sha256"]),
+        retry_decision=dict(decision),
+        attempt_receipt_sha256=_canonical_sha256(attempt),
+    )
+    return record, next_model_calls
+
+
+def _context_from_document(document: Mapping[str, Any]) -> EpisodeContext:
+    return EpisodeContext(
+        episode_id=str(document["episode_id"]),
+        attempt_id=str(document["attempt_id"]),
+        task_id=str(document["task_id"]),
+        condition=str(document["condition"]),
+        max_steps=document["max_steps"],
+        budget_limits=document["budget_limits"],
+        parent_attempt_id=document["parent_attempt_id"],
+        retry_index=document["retry_index"],
+        retry_reason=document["retry_reason"],
+        model_calls_before_attempt=document.get("model_calls_before_attempt", 0),
+    )
 
 
 def _retry_decision(

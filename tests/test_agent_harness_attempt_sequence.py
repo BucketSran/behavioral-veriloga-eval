@@ -166,6 +166,216 @@ def test_attempt_sequence_records_single_success_without_retry(tmp_path: Path) -
     assert verify_attempt_sequence_receipts(tmp_path / "sequence") is True
 
 
+def test_resume_reuses_completed_selection_without_execute(tmp_path: Path) -> None:
+    root = tmp_path / "sequence"
+    first = run_attempt_sequence(
+        initial_context=_context(),
+        output_root=root,
+        retry_policy=_policy(),
+        execute=lambda _context, _runtime: AttemptOutcome("pass", "completed"),
+    )
+
+    resumed = run_attempt_sequence(
+        initial_context=_context(),
+        output_root=root,
+        retry_policy=_policy(),
+        resume=True,
+        execute=lambda _context, _runtime: pytest.fail("completed resume must not execute"),
+    )
+
+    assert resumed.selected_attempt_id == first.selected_attempt_id
+    assert resumed.selection_sha256 == first.selection_sha256
+    assert resumed.attempt_count == 1
+
+
+def test_selection_cannot_mark_retryable_last_receipt_as_complete(tmp_path):
+    root = tmp_path / "sequence"
+    run_attempt_sequence(initial_context=_context(), output_root=root, retry_policy=_policy(),
+                         execute=lambda *_: AttemptOutcome("pass", "completed"))
+    receipt = _receipt(root / "attempt-001/attempt.json")
+    receipt["outcome"] = AttemptOutcome(
+        "infrastructure_failure", "startup", failure_category="sandbox_startup",
+        failure_phase="pre_final").to_document()
+    receipt["retry_decision"] = {"retry_allowed": True, "reason": "pre_final_infrastructure_failure",
+                                 "next_attempt_id": "attempt-001-retry-0001"}
+    _overwrite_receipt(root / "attempt-001/attempt.json", receipt)
+    _rewrite_attempt_and_selection_hashes(root, "attempt-001")
+    assert not verify_attempt_sequence_receipts(root)
+
+
+@pytest.mark.parametrize("selection_present", [False, True])
+def test_unrostered_attempt_blocks_terminal_reuse_and_selection_repair(tmp_path, selection_present):
+    root = tmp_path / "sequence"
+    run_attempt_sequence(initial_context=_context(), output_root=root, retry_policy=_policy(),
+                         execute=lambda *_: AttemptOutcome("pass", "completed"))
+    if not selection_present:
+        (root / "selection.json").unlink()
+    stray = root / "attempt-001-retry-0001"
+    stray.mkdir()
+    (stray / "request.json").write_text("{}")
+    with pytest.raises(AttemptSequenceError):
+        run_attempt_sequence(initial_context=_context(), output_root=root, retry_policy=_policy(),
+                             resume=True, execute=lambda *_: pytest.fail("must not execute"))
+    assert (root / "selection.json").exists() is selection_present
+
+
+@pytest.mark.parametrize("row", [None, {}, "invalid"])
+def test_malformed_selection_row_fails_closed_without_raising_keyerror(tmp_path, row):
+    root = tmp_path / "sequence"
+    run_attempt_sequence(initial_context=_context(), output_root=root, retry_policy=_policy(),
+                         execute=lambda *_: AttemptOutcome("pass", "completed"))
+    selection = _receipt(root / "selection.json")
+    selection["attempt_receipts"].insert(0, row)
+    _overwrite_receipt(root / "selection.json", selection)
+    assert not verify_attempt_sequence_receipts(root)
+
+
+def test_resume_continues_after_last_sealed_retry_allowed_attempt(tmp_path: Path) -> None:
+    root = tmp_path / "sequence"
+    run_attempt_sequence(
+        initial_context=_context(),
+        output_root=root,
+        retry_policy=RetryPolicy(max_attempts=1, retry_categories=frozenset({"sandbox_startup"})),
+        execute=lambda _context, _runtime: AttemptOutcome(
+            "infrastructure_failure",
+            "retryable transport",
+            failure_category="sandbox_startup",
+            failure_phase="pre_final",
+        ),
+    )
+    (root / "selection.json").chmod(0o644)
+    (root / "selection.json").unlink()
+    request = _receipt(root / "request.json")
+    policy = RetryPolicy(max_attempts=2, retry_categories=frozenset({"sandbox_startup"}))
+    request["retry_policy"] = policy.to_document()
+    request["retry_policy_sha256"] = _canonical_sha256(policy.to_document())
+    sequence_request_sha256 = _canonical_sha256(request)
+    _overwrite_receipt(root / "request.json", request)
+    attempt_request = _receipt(root / "attempt-001" / "request.json")
+    attempt_request["sequence_request_sha256"] = sequence_request_sha256
+    attempt_request["retry_policy_sha256"] = request["retry_policy_sha256"]
+    _overwrite_receipt(root / "attempt-001" / "request.json", attempt_request)
+    receipt = _receipt(root / "attempt-001" / "attempt.json")
+    receipt["sequence_request_sha256"] = sequence_request_sha256
+    receipt["retry_policy_sha256"] = request["retry_policy_sha256"]
+    receipt["request_sha256"] = _canonical_sha256(attempt_request)
+    receipt["retry_decision"] = {
+        "retry_allowed": True,
+        "reason": "pre_final_infrastructure_failure",
+        "next_attempt_id": "attempt-001-retry-0001",
+    }
+    _overwrite_receipt(root / "attempt-001" / "attempt.json", receipt)
+
+    calls: list[str] = []
+    resumed = run_attempt_sequence(
+        initial_context=_context(),
+        output_root=root,
+        retry_policy=policy,
+        resume=True,
+        execute=lambda context, _runtime: calls.append(context.attempt_id) or AttemptOutcome("pass", "completed"),
+    )
+
+    assert calls == ["attempt-001-retry-0001"]
+    assert resumed.selected_attempt_id == "attempt-001-retry-0001"
+    assert resumed.attempt_count == 2
+    assert verify_attempt_sequence_receipts(root)
+
+
+@pytest.mark.parametrize("limit", [2, 5])
+def test_between_attempt_resume_keeps_original_call_limit(tmp_path, monkeypatch, limit):
+    from runners.agent_harness import attempt_sequence as sequence
+    root = tmp_path / "sequence"
+    context = EpisodeContext("cell", "attempt", "task", "Agentic", None, {"model_calls": limit})
+    policy = RetryPolicy(max_attempts=6, retry_categories=frozenset({"provider_transport"}))
+    original_reserve = sequence._reserve_attempt_runtime
+    calls = []
+
+    def execute(current, _runtime):
+        before = current.model_calls_before_attempt
+        calls.append(before)
+        return AttemptOutcome("infrastructure_failure", "transport",
+                              failure_category="provider_transport", failure_phase="pre_final",
+                              evidence={"model_call_budget": {
+                                  "limit": limit, "used_before_attempt": before,
+                                  "admitted_in_attempt": 1, "used_total": before + 1,
+                                  "remaining": limit - before - 1}})
+
+    def interrupt(root, attempt_id):
+        if "retry" in attempt_id:
+            raise KeyboardInterrupt("sealed boundary")
+        return original_reserve(root, attempt_id)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(sequence, "_reserve_attempt_runtime", interrupt)
+        with pytest.raises(KeyboardInterrupt):
+            run_attempt_sequence(initial_context=context, output_root=root,
+                                 retry_policy=policy, execute=execute)
+    assert calls == [0]
+    resumed = run_attempt_sequence(initial_context=context, output_root=root,
+                                   retry_policy=policy, execute=execute, resume=True)
+    assert calls == list(range(limit))
+    assert resumed.attempt_count == limit
+    assert resumed.attempts[-1].retry_decision["reason"] == "model_call_limit"
+    assert verify_attempt_sequence_receipts(root)
+
+
+def test_resume_publishes_missing_selection_after_terminal_attempt(tmp_path: Path) -> None:
+    root = tmp_path / "sequence"
+    run_attempt_sequence(
+        initial_context=_context(),
+        output_root=root,
+        retry_policy=_policy(),
+        execute=lambda _context, _runtime: AttemptOutcome("pass", "completed"),
+    )
+    (root / "selection.json").chmod(0o644)
+    (root / "selection.json").unlink()
+
+    resumed = run_attempt_sequence(
+        initial_context=_context(),
+        output_root=root,
+        retry_policy=_policy(),
+        resume=True,
+        execute=lambda _context, _runtime: pytest.fail("terminal resume must not execute"),
+    )
+
+    assert resumed.selected_attempt_id == "attempt-001"
+    assert resumed.attempt_count == 1
+    assert (root / "selection.json").is_file()
+    assert verify_attempt_sequence_receipts(root)
+
+
+def test_resume_rejects_partial_attempt_request_without_execution(tmp_path: Path) -> None:
+    root = tmp_path / "sequence"
+    calls = 0
+
+    def execute(_context: EpisodeContext, _runtime: Path) -> AttemptOutcome:
+        nonlocal calls
+        calls += 1
+        return AttemptOutcome("pass", "completed")
+
+    run_attempt_sequence(
+        initial_context=_context(),
+        output_root=root,
+        retry_policy=_policy(),
+        execute=execute,
+    )
+    (root / "selection.json").chmod(0o644)
+    (root / "selection.json").unlink()
+    (root / "attempt-001" / "attempt.json").chmod(0o644)
+    (root / "attempt-001" / "attempt.json").unlink()
+
+    with pytest.raises(AttemptSequenceError, match="partial attempt"):
+        run_attempt_sequence(
+            initial_context=_context(),
+            output_root=root,
+            retry_policy=_policy(),
+            resume=True,
+            execute=execute,
+        )
+
+    assert calls == 1
+
+
 def test_pre_final_infrastructure_failure_gets_fresh_retry_with_parent_lineage(tmp_path: Path) -> None:
     seen: list[tuple[str, str | None, int, Path, bool]] = []
 

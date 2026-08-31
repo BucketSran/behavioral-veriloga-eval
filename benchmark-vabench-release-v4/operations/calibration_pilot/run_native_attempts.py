@@ -19,10 +19,12 @@ if str(REPO) not in sys.path:
 import run_campaign as runner  # noqa: E402
 import score_campaign as scorer  # noqa: E402
 from runners.agent_harness.attempt_sequence import (  # noqa: E402
+    AttemptRecord,
     AttemptOutcome,
+    AttemptSequenceError,
     RetryPolicy,
+    read_attempt_sequence_resume_state,
     run_attempt_sequence,
-    verify_attempt_sequence_receipts,
 )
 from runners.agent_harness.state import EpisodeContext  # noqa: E402
 from runners.agent_harness.budget import validate_model_call_limit  # noqa: E402
@@ -54,6 +56,7 @@ def run_native_attempt_sequence(
     args: Namespace,
     client_factory: ClientFactory,
     retry_policy: RetryPolicy,
+    resume: bool = False,
 ) -> dict[str, Any]:
     """Run one native campaign cell through fresh infrastructure attempts."""
     _validate_inputs(cell=cell, args=args, client_factory=client_factory, retry_policy=retry_policy)
@@ -61,6 +64,9 @@ def run_native_attempt_sequence(
     root = args.output / cell["cell_id"]
     limit = validate_model_call_limit(getattr(args, "native_model_call_limit", None))
     initial_context = _initial_context(cell, limit)
+    if resume:
+        validate_native_attempt_resume(
+            root, cell, campaign_sha, retry_policy, model_call_limit=limit)
 
     def execute(context: EpisodeContext, reserved_runtime: Path) -> AttemptOutcome:
         attempt_args = copy(args)
@@ -93,6 +99,7 @@ def run_native_attempt_sequence(
         output_root=root,
         retry_policy=retry_policy,
         execute=execute,
+        resume=resume,
     )
     return read_native_attempt_sequence(
         root,
@@ -100,6 +107,38 @@ def run_native_attempt_sequence(
         campaign_file_sha256=campaign_sha,
         expected_retry_policy=retry_policy,
     )
+
+
+def validate_native_attempt_resume(
+    root: Path,
+    cell: dict[str, Any],
+    campaign_file_sha256: str,
+    expected_retry_policy: RetryPolicy,
+    *,
+    model_call_limit: int | None = None,
+) -> dict[str, Any]:
+    """Validate existing native attempt evidence before any resumed client is created."""
+    state = read_attempt_sequence_resume_state(
+        output_root=root,
+        initial_context=_initial_context(cell, model_call_limit),
+        retry_policy=expected_retry_policy,
+    )
+    attempts, _ = _validate_native_attempt_records(
+        root=state.output_root,
+        cell=cell,
+        campaign_file_sha256=campaign_file_sha256,
+        records=state.attempts,
+    )
+    return {
+        "schema_version": "vaevas-native-attempt-resume-validation-v1",
+        "root": str(state.output_root),
+        "complete": state.complete,
+        "terminal_selection_missing": state.terminal_selection_missing,
+        "resumable": bool(state.next_context is not None or state.terminal_selection_missing),
+        "attempt_count": len(attempts),
+        "next_attempt_id": state.next_context.attempt_id if state.next_context is not None else None,
+        "attempts": attempts,
+    }
 
 
 def read_native_attempt_sequence(
@@ -110,21 +149,59 @@ def read_native_attempt_sequence(
     expected_retry_policy: RetryPolicy,
 ) -> dict[str, Any]:
     """Read and validate a native attempt sequence without executing cells."""
-    if not verify_attempt_sequence_receipts(root):
-        raise ValueError("attempt sequence receipts failed verification")
     request = _read_json(root / "request.json")
-    policy_sha256 = _canonical_sha256(expected_retry_policy.to_document())
-    if request.get("retry_policy_sha256") != policy_sha256:
+    if request.get("retry_policy_sha256") != _canonical_sha256(expected_retry_policy.to_document()):
         raise ValueError("retry policy differs from attempt sequence")
+    try:
+        limit = request["initial_context"]["budget_limits"].get("model_calls")
+        state = read_attempt_sequence_resume_state(
+            output_root=root, initial_context=_initial_context(cell, limit),
+            retry_policy=expected_retry_policy)
+    except (AttemptSequenceError, KeyError, TypeError, AttributeError) as exc:
+        raise ValueError(f"attempt sequence receipts failed verification: {exc}") from exc
+    if not state.complete:
+        raise ValueError("attempt sequence receipts failed verification: selection is missing")
     selection = _read_json(root / "selection.json")
+    attempts, selected_row = _validate_native_attempt_records(
+        root=state.output_root, cell=cell, campaign_file_sha256=campaign_file_sha256,
+        records=state.attempts)
+    if selected_row is None or attempts[-1]["attempt_id"] != selection["selected_attempt_id"]:
+        raise ValueError("attempt sequence selected row mismatch")
+    return _dispatch_document(
+        selected_row=selected_row,
+        attempts=attempts,
+        root=root,
+        retry_policy=expected_retry_policy,
+        selection=selection,
+    )
+
+
+def _validate_native_attempt_records(
+    *,
+    root: Path,
+    cell: dict[str, Any],
+    campaign_file_sha256: str,
+    records: tuple[AttemptRecord, ...],
+) -> tuple[list[dict[str, Any]], dict[str, Any] | None]:
     attempts: list[dict[str, Any]] = []
-    selected_row: dict[str, Any] | None = None
-    for row in selection["attempt_receipts"]:
-        attempt_id = row["attempt_id"]
-        receipt = _read_json(root / attempt_id / "attempt.json")
-        context = receipt["context"]
-        evidence = receipt["outcome"]["evidence"]
-        cell_runtime = _cell_runtime_from_receipt(root=root, receipt=receipt, cell=cell)
+    native_row = None
+    for record in records:
+        attempt_id = record.context.attempt_id
+        context = {
+            "attempt_id": record.context.attempt_id,
+            "parent_attempt_id": record.context.parent_attempt_id,
+            "retry_index": record.context.retry_index,
+            "retry_reason": record.context.retry_reason,
+            "budget_limits": dict(record.context.budget_limits),
+            **({"model_calls_before_attempt": record.context.model_calls_before_attempt}
+               if "model_calls" in record.context.budget_limits else {}),
+        }
+        evidence = record.outcome.evidence
+        cell_runtime = _cell_runtime_from_receipt(
+            root=root,
+            receipt={"runtime_path": record.runtime_path.relative_to(root).as_posix()},
+            cell=cell,
+        )
         relative_cell_runtime = cell_runtime.relative_to(root).as_posix()
         if evidence.get("cell_runtime") != relative_cell_runtime:
             raise ValueError("native attempt cell runtime evidence mismatch")
@@ -149,35 +226,24 @@ def read_native_attempt_sequence(
         observed_sources = source_hashes(cell_runtime)
         if observed_sources != evidence["source_hashes"]:
             raise ValueError("native attempt source hash mismatch")
-        attempt_summary = {
+        attempts.append({
             "attempt_id": attempt_id,
-            "retry_index": context["retry_index"],
-            "parent_attempt_id": context["parent_attempt_id"],
-            "retry_reason": context["retry_reason"],
-            "primary_outcome": receipt["outcome"]["primary_outcome"],
-            "terminal_reason": receipt["outcome"]["terminal_reason"],
-            "failure_category": receipt["outcome"]["failure_category"],
-            "failure_phase": receipt["outcome"]["failure_phase"],
-            "submission_frozen": receipt["outcome"]["submission_frozen"],
-            "final_started": receipt["outcome"]["final_started"],
-            "retry_decision": receipt["retry_decision"],
-            "cell_runtime": evidence["cell_runtime"],
+            "retry_index": record.context.retry_index,
+            "parent_attempt_id": record.context.parent_attempt_id,
+            "retry_reason": record.context.retry_reason,
+            "primary_outcome": record.outcome.primary_outcome,
+            "terminal_reason": record.outcome.terminal_reason,
+            "failure_category": record.outcome.failure_category,
+            "failure_phase": record.outcome.failure_phase,
+            "submission_frozen": record.outcome.submission_frozen,
+            "final_started": record.outcome.final_started,
+            "retry_decision": dict(record.retry_decision),
+            "cell_runtime": relative_cell_runtime,
             "native_row_sha256": evidence["native_row_sha256"],
             "source_hashes_sha256": _canonical_sha256(observed_sources),
             "costs": _attempt_costs(native_row),
-        }
-        attempts.append(attempt_summary)
-        if attempt_id == selection["selected_attempt_id"]:
-            selected_row = native_row
-    if selected_row is None or attempts[-1]["attempt_id"] != selection["selected_attempt_id"]:
-        raise ValueError("attempt sequence selected row mismatch")
-    return _dispatch_document(
-        selected_row=selected_row,
-        attempts=attempts,
-        root=root,
-        retry_policy=expected_retry_policy,
-        selection=selection,
-    )
+        })
+    return attempts, native_row
 
 
 def source_hashes(runtime: Path) -> dict[str, Any]:
