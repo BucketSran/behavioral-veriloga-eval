@@ -59,6 +59,9 @@ All AA-VAE-073/074/075 writers have handed back, including the reopened feature
 projection repair. Main now owns all files for stable-tree integration and
 focused publication. Reviewers remain read-only. No delegated edit/Git/paid
 lane is active; the earlier assignment paragraphs are retained for traceability.
+Source publication through `6ac7482d4b` and all three exact-source hosted gates
+are complete. Main owns only the evidence-record follow-up; all delegate lanes
+remain closed. This handoff does not authorize real-corpus ingestion or paid runs.
 
 AA-VAE-072 starts at `f1c78b3dd7b9b0913a626661158c816c55091667`.
 Main exclusively owns calibration-pilot `comparison_live.py`,

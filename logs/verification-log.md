@@ -1,5 +1,29 @@
 # Verification Log
 
+## 2026-09-01 - AA-VAE-073–075 fork publication and hosted GREEN
+
+- Seven focused commits through `6ac7482d4b49d7e2a71d844390765f91143eeb0e`
+  are published to BucketSran main. All three exact-source workflows succeeded:
+  [Evaluator Closure](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33414748175),
+  [Runner Smoke](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33414748058),
+  [Public Agent Runtime](https://github.com/BucketSran/behavioral-veriloga-eval/actions/runs/33414748145).
+- Hosted full-checkout regression: **1,557 passed / 56 optional skips, 70.86 s**.
+  This includes the historical V3 fixture omitted from local sparse storage.
+  New combined Native/Evolution/docs/waveform/live-fixture stage:
+  **36 passed, 31.01 s**. Existing live fixture **21 passed**; six-cell comparison/
+  cost-stop stage **3 passed**; multi-model Evolution stage **6 passed**;
+  batch recovery **3 passed**. All earlier Docker and final three-arm checks
+  succeeded; whole Evaluator Closure job completed in **8m52s** without rerun.
+- Runtime key/HTTP inputs remain synthetic. CI checks implementation and
+  integration, not real-provider quality, source-corpus licensing or a formal
+  benchmark ranking. No source corpus text or private runtime evidence published.
+- Local fork main was clean and 0/0 against origin after source publication.
+  EVAS fork/upstream remain pinned and unchanged. The existing hosted Node
+  action deprecation annotation is non-blocking and outside this slice.
+- This follow-up changes only documentation/ownership records, not executed
+  source. Corpus activation, fresh dated provider review and any paid study
+  remain explicit next gates, not missing waveform or live-entrypoint wiring.
+
 ## 2026-09-01 - AA-VAE-073–075 final local handoff
 
 - Final executed source bytes include `421e430808` scope hardening. Actual

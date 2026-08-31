@@ -17,7 +17,7 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- Implemented; publication verification in progress:
+- Implemented and published; exact-source hosted gates passed:
   [combined public-tool acceptance](combined-tools-acceptance.md), AA-VAE-073–075.
   Evolution coordinator waveform sharing, reviewed local corpus contracts and
   a separate combined live entrypoint are wired. Stable-tree actual Docker/EVAS
@@ -28,7 +28,10 @@ implementation and does not change the phase statuses below.
   candidate/input binding, all-branch costs and one final replay are preserved.
   Existing legacy comparison, r53 and EVAS 0.8.7 remain unchanged. No actual keys,
   paid calls or third-party corpus text imported. Main owns integration/Git;
-  delegated writing is closed. Hosted evidence is recorded after publication.
+  delegated writing is closed. Seven focused commits through `6ac7482d4b`
+  are on fork main; Evaluator Closure, Runner Smoke and Public Agent Runtime
+  all passed. Hosted full checkout: **1,557 passed / 56 optional skips**;
+  new combined Docker/live-fixture stage: **36 passed**. See verification log.
   Source: `cbfe1e2743` (corpus), `ff17ec4788` (Evolution waveform),
   `18bcd2a547` (combined wiring), `73b6a4aa8f` (CI), `421e430808` (claim labels).
   Next activation gates: exact source/rights for real docs, re-review dated
