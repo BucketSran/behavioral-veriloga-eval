@@ -14,6 +14,12 @@ def test_evaluator_closure_gates_legacy_native_comparison_and_cost_stops():
         assert f"tests/test_agent_harness_workflow_comparison.py::{name}" in workflow
 
 
+def test_evaluator_closure_gates_live_entrypoint_with_only_synthetic_http():
+    workflow = (ROOT / ".github/workflows/evaluator-closure.yml").read_text()
+    assert workflow.count('"benchmark-vabench-release-v4/operations/calibration_pilot/comparison_live.py"') == 2
+    assert "tests/test_agent_harness_comparison_live.py" in workflow
+
+
 def test_evaluator_closure_gates_batch_resume_without_provider_reentry():
     workflow = WORKFLOW.read_text(encoding="utf-8")
     for name in ("run_native_batch.py", "evolution_batch.py"):

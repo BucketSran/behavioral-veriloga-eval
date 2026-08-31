@@ -1,5 +1,13 @@
 # Verification Log
 
+## 2026-08-31 - AA-VAE-072 credential-free CI wiring
+
+- Add the live adapter to both evaluator-closure path filters and exercise its
+  full test file with actual Docker/EVAS and synthetic external HTTP only.
+  No CI key, paid service or additional dependency is introduced.
+- Workflow-contract regression: **20 passed**. All earlier evaluator stages
+  remain enabled; hosted exact-commit execution is pending fork publication.
+
 ## 2026-08-31 - AA-VAE-072 free live-transport integration and review
 
 - Intake `f1c78b3dd7` was clean/synced with BucketSran main; fetched upstream

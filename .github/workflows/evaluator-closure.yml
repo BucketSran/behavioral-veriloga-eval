@@ -32,6 +32,7 @@ on:
       - "benchmark-vabench-release-v4/operations/calibration_pilot/deepseek_budget.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/run_deepseek_pilot.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/run_legacy_native_comparison.py"
+      - "benchmark-vabench-release-v4/operations/calibration_pilot/comparison_live.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/comparison_results.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/comparison_surface.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/pilot_credentials.py"
@@ -78,6 +79,7 @@ on:
       - "benchmark-vabench-release-v4/operations/calibration_pilot/deepseek_budget.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/run_deepseek_pilot.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/run_legacy_native_comparison.py"
+      - "benchmark-vabench-release-v4/operations/calibration_pilot/comparison_live.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/comparison_results.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/comparison_surface.py"
       - "benchmark-vabench-release-v4/operations/calibration_pilot/pilot_credentials.py"
@@ -223,6 +225,13 @@ jobs:
             tests/test_agent_harness_public_evas_feedback.py::test_real_docker_evas_failure_remains_visible_after_tail \
             --basetemp "$RUNNER_TEMP/r53-budgeted-pilot"
 
+      - name: Run live entrypoint with synthetic external HTTP only
+        env:
+          VABENCH_TEST_DOCKER_RUNTIME: "1"
+        run: |
+          uv run --locked --extra agentic python -m pytest -q \
+            tests/test_agent_harness_comparison_live.py \
+            --basetemp "$RUNNER_TEMP/r53-comparison-live-fixture"
       - name: Run free legacy-native workflow comparison and budget censoring
         env:
           VABENCH_TEST_DOCKER_RUNTIME: '1'
