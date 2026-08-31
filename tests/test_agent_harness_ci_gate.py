@@ -5,6 +5,15 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "evaluator-closure.yml"
 
 
+def test_evaluator_closure_gates_legacy_native_comparison_and_cost_stops():
+    workflow = WORKFLOW.read_text()
+    for name in ("run_legacy_native_comparison.py", "comparison_results.py", "comparison_surface.py"):
+        assert workflow.count(f'"benchmark-vabench-release-v4/operations/calibration_pilot/{name}"') == 2
+    for name in ("test_real_six_cell_workflow_comparison_freezes_scores_and_reads_without_reentry",
+                 "test_real_comparison_cost_stop_retains_every_unscored_row"):
+        assert f"tests/test_agent_harness_workflow_comparison.py::{name}" in workflow
+
+
 def test_evaluator_closure_gates_batch_resume_without_provider_reentry():
     workflow = WORKFLOW.read_text(encoding="utf-8")
     for name in ("run_native_batch.py", "evolution_batch.py"):

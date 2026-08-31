@@ -1,5 +1,16 @@
 # Verification Log
 
+## 2026-08-31 - AA-VAE-071 hosted gate wiring
+
+- CI path/step tracer initially failed because all three comparison modules
+  were absent from the workflow filter. Add them for pull requests and main
+  pushes, plus a real Docker six-cell comparison and both cost-stop fixtures.
+- Focused workflow-contract suite: **19 passed**. Existing no-network synthetic
+  client is used; no CI credential or paid provider is introduced. The default
+  full-checkout compatibility suite and all prior Docker gates are retained.
+- This records wiring/local checks, not a hosted run. Exact-source hosted
+  outcomes are recorded separately after fork publication.
+
 ## 2026-08-31 - AA-VAE-071 free coordinator integration and review
 
 - Final active r53/harness/result/layout gate: **1,380 passed / 46 optional
