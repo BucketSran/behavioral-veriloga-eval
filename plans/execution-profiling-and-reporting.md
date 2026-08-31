@@ -53,3 +53,16 @@ Source/ownership drift, hidden-output leakage, changed final/retry semantics or
 required fees stop the affected branch. Missing historical sparse fixtures are
 reported separately; do not restore bulk assets or label optional skips passes.
 Instrumentation coverage and actual service rate-limit tests remain explicit.
+
+## Implementation outcome
+
+AA-VAE-078 timing, AA-VAE-079 fixed workload and AA-VAE-080 multi-path reporting
+are implemented. Independent reviews completed after fail-closed profiler
+repairs; actual Docker and official Inspect tests pass. See verification log
+for fresh measurements and final regression/publication evidence.
+
+Scope clarification: Evolution export covers one terminal attempt and its
+available all-branch costs, not every attempt of a retry batch. The adapter
+does not manufacture unavailable costs or an expanded candidate DAG. Whole-batch
+aggregation, paired-delta visualization, resource sampling and statistically
+controlled performance trials remain follow-ups. No scheduler rewrite occurred.

@@ -20,6 +20,11 @@ checkout is read-only; this register does not authorize an evaluator change.
 
 ## Current Ownership
 
+Closure of the 2026-09-01 slice: profiler delegate handed back its two files and
+stopped writing. Main owns all remaining integration, docs and Git. Both
+profiler and exporter received independent read-only review; review fixes are
+owned by main. No delegated mutation grant remains active for this slice.
+
 2026-09-01 execution profiling/reporting, base `3aa5129a112c220c546dd1e2004d22903860ba30`:
 main owns phase-timing runtime integration, new profiler/tests, CI and all
 plans/logs/migration docs/Git under `execution-profiling-and-reporting.md`.

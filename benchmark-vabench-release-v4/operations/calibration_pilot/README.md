@@ -24,6 +24,27 @@ runner/environment dependencies are unchanged. Legacy/Evolution/combined results
 are not silently converted into this ordinary native ledger. Code map and
 execution-performance follow-up: [AA-VAE-077](../../../docs/alphaapollo-migration/features/AA-VAE-077-inspect-readonly-results.md).
 
+Additional explicit `--source-kind` values are `legacy-native-comparison`,
+`evolution-single`, and `combined-tools`. Omit `--campaign` and keep `--workers 1`
+for these sources; `--run-root` is their sealed comparison/attempt/combined root.
+Evolution single-attempt export is not a batch/retry aggregation. Scores, costs,
+and denominators stay in separate protocol groups; unknown costs remain null.
+See [AA-VAE-080](../../../docs/alphaapollo-migration/features/AA-VAE-080-multipath-readonly-reporting.md).
+
+Fixed execution profiling is separate from the viewer/import path:
+
+```sh
+.venv/bin/python scripts/profile_native_execution.py \
+  --output-root benchmark-vabench-release-v4/reports/my-fresh-profile \
+  --native-docker --workers 1,2,4
+```
+
+This reuses scripted public stubs, real Docker/EVAS, and fresh native attempts;
+no paid model calls. It checks frozen content/verdict consistency and reports
+actual elapsed/queue/phase time. It does not infer CPU/RAM usage, recommend a
+production worker count, or claim model-quality speedup. Details and limitations:
+[AA-VAE-079](../../../docs/alphaapollo-migration/features/AA-VAE-079-fixed-execution-profile.md).
+
 ## Explicit live legacy/native comparison
 
 `comparison_live.py` adds separate `prepare`, `inspect`, `run`, and read-only

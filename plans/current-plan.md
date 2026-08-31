@@ -17,12 +17,22 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- Active: [execution profiling and multi-path reporting](execution-profiling-and-reporting.md).
-  Approved phase telemetry, fixed workers=1/2/4 scripted Docker workload and
-  read-only legacy/Evolution/combined export. No paid runs or Inspect execution
-  migration; resource scheduling changes remain conditional on measurements.
+- Implemented and locally verified; fork publication and hosted CI tracked separately:
+  [execution profiling and multi-path reporting](execution-profiling-and-reporting.md).
+  AA-VAE-078–080 add opt-in phase telemetry, fresh workers=1/2/4 scripted Docker
+  profiling, and read-only legacy comparison/Evolution-single/combined export.
+  Three cells per worker setting retain identical submission bytes/verdicts;
+  official Inspect plus real combined Docker gate is 20/20. No paid runs,
+  scheduler change or Inspect execution migration. Small-run timing variability
+  precludes a production concurrency recommendation. Next optional measurements:
+  repeated/larger workloads and real resource counters; next reporting scope:
+  full Evolution batch/retry aggregation and paired-delta views.
+  Active regression: **1,469 passed / 68 optional skips / 1 absent historical
+  fixture deselected**. Timing/profiler/export commits are `0cc1a8f3dd`,
+  `9f65bbc0bd`, `6e327b57fc`; no claim of full hosted CI completion yet.
 
-- Implemented locally: [adversarial acceptance and read-only framework adapter](adversarial-and-result-adapter.md).
+- Published at `3aa5129a11`, all three hosted gates passed:
+  [adversarial acceptance and read-only framework adapter](adversarial-and-result-adapter.md).
   These are separate goals: runtime/checker boundary regressions versus framework
   interoperability and execution-efficiency groundwork. Preserve r53/EVAS and
   existing scheduling/retry ownership; no paid run. Five real Docker/EVAS attack
@@ -30,8 +40,8 @@ implementation and does not change the phase statuses below.
   API tests. Active regression: 1,450 passed / 65 optional skips / one absent
   historical fixture deselected. Historical-inclusive sparse checkout failures
   are recorded, not hidden. Main closes review and fork publication separately.
-  Next performance work is measured workers=1/2/4 execution profiling and a
-  bounded execution-adapter design, not relabeling result-import timing.
+  The measured workers=1/2/4 profiling follow-up is recorded above; actual
+  Inspect execution delegation remains deferred, not inferred from imports.
 
 - Activated: [authorized Verilog-A reference corpus](veriloga-corpus-activation.md),
   an AA-VAE-074 follow-up. User contributor authorization resolves project use.

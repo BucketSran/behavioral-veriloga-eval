@@ -5,6 +5,15 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "evaluator-closure.yml"
 
 
+def test_execution_profile_and_multipath_reporting_have_explicit_gates():
+    workflow = WORKFLOW.read_text()
+    assert workflow.count('"scripts/profile_native_execution.py"') == 2
+    assert workflow.count('"benchmark-vabench-release-v4/operations/calibration_pilot/reporting_sources.py"') == 2
+    assert "scripts/profile_native_execution.py" in workflow
+    assert "--native-docker --workers 1,2,4" in workflow
+    assert "tests/test_agent_harness_reporting_sources.py" in workflow
+
+
 def test_adversarial_and_official_inspect_import_have_explicit_gates():
     workflow = WORKFLOW.read_text()
     assert workflow.count('"benchmark-vabench-release-v4/operations/calibration_pilot/result_adapter.py"') == 2

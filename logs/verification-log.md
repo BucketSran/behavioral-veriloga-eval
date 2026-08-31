@@ -1,5 +1,56 @@
 # Verification Log
 
+## 2026-09-01 - AA-VAE-079/080 profiling and multi-path reporting
+
+- Profiler RED: missing module. Independent review then found unbound identities,
+  empty evidence, overwrite and private exception/verdict copying; regression
+  REDs reproduced each issue before repairs. Final fixture gate: **10 passed**;
+  phase/profile/CI gate **37 passed**. Read-only reviewer: OKAY after repairs.
+- Export RED: missing source-kind keyword/authority metadata. Integration also
+  caught rejection of the production public self-alias and wrong feature-counter
+  names. Refactored an existing Docker test into a reusable helper so export
+  runs BEFORE that test deliberately corrupts evidence; corruption check remains.
+- Final Docker plus official Inspect 0.3.261:
+  `VABENCH_TEST_DOCKER_RUNTIME=1 uv run --locked --extra agentic
+  --with-requirements environment/requirements-inspect-reporting.txt python -m
+  pytest -q tests/test_agent_harness_reporting_sources.py
+  tests/test_agent_harness_result_adapter.py --basetemp
+  benchmark-vabench-release-v4/reports/export-docker-test-4 --tb=short`
+  **20 passed / no skips**. Both combined backends round-trip through the
+  official SDK; all source bytes remain unchanged. Independent exporter review
+  found no blocker. No model/tool/judge is re-entered by the exporter.
+- Real final profile, no concurrent Docker test launched by this task:
+  `.venv/bin/python scripts/profile_native_execution.py --output-root
+  benchmark-vabench-release-v4/reports/execution-profile-final --native-docker
+  --workers 1,2,4`. Report SHA-256:
+  `8fb52a118def9e9d4796d774caa02d9e64b3d68a288d55805d36d962626a434b`.
+  workers 1/2/4: elapsed **35.634 / 23.330 / 14.098 s**; throughput
+  **0.0842 / 0.1286 / 0.2128 cells/s**; terminals **3/3/3**; peak active cells
+  **1/2/3**. Every submitted file and verdict matched across runs; all scripted
+  verdicts were behavior_failure, score 0. No paid/live model calls.
+- Earlier delegate run elapsed 28.170/20.876/23.130 s; a subsequent run overlapped
+  another Docker test and is not the final timing evidence. Order/host variability
+  remains uncontrolled: these smokes establish consistency, not a robust speedup
+  or optimal worker count. Three tasks cannot saturate four workers.
+- Raw reports stay ignored/local under v4 reports. Ruff 0.12.12 and diff checks
+  passed. Expanded regression and hosted CI are recorded separately below.
+- Final active local regression: **1,469 passed / 68 optional skips / 1
+  explicitly deselected absent historical fixture**, 220.16 s. Command:
+  `.venv/bin/python -m pytest -q tests/test_agent_harness_*.py
+  tests/test_evaluator_environment_contract.py
+  benchmark-vabench-release-v4/scripts/tests/test_v4_experiment_result_protocol.py
+  tests/test_score_campaign_reuse.py tests/test_mini_swe_vabench.py
+  tests/test_v4_r53_active_entrypoints.py tests/test_v4_r53_clean_room_smoke.py
+  -k 'not test_single_task_hidden_scoring_smoke_binds_claim_boundary' --tb=short`.
+- Final official SDK repeat (Docker opt-in off): **18 passed / 2 Docker skips**.
+  Pycompile, Ruff and diff checks pass; no dedicated new typecheck configured.
+  EVAS working tree clean; r53 has no diff from base. Staged secret scan matched
+  only an existing synthetic combined-test credential, not a real key.
+- Source commits: `0cc1a8f3dd` timing, `9f65bbc0bd` profiler, `6e327b57fc` exporter.
+  Prior baseline `3aa5129a11` hosted Evaluator Closure/Public Agent Runtime/Runner
+  Smoke all passed; this iteration's hosted CI is pending publication, not yet
+  claimed green. Expanded local regression excludes optional external workloads.
+
 ## 2026-09-01 - AA-VAE-078 opt-in phase timing
 
 - Base `3aa5129a11`: clean main equals origin/main (0/0), contains upstream

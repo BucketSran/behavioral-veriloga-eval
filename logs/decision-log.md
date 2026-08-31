@@ -1,5 +1,24 @@
 # Decision Log
 
+## 2026-09-01 - Measure native execution; keep report protocols separate
+
+- AA-VAE-079 reuses the existing clean-room stub/production native execution and
+  verified score reader, with one attempt and fresh immutable profile outputs.
+  No new scheduling owner, paid model call, evaluator or sealed-release change.
+- Small fixed-order runs differ enough that no production worker-count or
+  causal performance conclusion is justified. Preserve the current scheduler;
+  CPU/RAM/peak-container sampling and service throttling are not measured here.
+- AA-VAE-080 extends only read-only Inspect reporting. Legacy comparison keeps
+  six planned rows; Evolution single keeps selected-candidate and branch cost
+  semantics; combined keeps actual feature counters and budget reservations.
+  Never pool their scores. Evolution batch/retry aggregation and paired-delta
+  visualization are explicit future reporting gaps, not implied by this export.
+- Review repairs bind profiler identities, reject empty evidence, prevent
+  overwrite and redact exception/verdict extras. Reporter permits only the
+  production self-alias public/public -> .; source readers still verify hashes.
+- Reports require canonical paths with no symlink ancestors. This intentional
+  existing safety rule means macOS /tmp aliases are not accepted directly.
+
 ## 2026-09-01 - Keep phase profiling outside authoritative evidence
 
 - Enable timing explicitly with a worker-local collector; keep legacy/default

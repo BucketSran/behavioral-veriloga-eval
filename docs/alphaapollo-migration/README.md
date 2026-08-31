@@ -29,6 +29,11 @@ AI-native benchmark、agent harness、trajectory、评分与结果生成链路�
 
 最新修复与扩展：
 
+- [AA-VAE-078：阶段计时](features/AA-VAE-078-execution-phase-timing.md)、
+  [AA-VAE-079：固定并发诊断](features/AA-VAE-079-fixed-execution-profile.md)、
+  [AA-VAE-080：多路径只读报告](features/AA-VAE-080-multipath-readonly-reporting.md)：
+  可复跑的免费 Docker/EVAS 吞吐诊断与 Inspect 报告互通；不迁移调度、不混合条件总分。
+
 - [AA-VAE-073：Evolution 波形共享](features/AA-VAE-073-evolution-waveform-sharing.md)、
   [AA-VAE-074：受控真实语料契约](features/AA-VAE-074-reviewed-local-docs.md)、
   [AA-VAE-075：联合验收/live 入口](features/AA-VAE-075-combined-tools-live-entrypoint.md)：
