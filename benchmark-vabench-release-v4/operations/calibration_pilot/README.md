@@ -1,5 +1,47 @@
 # V4 Calibration Pilot
 
+## Explicit live legacy/native comparison
+
+`comparison_live.py` adds separate `prepare`, `inspect`, `run`, and read-only
+`report` commands. It reuses the free coordinator below with the same six cells,
+existing budgeted DeepSeek transport and final readers. It is not the default
+campaign runner, and preparing a profile does not grant spending authority.
+
+Free local preparation (replace placeholders with local identities; no key or HTTP):
+
+```bash
+.venv/bin/python benchmark-vabench-release-v4/operations/calibration_pilot/comparison_live.py \
+  prepare --output-root /absolute/fresh-private-comparison \
+  --currency CNY --cap PROPOSED_CAP --image vabench-agent-runtime:0.8.7 \
+  --evas-command /absolute/path/to/evas
+.venv/bin/python benchmark-vabench-release-v4/operations/calibration_pilot/comparison_live.py \
+  inspect --output-root /absolute/fresh-private-comparison
+```
+
+Only after separate fee approval, `run` requires `--output-root`,
+`--expected-manifest-sha256`, `--approve-cap`, `--currency`, `--credential-file`
+and `--evas-command`. There are no default fee, credential, hash or resume flags.
+The cap string/currency must exactly match the inspected manifest; the key file
+must be repository-external and owner-only. The loader reads literal fields,
+never sources shell. Known provider environment keys are removed before runtime
+work. `prepare` also clears those names before local executable inspection.
+
+The dated v1 provider profile permits launch only on its reviewed UTC day,
+2026-08-31; old profiles stay readable but must not be automatically refreshed.
+The operator receipt prevents accidental unapproved/repeated starts, not a
+host-authenticated identity check. Metadata checks retain only currency,
+availability and hashes; the reused conservative preflight requires balance
+at least the guard's supported maximum even when the proposed cap is smaller.
+Any reserved launch or fee stop requires inspection, never rerun with reset funds.
+
+`report --output-root ...` validates existing launch, budget and score evidence
+without reading a key, contacting a provider, refreezing or scoring again.
+Potentially billable attempts and guard upper bounds are not invoice charges;
+live `paid_requests` is null rather than an invented zero. Real model quality
+evidence and fresh fee authorization remain unexecuted in this implementation.
+See [AA-VAE-072](../../../docs/alphaapollo-migration/features/AA-VAE-072-explicit-live-comparison.md)
+for official source references, code map, tests and model-alias limitations.
+
 ## Free legacy/native workflow comparison
 
 `run_legacy_native_comparison.py` is an opt-in **scripted-response Python API**,
@@ -25,8 +67,9 @@ test conservative reservation arithmetic, not real invoices. It preserves every
 scheduled row on insufficient funds/unknown costs and blocks reentry. Matched
 score/cost/time deltas require valid paired surface evidence. Unknown scores are
 null, not zero. EVAS results remain development-only; these scripted fixtures
-do not reproduce a model baseline. A real comparison still needs a separately
-reviewed live transport adapter and a new frozen model/rates/decoding/fee profile.
+do not reproduce a model baseline. The separate live entrypoint above supplies
+the transport gate; a real comparison still needs a freshly reviewed frozen
+profile and fee approval. This free API never grants that authority.
 See `docs/alphaapollo-migration/features/AA-VAE-071-comparison-engineering-gates.md`
 for code mapping, tests and claim boundaries.
 

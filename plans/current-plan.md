@@ -17,10 +17,15 @@ implementation and does not change the phase statuses below.
 
 ## Current Status
 
-- In progress: [explicit live comparison entrypoint](legacy-native-live-entrypoint.md),
+- Implemented: [explicit live comparison entrypoint](legacy-native-live-entrypoint.md),
   AA-VAE-072. Reuse AA-VAE-071 with a frozen provider profile and explicit
-  manifest/cap launch assertion. This turn uses synthetic transport/free Docker
-  only; no paid call or new fee authority. Main owns integration and publication.
+  manifest/cap launch assertion; prepare/inspect/run/report remain separate.
+  Runtime `00eb11e7c1`, CI wiring `39123500cc`: real Docker/EVAS with synthetic
+  external HTTP **62 passed**; active regression **1,398 passed / 50 optional
+  skips**; independent review found no required correction. Hosted exact-source
+  checks follow publication. No actual key, provider request or paid run was used.
+  A real comparison still needs fresh dated preparation and new fee authority;
+  implemented launch controls do not constitute model-performance evidence.
 
 - Implemented free [legacy/native comparison engineering gates](legacy-native-comparison-engineering.md),
   AA-VAE-071: shared spending admission, immutable six-cell schedule, observed
@@ -40,8 +45,9 @@ implementation and does not change the phase statuses below.
   has one historical real native DUT score out of six native combinations.
   It is separate from this free family001 six-cell fixture and the family029
   paid pilot. No new paid call, benchmark/evaluator change or budget reuse.
-  Next live gate: an explicit transport adapter plus newly frozen named
-  service/model/rates/decoding and fee authority, followed by a fresh comparison.
+  AA-VAE-072 now supplies the explicit live transport gate. Next experimental
+  step: freshly review/freeze named service/model/rates/decoding and obtain new
+  fee authority, then run the separate real-model comparison.
 
 - Publication correction: all nine commits through `e2498952bb` are on
   BucketSran main. Exact-source Evaluator Closure, Runner Smoke and Public Agent
@@ -82,9 +88,9 @@ implementation and does not change the phase statuses below.
   workflows pass (1,348 regression passes / 42 skips and all existing Docker
   stages). Protocol preparation is closed; the live-study gates below stay open.
   The original real-study blueprint stays unstarted and immutable. AA-VAE-071
-  separately implements/tests its free launch gates; live adapter and new frozen
-  model/rates/decoding/fee authorization remain. This is a workflow comparison,
-  not pure-controller attribution.
+  separately implements/tests its free launch gates, and AA-VAE-072 supplies
+  the opt-in live adapter. Fresh model/rates/decoding/fee authorization and the
+  real run remain. This is a workflow comparison, not pure-controller attribution.
 
 - Completed bounded repair: [legacy native r53 compatibility](legacy-native-r53-contract-compatibility.md)
   ([AA-VAE-068](../docs/alphaapollo-migration/features/AA-VAE-068-legacy-native-r53-contracts.md)).
