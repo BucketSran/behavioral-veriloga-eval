@@ -13,7 +13,14 @@ from pathlib import Path
 import subprocess
 
 from build_campaign import DEFAULT_RELEASE, build_campaign
-from deepseek_budget import BudgetedDeepSeekClient, DeepSeekPilotBudget, MAX_OUTPUT_TOKENS, MODEL, RATES
+from deepseek_budget import (
+    BudgetedDeepSeekClient,
+    DeepSeekPilotBudget,
+    MAX_OUTPUT_TOKENS,
+    MODEL,
+    PRICING_REVIEWED_ON,
+    RATES,
+)
 from pilot_credentials import load_pilot_key
 from run_campaign import resolve_pinned_evas_identity, run_cell_preserving_failure, validate_campaign_cells
 from score_campaign import read_native_cell
@@ -117,7 +124,7 @@ def freeze_pilot(root: Path, *, preflight: dict, image_id: str,
         "model": MODEL, "thinking": {"type": "disabled"}, "temperature": 0,
         "currency": currency, "cap": str(RATES[currency][2]),
         "input_peak_miss_per_million": str(RATES[currency][0]),
-        "output_peak_per_million": str(RATES[currency][1]), "pricing_date": "2026-08-30",
+        "output_peak_per_million": str(RATES[currency][1]), "pricing_date": PRICING_REVIEWED_ON,
         "max_output_tokens": MAX_OUTPUT_TOKENS, "model_calls_per_cell": model_call_limit,
         "native_max_attempts": 1, "workers": 1, "preflight": preflight,
         "code_commit": code_commit, "docker_image_id": image_id, "evas_identity": evas_identity,

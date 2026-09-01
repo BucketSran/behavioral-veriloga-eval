@@ -23,7 +23,7 @@ def reviewed_clock(monkeypatch):
     class Clock:
         @staticmethod
         def now(tz):
-            return datetime(2026, 8, 31, 12, tzinfo=timezone.utc)
+            return datetime(2026, 9, 1, 12, tzinfo=timezone.utc)
 
     monkeypatch.setattr(live, "datetime", Clock)
 
@@ -41,6 +41,14 @@ def test_live_preparation_freezes_named_provider_without_granting_spending(tmp_p
     assert manifest["live_authorized"] is False
     assert manifest["provider_profile"] == profile
     assert profile["model"] == "deepseek-v4-flash"
+    assert profile["reviewed_on"] == "2026-09-01"
+    assert profile["pricing_schedule"] == {
+        "timezone": "Asia/Shanghai",
+        "peak_weekdays": ["09:00-12:00", "14:00-18:00"],
+        "input_cache_hit_per_million": {"off_peak": "0.05", "peak": "0.10"},
+        "input_cache_miss_per_million": {"off_peak": "1.50", "peak": "3.00"},
+        "output_per_million": {"off_peak": "4.50", "peak": "9.00"},
+    }
     assert profile["decoding"]["thinking"] == {"type": "disabled"}
     assert profile["model_snapshot_policy"] == "provider_alias_not_immutable_snapshot"
     assert manifest["evidence_scope"] == "real_model_workflow_comparison"
@@ -102,7 +110,7 @@ def test_expired_profile_blocks_launch_but_remains_inspectable(tmp_path, monkeyp
     class Later:
         @staticmethod
         def now(tz):
-            return datetime(2026, 9, 1, tzinfo=timezone.utc)
+            return datetime(2026, 9, 2, tzinfo=timezone.utc)
 
     monkeypatch.setattr(live, "datetime", Later)
     comparison._validate_frozen(root, manifest, current_source=False)
@@ -111,6 +119,24 @@ def test_expired_profile_blocks_launch_but_remains_inspectable(tmp_path, monkeyp
         live.execute_live_comparison(root, expected_manifest_sha256=comparison.file_sha256(root / "comparison-manifest.json"),
                                      approved_cap="0.01", currency="CNY",
                                      credential_file=tmp_path / "absent", evas_command="unused")
+
+
+def test_previous_reviewed_profile_remains_readable_but_cannot_launch(tmp_path):
+    live, comparison, root, manifest = _prepared(tmp_path)
+    legacy_profile = dict(manifest["provider_profile"])
+    legacy_profile.pop("pricing_schedule")
+    legacy_profile.update(reviewed_on="2026-08-31", valid_through_utc="2026-08-31")
+    manifest["provider_profile"] = legacy_profile
+    manifest["budget"]["pricing_date"] = "2026-08-30"
+    path = root / "comparison-manifest.json"
+    path.chmod(0o600)
+    path.write_text(json.dumps(manifest, sort_keys=True))
+
+    comparison._validate_frozen(root, manifest, current_source=False)
+    with pytest.raises(ValueError, match="profile"):
+        live.validate_provider_profile(
+            legacy_profile, currency="CNY", cap="0.01", for_launch=True,
+        )
 
 
 @pytest.mark.parametrize("cap,unknown,expected_calls", [("0.01", False, 0), ("5.00", True, 1), ("5.00", False, 2)])

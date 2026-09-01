@@ -18,7 +18,15 @@ import sys
 import time
 
 from build_campaign import DEFAULT_RELEASE, build_campaign
-from deepseek_budget import BudgetedDeepSeekClient, DeepSeekPilotBudget, MAX_OUTPUT_TOKENS, MODEL, PilotBudgetStop, RATES
+from deepseek_budget import (
+    BudgetedDeepSeekClient,
+    DeepSeekPilotBudget,
+    MAX_OUTPUT_TOKENS,
+    MODEL,
+    PRICING_REVIEWED_ON,
+    PilotBudgetStop,
+    RATES,
+)
 import run_campaign as runner
 from run_campaign import validate_campaign_cells
 from runners.agent_harness.batch_resume import _atomic_once, file_sha256, source_identity
@@ -99,7 +107,7 @@ def freeze_comparison(root: Path, *, image_id: str, code_commit: str,
         "budget": {"currency": currency, "cap": str(Decimal(cap)),
                    "input_peak_per_million": str(RATES[currency][0]),
                    "output_peak_per_million": str(RATES[currency][1]),
-                   "pricing_date": "2026-08-30", "model_call_limit": None},
+                   "pricing_date": PRICING_REVIEWED_ON, "model_call_limit": None},
     }
     if provider_profile is not None:
         manifest.update(schema_version="vaevas-workflow-comparison-live-v1",
@@ -275,19 +283,28 @@ def _validate_frozen(root, manifest, *, current_source=True):
         raise ValueError("frozen comparison manifest mismatch")
     budget = manifest["budget"]
     currency, cap = budget["currency"], Decimal(budget["cap"])
+    pricing_date = budget.get("pricing_date")
     if (currency not in RATES or not cap.is_finite() or not 0 < cap <= RATES[currency][2]
+            or pricing_date not in {"2026-08-30", PRICING_REVIEWED_ON}
             or budget != {"currency": currency, "cap": str(cap),
                           "input_peak_per_million": str(RATES[currency][0]),
                           "output_peak_per_million": str(RATES[currency][1]),
-                          "pricing_date": "2026-08-30", "model_call_limit": None}):
+                          "pricing_date": pricing_date, "model_call_limit": None}):
         raise ValueError("comparison budget differs from supported guard")
     blueprint = json.loads(BLUEPRINT.read_text())
     controls = {**blueprint["controls"], "image_id_for_live_run": manifest["controls"]["image_id_for_live_run"]}
     live = manifest["schema_version"] == "vaevas-workflow-comparison-live-v1"
     if live:
-        from comparison_live import validate_provider_profile
+        from comparison_live import PREVIOUS_REVIEWED_ON, validate_provider_profile
         validate_provider_profile(manifest["provider_profile"], currency=manifest["budget"]["currency"],
                                   cap=manifest["budget"]["cap"])
+        expected_pricing_date = (
+            "2026-08-30"
+            if manifest["provider_profile"].get("reviewed_on") == PREVIOUS_REVIEWED_ON
+            else PRICING_REVIEWED_ON
+        )
+        if pricing_date != expected_pricing_date:
+            raise ValueError("comparison provider/budget review mismatch")
     elif "provider_profile" in manifest:
         raise ValueError("free fixture cannot carry a live provider profile")
     if (manifest["schema_version"] not in {"vaevas-workflow-comparison-v1", "vaevas-workflow-comparison-live-v1"}

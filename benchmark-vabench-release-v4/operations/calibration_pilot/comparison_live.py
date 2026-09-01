@@ -8,13 +8,22 @@ from pathlib import Path
 import re
 import subprocess
 
-from deepseek_budget import BudgetedDeepSeekClient, CONTEXT_TOKEN_BOUND, MAX_OUTPUT_TOKENS, MODEL, RATES
+from deepseek_budget import (
+    BudgetedDeepSeekClient,
+    CONTEXT_TOKEN_BOUND,
+    MAX_OUTPUT_TOKENS,
+    MODEL,
+    PRICING_REVIEWED_ON,
+    PRICING_SCHEDULES,
+    RATES,
+)
 from pilot_credentials import load_pilot_key
 from run_deepseek_pilot import clear_provider_environment, provider_preflight
 from runners.agent_harness.batch_resume import _atomic_once, docker_image_identity, file_sha256
 
 
-REVIEWED_ON = "2026-08-31"
+REVIEWED_ON = PRICING_REVIEWED_ON
+PREVIOUS_REVIEWED_ON = "2026-08-31"
 ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
 
 
@@ -37,6 +46,7 @@ def build_provider_profile(*, currency: str, cap: str) -> dict:
         "currency": currency, "cap": str(amount),
         "input_peak_per_million": str(RATES[currency][0]),
         "output_peak_per_million": str(RATES[currency][1]),
+        "pricing_schedule": PRICING_SCHEDULES[currency],
         "context_token_bound": CONTEXT_TOKEN_BOUND,
         "decoding": {"temperature": 0, "thinking": {"type": "disabled"},
                      "stream": True, "stream_options": {"include_usage": True},
@@ -45,7 +55,11 @@ def build_provider_profile(*, currency: str, cap: str) -> dict:
 
 
 def validate_provider_profile(profile: dict, *, currency: str, cap: str, for_launch=False) -> None:
-    if profile != build_provider_profile(currency=currency, cap=cap):
+    current = build_provider_profile(currency=currency, cap=cap)
+    previous = dict(current)
+    previous.pop("pricing_schedule")
+    previous.update(reviewed_on=PREVIOUS_REVIEWED_ON, valid_through_utc=PREVIOUS_REVIEWED_ON)
+    if profile != current and (for_launch or profile != previous):
         raise ValueError("frozen provider profile mismatch")
     if for_launch and datetime.now(timezone.utc).date().isoformat() != profile["valid_through_utc"]:
         raise ValueError("provider profile expired; review rates and freeze a fresh profile")

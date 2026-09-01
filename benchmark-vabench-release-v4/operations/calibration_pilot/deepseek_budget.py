@@ -20,9 +20,26 @@ from run_campaign import OpenAICompatible, parse_openai_sse_response
 MODEL = "deepseek-v4-flash"
 CONTEXT_TOKEN_BOUND = 1_048_576  # Conservative interpretation of documented 1M.
 MAX_OUTPUT_TOKENS = 4096
+PRICING_REVIEWED_ON = "2026-09-01"
 RATES = {
     "CNY": (Decimal("3.00"), Decimal("9.00"), Decimal("5.00")),
     "USD": (Decimal("0.44"), Decimal("1.32"), Decimal("0.70")),
+}
+PRICING_SCHEDULES = {
+    "CNY": {
+        "timezone": "Asia/Shanghai",
+        "peak_weekdays": ["09:00-12:00", "14:00-18:00"],
+        "input_cache_hit_per_million": {"off_peak": "0.05", "peak": "0.10"},
+        "input_cache_miss_per_million": {"off_peak": "1.50", "peak": "3.00"},
+        "output_per_million": {"off_peak": "4.50", "peak": "9.00"},
+    },
+    "USD": {
+        "timezone": "UTC",
+        "peak_weekdays": ["01:00-04:00", "06:00-10:00"],
+        "input_cache_hit_per_million": {"off_peak": "0.007", "peak": "0.014"},
+        "input_cache_miss_per_million": {"off_peak": "0.22", "peak": "0.44"},
+        "output_per_million": {"off_peak": "0.66", "peak": "1.32"},
+    },
 }
 
 
@@ -64,7 +81,7 @@ class DeepSeekPilotBudget:
                          output_peak_per_million=str(self.output_rate),
                          context_token_bound=CONTEXT_TOKEN_BOUND, model=MODEL,
                          model_call_limit_per_cell=model_call_limit, max_output_tokens=MAX_OUTPUT_TOKENS,
-                         pricing_date="2026-08-30", may_enter_model_memory=False)
+                         pricing_date=PRICING_REVIEWED_ON, may_enter_model_memory=False)
         except BaseException:
             self.journal.close()
             raise
