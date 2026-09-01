@@ -1,5 +1,28 @@
 # Verification Log
 
+## 2026-09-01 - CNY 30 real-model differential and tool diagnostic
+
+- Preflight verified a repository-external owner-only credential file, CNY
+  account currency and availability of the frozen `deepseek-v4-flash` alias.
+  No credential value, balance or raw provider body is retained in Git.
+- Five one-use roots froze CNY 25.00 of the CNY 30.00 user ceiling. The unused
+  CNY 5.00 was not assigned to retries. Known conservative guard upper bounds
+  sum to **CNY 2.979222**; they are not an invoice.
+- Study 1 preserved all six rows: DUT and bugfix legacy/native pairs completed,
+  matched their audited surfaces and scored 1.0/1.0; legacy Testbench was
+  budget-censored before the next reservation and native Testbench remained
+  unstarted. No replacement or rerun occurred.
+- Study 2 A/B/C/D all completed final EVAS 0.8.7 replay with score 1.0. Baseline
+  A and C passed zero-tool-use acceptance. B called neither enabled tool. D had
+  no round-0 waveform receipts and therefore no complete next-round feedback
+  evidence. B and D fail condition acceptance; their scores remain valid.
+- The D report defect and its no-rerun fix are recorded in the next entry.
+  Existing D evidence re-read as `disposition=completed`, `score=1.0`,
+  `condition_acceptance_passed=false`, 13 model calls and CNY 0.246876 guard
+  upper bound.
+- Sanitized denominators, contrasts and evidence hashes:
+  `docs/alphaapollo-migration/experiments/real-model-differential-and-tools-20260901.md`.
+
 ## 2026-09-01 - Combined Evolution report fails closed on incomplete waveform evidence
 
 - A one-use real-model `evolution + rag-waveform` run completed candidate

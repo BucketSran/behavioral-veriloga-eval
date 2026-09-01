@@ -50,21 +50,20 @@ No implementation remains open in this slice; the next study is a separate decis
 
 ## Active study: evidence before more features
 
-The next evidence slice is now preregistered as
-[a differential and incremental study](real-model-differential-and-incremental-study.md):
-first the family001 six-cell legacy/native workflow comparison, then a separate
-family001 DUT 2×2 native-Reasoning/Evolution × baseline/RAG-waveform diagnostic.
-The implementation and free Docker gates are complete. A paid launch remains
-blocked until the user supplies an exact aggregate fee cap and the path to an
-external owner-only DeepSeek credential file.
+The preregistered
+[differential and incremental study](real-model-differential-and-incremental-study.md)
+has executed once under a CNY 30 ceiling. Study 1 completed the matched DUT and
+bugfix pairs, then preserved a budget-censored Testbench pair. Study 2 produced
+four score-1.0 final submissions, but neither RAG-waveform condition passed
+actual-use acceptance. See the
+[sanitized result note](../docs/alphaapollo-migration/experiments/real-model-differential-and-tools-20260901.md).
 
-Before execution, freshly review model/service identity, dated provider profile,
-rates/decoding and fee authority; freeze task roster, budget and information
-surfaces. The stopped DeepSeek pilot is immutable and grants no new spending.
-Combined success checks integration. The new explicit baseline permits matched
-single-task contrasts, but does not identify RAG versus waveform individually;
-that would require a later RAG-only/waveform-only ablation justified by these
-first observations.
+The one-use roots are closed and grant no retry authority. The explicit baseline
+permits matched single-task contrasts, but the enabled conditions did not
+establish tool use, so an individual RAG/waveform ablation is not yet justified.
+The next decision is either a newly preregistered larger-cap six-cell completion
+or a harder multi-family natural-use/forced-use tool study; do not spend the
+unused authorization automatically.
 
 Remaining evidence gaps, not missing core wiring:
 

@@ -31,6 +31,10 @@ AI-native benchmark、agent harness、trajectory、评分与结果生成链路�
 
 最新修复与扩展：
 
+- [2026-09-01 真实模型工作流/工具诊断](experiments/real-model-differential-and-tools-20260901.md)：
+  记录 family001 旧/新 mini-swe 配对和 Reasoning/Evolution ×
+  baseline/RAG-waveform 的一次性运行、费用上界、完整分母与失败验收边界。
+
 - [AA-VAE-078：阶段计时](features/AA-VAE-078-execution-phase-timing.md)、
   [AA-VAE-079：固定并发诊断](features/AA-VAE-079-fixed-execution-profile.md)、
   [AA-VAE-080：多路径只读报告](features/AA-VAE-080-multipath-readonly-reporting.md)：
@@ -44,7 +48,8 @@ AI-native benchmark、agent harness、trajectory、评分与结果生成链路�
   见 [语料激活记录](../../plans/veriloga-corpus-activation.md)。不代表已证明检索收益。
 
 - [AA-VAE-069：旧/新 mini-swe 对照协议](features/AA-VAE-069-legacy-native-comparison-protocol.md)：
-  六单元 blueprint、信息面审计与预算/结果验收；只有免费证据，真实实验尚未启动。
+  六单元 blueprint、信息面审计与预算/结果验收；原协议页保留实现时的免费证据边界，
+  后续一次性真实运行见上方 2026-09-01 诊断记录。
 
 - AA-VAE-060/061：独立公开波形执行器和 native 显式工具，预算/候选/回执 join。
 - AA-VAE-063：保留配对报告与安全 case 索引；AA-VAE-062 合成训练 adapter 已退役。

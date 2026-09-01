@@ -1,7 +1,9 @@
 # Real-model Differential And Incremental Study
 
-Status: implementation and free clean-room validation complete; paid execution
-blocked until an exact aggregate fee cap and credential-file path are supplied.
+Status: one-use paid execution complete under the CNY 30 authorization; Study 1
+is budget-censored at 4/6 completed cells and Study 2 has four completed scores
+but neither tool-enabled condition passed feature-use acceptance. Sanitized
+results: [experiment note](../docs/alphaapollo-migration/experiments/real-model-differential-and-tools-20260901.md).
 Updated: 2026-09-01. Integration owner: main.
 
 ## Fixed baseline and purpose
@@ -89,11 +91,11 @@ report actual branch/model calls, cost bounds and complete branch denominators.
 
 ## Spending, launch and stop contract
 
-No amount is implied by this plan. A paid launch requires a new exact aggregate
-fee authorization and an external owner-only literal credential-file path.
-Study 1 uses one shared cap. Study 2 currently uses one guard per condition, so
-the frozen four condition caps must sum to no more than the separately approved
-Study 2 aggregate ceiling; do not quote only a per-root cap as the total risk.
+The executed launch used a CNY 30.00 aggregate authorization: CNY 5.00 for
+Study 1 and CNY 5.00 for each Study 2 condition, for CNY 25.00 frozen caps.
+The remaining CNY 5.00 was not allocated. Study 1 uses one shared cap; Study 2
+uses one guard per condition. These caps and the one-use roots are closed and
+grant no authority for a replacement or retry.
 
 The 2026-09-01 official CNY schedule is frozen in the provider profile: input
 cache hit 0.05/0.10, cache miss 1.50/3.00 and output 4.50/9.00 per million tokens

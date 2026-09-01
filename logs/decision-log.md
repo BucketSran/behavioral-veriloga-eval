@@ -1,5 +1,21 @@
 # Decision Log
 
+## 2026-09-01 - Close the CNY 30 one-use diagnostic without replacement runs
+
+- Allocate at most CNY 5.00 to the six-cell comparison and CNY 5.00 to each of
+  four combined-tool roots. The frozen maximum is CNY 25.00; retain the other
+  CNY 5.00 rather than converting it into retries or post-outcome conditions.
+- Keep Study 1's Testbench budget stop and Study 2's failed feature-use
+  acceptance in their original denominators. Equal EVAS scores do not establish
+  tool utility when the enabled tools were unused or incomplete.
+- Repair only the read-only `null > 0` acceptance crash exposed by D. Re-read
+  its immutable evidence after the repair; do not rerun generation, public
+  validation or final replay.
+- Future paid evidence needs a new preregistration and fee authority. The choice
+  is between completing the original six-cell coverage with a larger shared cap
+  and selecting a harder, multi-family tool-utility workload with separate
+  natural-use and forced-use estimands.
+
 ## 2026-09-01 - Separate workflow differential from tool/backend increments
 
 - Execute the user's first two requested evidence items as separate diagnostics:
