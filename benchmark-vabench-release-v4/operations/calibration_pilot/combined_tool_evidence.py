@@ -20,17 +20,30 @@ _SUPPORTED_BACKENDS = frozenset({"native-reasoning", "evolution"})
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
-def collect_feature_use(run_dir: Path, *, backend: str) -> dict[str, Any]:
+def collect_feature_use(
+    run_dir: Path,
+    *,
+    backend: str,
+    expected_features: Mapping[str, bool] | None = None,
+) -> dict[str, Any]:
     """Project observed tool use without reading credentials or rerunning checks."""
 
     if backend not in _SUPPORTED_BACKENDS:
         raise ValueError("backend must be native-reasoning or evolution")
+    expected = (
+        {"offline_docs": True, "public_waveform": True}
+        if expected_features is None else expected_features
+    )
+    if (set(expected) != {"offline_docs", "public_waveform"}
+            or any(type(enabled) is not bool for enabled in expected.values())):
+        raise ValueError("expected feature surface must contain two boolean flags")
     root = _checked_root(run_dir)
     report = (
         _collect_native(root, backend=backend)
         if backend == "native-reasoning"
-        else _collect_evolution(root, backend=backend)
+        else _collect_evolution(root, backend=backend, expected_features=expected)
     )
+    report["expected_features"] = dict(expected)
     report["report_sha256"] = canonical_sha256(report)
     return report
 
@@ -53,7 +66,7 @@ def _collect_native(root: Path, *, backend: str) -> dict[str, Any]:
         _DOCS_TOOL: [],
         _WAVEFORM_TOOL: [],
     }
-    trajectory = _read_events(
+    _read_events(
         root,
         "evidence/native-episode/trajectory.jsonl",
         files=files,
@@ -81,7 +94,12 @@ def _collect_native(root: Path, *, backend: str) -> dict[str, Any]:
     )
 
 
-def _collect_evolution(root: Path, *, backend: str) -> dict[str, Any]:
+def _collect_evolution(
+    root: Path,
+    *,
+    backend: str,
+    expected_features: Mapping[str, bool],
+) -> dict[str, Any]:
     files: dict[str, Any] = {}
     request = _read_json(root, "request.json", files=files)
     manifest_sha = _optional_sha256(request.get("manifest_sha256"))
@@ -121,12 +139,14 @@ def _collect_evolution(root: Path, *, backend: str) -> dict[str, Any]:
                     private,
                     prior_waveform_receipts,
                 )
-            receipt = _read_optional_json(
-                root,
-                f"{prefix}/public-validation.json",
-                files=files,
-                incomplete=waveform_missing,
-            )
+            receipt = None
+            if expected_features["public_waveform"]:
+                receipt = _read_optional_json(
+                    root,
+                    f"{prefix}/public-validation.json",
+                    files=files,
+                    incomplete=waveform_missing,
+                )
             if receipt is None:
                 continue
             identity = _valid_public_receipt(

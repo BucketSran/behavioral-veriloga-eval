@@ -126,6 +126,14 @@ def _native_run(tmp_path: Path) -> Path:
     return run
 
 
+def test_expected_feature_surface_rejects_empty_mapping(tmp_path: Path) -> None:
+    run = tmp_path / "empty"
+    run.mkdir()
+
+    with pytest.raises(ValueError, match="two boolean flags"):
+        combined.collect_feature_use(run, backend="native-reasoning", expected_features={})
+
+
 def test_native_feature_use_counts_tools_and_exposure_without_raw_content(tmp_path: Path) -> None:
     run = _native_run(tmp_path)
 
@@ -559,6 +567,33 @@ def test_native_feature_use_reads_real_native_launcher_evidence(native_case, tmp
     assert report["features"]["offline_docs"]["feedback_exposed_requests"] == 1
     assert report["features"]["public_waveform"]["attempted"] == 0
     assert report["features"]["public_waveform"]["succeeded"] == 0
+
+
+def test_evolution_baseline_does_not_treat_absent_public_receipts_as_incomplete(tmp_path: Path) -> None:
+    run = tmp_path / "evolution-baseline"
+    branch = run / "evolution/branches/round-0000/branch-a"
+    branch.mkdir(parents=True)
+    (run / "request.json").write_text(json.dumps({
+        "schema_version": "vaevas-native-evolution-request-v1",
+        "manifest_sha256": SHA_C,
+        "config": {"rounds": 1, "branch_roster": [{"branch_id": "branch-a", "model_ref": "fixture"}]},
+    }, sort_keys=True))
+    _record(branch / "private-events.jsonl", "provider_request", {
+        "request_id": "baseline-request", "messages": [{"content": "no public tools"}],
+    })
+
+    report = combined.collect_feature_use(
+        run,
+        backend="evolution",
+        expected_features={"offline_docs": False, "public_waveform": False},
+    )
+
+    assert report["features"]["offline_docs"] == {
+        "attempted": 0, "succeeded": 0, "feedback_exposed_requests": 0, "incomplete": [],
+    }
+    assert report["features"]["public_waveform"] == {
+        "attempted": 0, "succeeded": 0, "feedback_exposed_requests": 0, "incomplete": [],
+    }
 
 
 def test_evolution_feature_use_reads_real_evolution_engine_layout(tmp_path: Path) -> None:

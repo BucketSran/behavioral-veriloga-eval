@@ -133,7 +133,14 @@ def _combined(root):
     manifest = json.loads((root / "combined-manifest.json").read_bytes())
     identity = _pick(manifest["source_cell"], ("cell_id", "task_id", "family_id", "form"))
     identity["backend"] = report["backend"]
-    details = {"combined_acceptance_passed": report["combined_acceptance_passed"],
+    intervention = report.get("intervention") or {
+        "name": "rag-waveform", "offline_docs": True, "public_waveform": True,
+    }
+    identity["intervention"] = intervention["name"]
+    details = {"intervention": intervention,
+               "condition_acceptance_passed": report.get("condition_acceptance_passed",
+                                                          report["combined_acceptance_passed"]),
+               "combined_acceptance_passed": report["combined_acceptance_passed"],
                "score_authority": "development_only",
                **_pick(report, ("evidence_scope", "paid_requests"))}
     if report["backend"] == "evolution" and report["disposition"] == "completed":
@@ -155,7 +162,7 @@ def _combined(root):
     ]
     record = _record(
         identity, status=report["disposition"], score=report["score"],
-        group=f"combined-tools/{report['backend']}",
+        group=f"combined-tools/{intervention['name']}/{report['backend']}",
         costs={"budget": safe_budget,
                "all_branch_costs": _costs(report.get("all_branch_costs"))},
         hashes={"source_report_sha256": _digest(report), "manifest_sha256": report["manifest_sha256"]},

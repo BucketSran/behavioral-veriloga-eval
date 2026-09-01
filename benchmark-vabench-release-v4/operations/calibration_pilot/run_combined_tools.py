@@ -26,7 +26,13 @@ if str(ROOT) not in sys.path:
 
 from build_campaign import build_campaign  # noqa: E402
 import comparison_live as live_transport  # noqa: E402
-from deepseek_budget import DeepSeekPilotBudget, MAX_OUTPUT_TOKENS, MODEL, PilotBudgetStop  # noqa: E402
+from deepseek_budget import (  # noqa: E402
+    DeepSeekPilotBudget,
+    MAX_OUTPUT_TOKENS,
+    MODEL,
+    PRICING_REVIEWED_ON,
+    PilotBudgetStop,
+)
 import run_campaign as runner  # noqa: E402
 from runners.agent_harness.batch_resume import (  # noqa: E402
     _atomic_once, _tree, file_sha256, source_identity,
@@ -36,8 +42,24 @@ from runners.agent_harness.tools.offline_docs import (  # noqa: E402
 )
 
 BACKENDS = ("native-reasoning", "evolution")
-EVIDENCE_SCOPES = {False: "synthetic_provider_integration", True: "real_model_combined_acceptance"}
-CLAIM_SCOPE = "combined_connectivity_not_individual_effect_or_model_quality"
+INTERVENTIONS = {
+    "baseline": {"name": "baseline", "offline_docs": False, "public_waveform": False},
+    "rag-waveform": {"name": "rag-waveform", "offline_docs": True, "public_waveform": True},
+}
+EVIDENCE_SCOPES = {
+    False: {
+        "baseline": "synthetic_provider_condition",
+        "rag-waveform": "synthetic_provider_integration",
+    },
+    True: {
+        "baseline": "real_model_condition_observation",
+        "rag-waveform": "real_model_combined_acceptance",
+    },
+}
+CLAIM_SCOPES = {
+    "baseline": "single_task_condition_diagnostic_not_population_or_individual_causality",
+    "rag-waveform": "combined_connectivity_not_individual_effect_or_model_quality",
+}
 JUDGE_COMMAND = shlex.join([sys.executable, str(HERE / "trusted_replay_adapter.py")])
 
 
@@ -77,12 +99,15 @@ def _controls(backend, *, rounds, branch_count, model_calls, tool_calls, public_
 def freeze_combined(root: Path, *, backend: str, family_id: str, form: str,
                     docs_corpus: OfflineDocsCorpus, image_id: str, branch_image_id: str,
                     evas_identity: dict, currency: str, cap: str, live=False,
+                    intervention="rag-waveform",
                     rounds=2, branch_count=2, model_calls=8, tool_calls=8, public_calls=1) -> dict:
     """Freeze one task and all optional interventions; no key or HTTP access."""
     controls = _controls(backend, rounds=rounds, branch_count=branch_count,
                          model_calls=model_calls, tool_calls=tool_calls, public_calls=public_calls)
     if type(live) is not bool:
         raise ValueError("live preparation must be explicit")
+    if intervention not in INTERVENTIONS:
+        raise ValueError("unsupported intervention")
     if any(not re.fullmatch(r"sha256:[0-9a-f]{64}", image) for image in (image_id, branch_image_id)):
         raise ValueError("resolved Docker image IDs required")
     profile = live_transport.build_provider_profile(currency=currency, cap=cap)
@@ -92,18 +117,20 @@ def freeze_combined(root: Path, *, backend: str, family_id: str, form: str,
     manifest = {
         "schema_version": "vaevas-combined-tools-v1", "backend": backend,
         "live": live, "live_authorized": False,
-        "evidence_scope": EVIDENCE_SCOPES[live],
+        "evidence_scope": EVIDENCE_SCOPES[live][intervention],
         "family_id": family_id, "form": form, "source_cell": cell,
         "controls": controls, "budget_ids": budget_ids,
         "image_id": image_id, "branch_image_id": branch_image_id,
-        "evas_identity": deepcopy(evas_identity), "public_waveform": True,
+        "evas_identity": deepcopy(evas_identity),
+        "intervention": deepcopy(INTERVENTIONS[intervention]),
+        "public_waveform": INTERVENTIONS[intervention]["public_waveform"],
         "docs_profile": docs_corpus.profile, "provider_profile": profile,
         "budget": {"currency": currency, "cap": profile["cap"]},
         "release_manifest_sha256": file_sha256(runner.DEFAULT_RELEASE / "MANIFEST.json"),
         "experiment_policy_sha256": runner.experiment_policy_sha256(),
         "source_identity": source_identity(ROOT),
         "code_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
-        "claim_scope": CLAIM_SCOPE,
+        "claim_scope": CLAIM_SCOPES[intervention],
     }
     root.mkdir(parents=True, mode=0o700, exist_ok=False)
     _atomic_once(root / "combined-manifest.json", manifest)
@@ -119,9 +146,13 @@ def _validate_frozen(root, *, current_source):
     value = _document(root, "combined-manifest.json")
     if value.get("schema_version") != "vaevas-combined-tools-v1" or value.get("live_authorized") is not False:
         raise ValueError("invalid combined manifest")
-    if type(value.get("live")) is not bool or value.get("public_waveform") is not True:
+    intervention = value.get("intervention", INTERVENTIONS["rag-waveform"])
+    if (type(value.get("live")) is not bool or intervention not in INTERVENTIONS.values()
+            or value.get("public_waveform") is not intervention["public_waveform"]):
         raise ValueError("combined intervention mismatch")
-    if value.get("evidence_scope") != EVIDENCE_SCOPES[value["live"]] or value.get("claim_scope") != CLAIM_SCOPE:
+    intervention_name = intervention["name"]
+    if (value.get("evidence_scope") != EVIDENCE_SCOPES[value["live"]][intervention_name]
+            or value.get("claim_scope") != CLAIM_SCOPES[intervention_name]):
         raise ValueError("combined evidence/claim scope mismatch")
     controls = value["controls"]
     expected = _controls(value["backend"], rounds=controls["rounds"], branch_count=controls["branch_count"],
@@ -143,12 +174,15 @@ def _validate_frozen(root, *, current_source):
 
 def inspect_combined(root: Path) -> dict:
     manifest = _validate_frozen(root, current_source=False)
+    intervention = manifest.get("intervention", INTERVENTIONS["rag-waveform"])
     return {"manifest_sha256": file_sha256(root / "combined-manifest.json"),
             "live_authorized": False, "backend": manifest["backend"],
             "task_id": manifest["source_cell"]["task_id"],
             "provider_profile": manifest["provider_profile"],
             "controls": manifest["controls"], "docs_profile": manifest["docs_profile"],
-            "public_waveform": True, "evidence_scope": manifest["evidence_scope"]}
+            "intervention": intervention,
+            "public_waveform": intervention["public_waveform"],
+            "evidence_scope": manifest["evidence_scope"]}
 
 
 def _authorization(root, manifest):
@@ -216,11 +250,12 @@ def execute_fixture(root: Path, *, docs_corpus: OfflineDocsCorpus, evas_command:
 def _run_campaign(manifest, *, docs_corpus, evas_command):
     from run_native_evolution import evolution_extension_config
     controls = manifest["controls"]
+    intervention = manifest.get("intervention", INTERVENTIONS["rag-waveform"])
     cell = deepcopy(manifest["source_cell"])
     if manifest["backend"] == "evolution":
         cell.update(cell_id=cell["cell_id"] + "-combined-evolution",
                     experimental_arm="AlphaApollo-Evolution+EVAS")
-    return {
+    campaign = {
         "schema_version": "vaevas-combined-engine-campaign-v1",
         "source_cell_id": manifest["source_cell"]["cell_id"], "cell": cell,
         "condition": cell["experimental_arm"], "backend": manifest["backend"],
@@ -232,9 +267,17 @@ def _run_campaign(manifest, *, docs_corpus, evas_command):
         "public_validation_docker_image": manifest["image_id"],
         "final_command_sha256": hashlib.sha256(JUDGE_COMMAND.encode()).hexdigest(),
         "evas_command_sha256": hashlib.sha256(evas_command.encode()).hexdigest(),
-        "extensions": evolution_extension_config(docs_corpus=docs_corpus, public_waveform=True,
-                                                   public_waveform_max_calls=controls["public_validation_calls"]),
     }
+    extensions = evolution_extension_config(
+        docs_corpus=docs_corpus if intervention["offline_docs"] else None,
+        public_waveform=intervention["public_waveform"],
+        public_waveform_max_calls=(
+            controls["public_validation_calls"] if intervention["public_waveform"] else None
+        ),
+    )
+    if extensions:
+        campaign["extensions"] = extensions
+    return campaign
 
 
 def _read_campaign(root, manifest):
@@ -260,6 +303,11 @@ def _read_budget(root, manifest):
     from run_legacy_native_comparison import _source_path
     events = [json.loads(line) for line in _source_path(root, "budget.jsonl").read_text().splitlines()]
     profile = manifest["provider_profile"]
+    pricing_date = (
+        "2026-08-30"
+        if profile.get("reviewed_on") == live_transport.PREVIOUS_REVIEWED_ON
+        else PRICING_REVIEWED_ON
+    )
     limit = manifest["controls"]["model_calls"] * manifest["controls"]["rounds"]
     expected = {"event": "opened", "cell_ids": manifest["budget_ids"], **manifest["budget"],
                 "model": profile["model"], "model_call_limit_per_cell": limit,
@@ -267,7 +315,7 @@ def _read_budget(root, manifest):
                 "output_peak_per_million": profile["output_peak_per_million"],
                 "context_token_bound": profile["context_token_bound"],
                 "max_output_tokens": profile["decoding"]["max_tokens"],
-                "pricing_date": "2026-08-30", "may_enter_model_memory": False,
+                "pricing_date": pricing_date, "may_enter_model_memory": False,
                 "committed_upper_bound": "0"}
     if not events or events[0] != expected:
         raise ValueError("combined budget identity mismatch")
@@ -344,6 +392,9 @@ def _execute(root, manifest, *, docs_corpus, evas_command, client_factory):
     _atomic_once(root / "campaign.json", campaign)
     campaign_sha = file_sha256(root / "campaign.json")
     controls, runtime = manifest["controls"], root / "run"
+    intervention = manifest.get("intervention", INTERVENTIONS["rag-waveform"])
+    enabled_docs = docs_corpus if intervention["offline_docs"] else None
+    enabled_waveform = intervention["public_waveform"]
     disposition, error_type = "completed", None
     started = time.monotonic()
     with DeepSeekPilotBudget(root / "budget.jsonl", cell_ids=manifest["budget_ids"],
@@ -368,7 +419,7 @@ def _execute(root, manifest, *, docs_corpus, evas_command, client_factory):
                     public_validation_docker_image=manifest["image_id"],
                     deadline_monotonic=time.monotonic() + controls["wall_time_seconds"],
                     campaign_file_sha256=campaign_sha, max_workers=controls["branch_count"],
-                    docs_corpus=docs_corpus, public_waveform=True,
+                    docs_corpus=enabled_docs, public_waveform=enabled_waveform,
                 )
             else:
                 runner.export_runtime(campaign["cell"], runner.DEFAULT_RELEASE, runtime,
@@ -379,8 +430,10 @@ def _execute(root, manifest, *, docs_corpus, evas_command, client_factory):
                     evas_command=evas_command, final_judge_command=JUDGE_COMMAND,
                     docker_image=manifest["image_id"], campaign_file_sha256=campaign_sha,
                     episode_backend="native-reasoning", model_call_limit=controls["model_calls"],
-                    tool_call_limit=controls["tool_calls"], docs_corpus=docs_corpus,
-                    public_waveform_max_calls=controls["public_validation_calls"],
+                    tool_call_limit=controls["tool_calls"], docs_corpus=enabled_docs,
+                    public_waveform_max_calls=(
+                        controls["public_validation_calls"] if enabled_waveform else None
+                    ),
                     request_timeout_s=controls["watchdog_s"], tool_timeout_s=controls["watchdog_s"],
                     judge_timeout_s=controls["watchdog_s"],
                 )
@@ -413,10 +466,12 @@ def read_combined(root: Path) -> dict:
     from score_campaign import read_native_cell
 
     manifest = _validate_frozen(root, current_source=False)
+    intervention = manifest.get("intervention", INTERVENTIONS["rag-waveform"])
     result = {"schema_version": "vaevas-combined-report-v1", "backend": manifest["backend"],
               "manifest_sha256": file_sha256(root / "combined-manifest.json"),
               "evidence_scope": manifest["evidence_scope"], "scheduled": 1, "score": None,
-              "feature_use": None, "combined_acceptance_passed": False,
+              "intervention": intervention, "feature_use": None,
+              "condition_acceptance_passed": False, "combined_acceptance_passed": False,
               "paid_requests": None if manifest["live"] else 0,
               "claim_scope": manifest["claim_scope"]}
     if not (root / "execution.json").exists():
@@ -462,12 +517,35 @@ def read_combined(root: Path) -> dict:
         terminal = read_native_cell(runtime, campaign["cell"],
                                     campaign_file_sha256=file_sha256(root / "campaign.json"))
         result.update(score=terminal.get("score"), engine_status=terminal["terminal_reason"])
-    result["feature_use"] = collect_feature_use(runtime, backend=manifest["backend"])
+    expected_features = {
+        "offline_docs": intervention["offline_docs"],
+        "public_waveform": intervention["public_waveform"],
+    }
+    result["feature_use"] = collect_feature_use(
+        runtime,
+        backend=manifest["backend"],
+        expected_features=expected_features,
+    )
     features = result["feature_use"]["features"]
-    observed = all(features[name].get("succeeded", 0) and not features[name].get("incomplete")
-                   for name in ("offline_docs", "public_waveform"))
-    shared = manifest["backend"] != "evolution" or features["public_waveform"].get("feedback_exposed_requests", 0) > 0
-    result["combined_acceptance_passed"] = bool(observed and shared and result["score"] is not None)
+    observed = all(
+        (features[name].get("succeeded", 0) > 0 and not features[name].get("incomplete"))
+        if enabled else (
+            features[name].get("attempted") == 0
+            and features[name].get("succeeded") == 0
+            and features[name].get("feedback_exposed_requests") == 0
+            and not features[name].get("incomplete")
+        )
+        for name, enabled in expected_features.items()
+    )
+    shared = (
+        not intervention["public_waveform"]
+        or manifest["backend"] != "evolution"
+        or features["public_waveform"].get("feedback_exposed_requests", 0) > 0
+    )
+    result["condition_acceptance_passed"] = bool(observed and shared and result["score"] is not None)
+    result["combined_acceptance_passed"] = bool(
+        intervention["name"] == "rag-waveform" and result["condition_acceptance_passed"]
+    )
     return result
 
 
@@ -487,6 +565,7 @@ def main(argv=None) -> int:
     prepare.add_argument("--model-calls", type=int, default=8)
     prepare.add_argument("--tool-calls", type=int, default=8)
     prepare.add_argument("--public-calls", type=int, default=1)
+    prepare.add_argument("--intervention", choices=tuple(INTERVENTIONS), default="rag-waveform")
     commands.add_parser("inspect", help="read preparation; no corpus or provider access")
     commands.add_parser("report", help="validate existing evidence; never run another final judge")
     run = commands.add_parser("run", help="explicitly asserted one-use potentially paid execution")
@@ -514,6 +593,7 @@ def main(argv=None) -> int:
                 currency=args.currency, cap=args.cap, live=True, rounds=args.rounds,
                 branch_count=args.branch_count, model_calls=args.model_calls,
                 tool_calls=args.tool_calls, public_calls=args.public_calls,
+                intervention=args.intervention,
             )
             result = inspect_combined(args.output_root)
         elif args.command == "run":

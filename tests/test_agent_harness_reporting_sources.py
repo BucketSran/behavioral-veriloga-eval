@@ -55,6 +55,52 @@ def test_combined_prepared_is_not_a_completed_score(tmp_path):
         source.read_reporting_ledger("combined-tools", root)
 
 
+def test_combined_reporting_names_the_frozen_intervention(tmp_path, monkeypatch):
+    import reporting_sources as source
+    import run_combined_tools
+
+    root = tmp_path / "baseline"
+    root.mkdir()
+    (root / "combined-manifest.json").write_text(json.dumps({
+        "source_cell": {
+            "cell_id": "v4-001-dut-agentic-r0",
+            "task_id": "v4-001-dut",
+            "family_id": "001",
+            "form": "dut",
+        },
+    }))
+    monkeypatch.setattr(run_combined_tools, "read_combined", lambda _: {
+        "terminal": 1,
+        "disposition": "completed",
+        "backend": "native-reasoning",
+        "score": 1.0,
+        "manifest_sha256": "a" * 64,
+        "intervention": {
+            "name": "baseline", "offline_docs": False, "public_waveform": False,
+        },
+        "condition_acceptance_passed": True,
+        "combined_acceptance_passed": False,
+        "evidence_scope": "real_model_condition_observation",
+        "paid_requests": None,
+        "feature_use": {"features": {
+            "offline_docs": {"attempted": 0, "succeeded": 0,
+                             "feedback_exposed_requests": 0, "incomplete": []},
+            "public_waveform": {"attempted": 0, "succeeded": 0,
+                                "feedback_exposed_requests": 0, "incomplete": []},
+        }},
+        "cost": {"currency": "CNY", "guard_upper_bound": "0", "model_calls": 1,
+                 "transport_reservations": 1, "censored": False},
+    })
+
+    _, records = source._combined(root)
+
+    record, = records
+    assert record["identity"]["intervention"] == "baseline"
+    assert record["report_group"] == "combined-tools/baseline/native-reasoning"
+    assert record["details"]["condition_acceptance_passed"] is True
+    assert record["details"]["combined_acceptance_passed"] is False
+
+
 def test_official_multipath_export_is_readonly_and_keeps_unscored(tmp_path, monkeypatch):
     pytest.importorskip("inspect_ai")
     from inspect_ai.log import read_eval_log

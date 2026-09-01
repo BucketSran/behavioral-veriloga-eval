@@ -26,7 +26,7 @@ def reviewed_clock(monkeypatch):
     class Clock:
         @staticmethod
         def now(tz):
-            return datetime(2026, 8, 31, 12, tzinfo=timezone.utc)
+            return datetime(2026, 9, 1, 12, tzinfo=timezone.utc)
     monkeypatch.setattr(importlib.import_module("comparison_live"), "datetime", Clock)
 
 
@@ -46,7 +46,7 @@ def corpus(tmp_path):
     return OfflineDocsCorpus.from_manifest(root, manifest)
 
 
-def prepared(tmp_path, *, backend="evolution", live=False, cap="5.00"):
+def prepared(tmp_path, *, backend="evolution", live=False, cap="5.00", intervention="rag-waveform"):
     module = importlib.import_module("run_combined_tools")
     docs = corpus(tmp_path)
     root = tmp_path / "acceptance"
@@ -54,6 +54,7 @@ def prepared(tmp_path, *, backend="evolution", live=False, cap="5.00"):
         root, backend=backend, family_id="001", form="DUT", docs_corpus=docs,
         image_id="sha256:" + "a" * 64, branch_image_id="sha256:" + "b" * 64,
         evas_identity={"available": True}, currency="CNY", cap=cap, live=live,
+        intervention=intervention,
     )
     return module, root, manifest, docs
 
@@ -69,6 +70,41 @@ def test_prepare_freezes_all_extensions_without_spending(tmp_path):
     assert module.inspect_combined(root)["manifest_sha256"] == module.file_sha256(root / "combined-manifest.json")
     assert not (root / "budget.jsonl").exists()
     assert not (root / "live-authorization.json").exists()
+
+
+def test_baseline_preparation_freezes_an_empty_public_tool_surface(tmp_path):
+    module, root, manifest, docs = prepared(tmp_path, intervention="baseline")
+
+    assert manifest["intervention"] == {
+        "name": "baseline",
+        "offline_docs": False,
+        "public_waveform": False,
+    }
+    assert manifest["evidence_scope"] == "synthetic_provider_condition"
+    assert manifest["claim_scope"] == (
+        "single_task_condition_diagnostic_not_population_or_individual_causality"
+    )
+    inspected = module.inspect_combined(root)
+    assert inspected["intervention"] == manifest["intervention"]
+    campaign = module._run_campaign(manifest, docs_corpus=docs, evas_command="/fixture/evas")
+    assert "extensions" not in campaign
+
+
+def test_historical_rag_manifest_without_intervention_remains_readable(tmp_path):
+    module, root, manifest, _ = prepared(tmp_path)
+    manifest.pop("intervention")
+    profile = dict(manifest["provider_profile"])
+    profile.pop("pricing_schedule")
+    profile.update(reviewed_on="2026-08-31", valid_through_utc="2026-08-31")
+    manifest["provider_profile"] = profile
+    path = root / "combined-manifest.json"
+    path.chmod(0o600)
+    path.write_text(json.dumps(manifest, sort_keys=True))
+
+    inspected = module.inspect_combined(root)
+
+    assert inspected["intervention"] == module.INTERVENTIONS["rag-waveform"]
+    assert inspected["evidence_scope"] == "synthetic_provider_integration"
 
 
 @pytest.mark.parametrize("field,value", [
@@ -222,6 +258,29 @@ def test_shared_transport_guard_independently_enforces_all_round_call_cap(tmp_pa
     assert journal[-1]["event"] == "cell_stopped"
 
 
+def test_baseline_execution_withholds_docs_and_waveform_from_evolution(tmp_path, monkeypatch):
+    module, root, manifest, docs = prepared(tmp_path, intervention="baseline")
+    import run_native_evolution
+    observed = {}
+
+    def controller(**kwargs):
+        observed.update(kwargs)
+        raise RuntimeError("stop after observing the public execution contract")
+
+    monkeypatch.setattr(run_native_evolution, "run_native_evolution", controller)
+    report = module._execute(
+        root,
+        manifest,
+        docs_corpus=docs,
+        evas_command="/fixture/evas",
+        client_factory=lambda **kwargs: pytest.fail("baseline fixture unexpectedly called the model"),
+    )
+
+    assert report["disposition"] == "incomplete_evidence"
+    assert observed["docs_corpus"] is None
+    assert observed["public_waveform"] is False
+
+
 @pytest.mark.parametrize("fault", ["authorization", "preflight", "campaign", "start", "budget"])
 def test_rehashed_terminal_metadata_still_requires_semantic_binding(tmp_path, monkeypatch, fault):
     module, root, manifest, docs = prepared(tmp_path, live=True)
@@ -294,12 +353,20 @@ def test_combined_budget_failure_stops_before_extra_transport(tmp_path, monkeypa
     assert report["cost"]["transport_reservations"] == expected_sent
 
 
-@pytest.mark.parametrize("backend,live", [("native-reasoning", False), ("evolution", False), ("evolution", True)])
-def test_real_docker_combined_tools_and_readonly_report(tmp_path, monkeypatch, backend, live):
-    _exercise_real_combined(tmp_path, monkeypatch, backend, live)
+@pytest.mark.parametrize("backend,live,intervention", [
+    ("native-reasoning", False, "rag-waveform"),
+    ("evolution", False, "rag-waveform"),
+    ("evolution", True, "rag-waveform"),
+    ("native-reasoning", False, "baseline"),
+    ("evolution", False, "baseline"),
+])
+def test_real_docker_combined_tools_and_readonly_report(
+        tmp_path, monkeypatch, backend, live, intervention):
+    _exercise_real_combined(tmp_path, monkeypatch, backend, live, intervention=intervention)
 
 
-def _exercise_real_combined(tmp_path, monkeypatch, backend, live, verify_completed=None):
+def _exercise_real_combined(
+        tmp_path, monkeypatch, backend, live, verify_completed=None, intervention="rag-waveform"):
     if os.environ.get("VABENCH_TEST_DOCKER_RUNTIME") != "1":
         pytest.skip("opt-in actual Docker/EVAS with synthetic model replies only")
     module = importlib.import_module("run_combined_tools")
@@ -313,12 +380,16 @@ def _exercise_real_combined(tmp_path, monkeypatch, backend, live, verify_complet
         image_id=docker_image_identity(smoke.DEFAULT_EVAS_IMAGE),
         branch_image_id=docker_image_identity(smoke.DEFAULT_NO_EVAS_IMAGE),
         evas_identity=identity, currency="CNY", cap="5.00", live=live,
+        intervention=intervention,
     )
     artifacts = smoke.public_stub_artifacts(smoke.public_contract(smoke.DEFAULT_RELEASE, "v4-001"))
     write = " && ".join(f"printf %s {shlex.quote(text)} > public/submission/{name}"
                         for name, text in artifacts.items())
-    sequence = [("vaevas_docs_search", {"query": "analog contribution"}), ("bash", {"command": write})]
-    if backend == "native-reasoning":
+    sequence = []
+    if intervention == "rag-waveform":
+        sequence.append(("vaevas_docs_search", {"query": "analog contribution"}))
+    sequence.append(("bash", {"command": write}))
+    if intervention == "rag-waveform" and backend == "native-reasoning":
         sequence.append(("vaevas_public_simulate", {}))
     sequence.append(("bash", {"command": "vabench-submit"}))
     calls = dict.fromkeys(manifest["budget_ids"], 0)
@@ -366,13 +437,15 @@ def _exercise_real_combined(tmp_path, monkeypatch, backend, live, verify_complet
         report = module.execute_fixture(root, docs_corpus=docs, evas_command=evas, scripted_response=response)
     assert report["disposition"] == "completed", report
     assert report["score"] is not None, report
-    assert report["combined_acceptance_passed"], report
+    assert report["condition_acceptance_passed"], report
+    assert report["combined_acceptance_passed"] == (intervention == "rag-waveform"), report
     use = report["feature_use"]["features"]
-    assert use["offline_docs"]["succeeded"] == (4 if backend == "evolution" else 1)
-    assert use["public_waveform"]["succeeded"] == (4 if backend == "evolution" else 1)
+    expected = (4 if backend == "evolution" else 1) if intervention == "rag-waveform" else 0
+    assert use["offline_docs"]["succeeded"] == expected
+    assert use["public_waveform"]["succeeded"] == expected
     assert report["cost"]["model_calls"] == len(seen)
     assert report["paid_requests"] is None if live else report["paid_requests"] == 0
-    if backend == "evolution":
+    if backend == "evolution" and intervention == "rag-waveform":
         assert use["public_waveform"]["feedback_exposed_requests"] > 0
     monkeypatch.setattr(module, "_execute", lambda *a, **k: pytest.fail("report executed engine"))
     assert module.read_combined(root) == report
