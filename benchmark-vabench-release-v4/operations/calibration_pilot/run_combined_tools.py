@@ -459,6 +459,32 @@ def _execute(root, manifest, *, docs_corpus, evas_command, client_factory):
     return report
 
 
+def condition_acceptance_passed(features, *, expected_features, backend, score):
+    """Fail closed when declared feature-use evidence is missing or incomplete."""
+    observed = all(
+        (
+            type(features[name].get("succeeded")) is int
+            and features[name]["succeeded"] > 0
+            and not features[name].get("incomplete")
+        )
+        if enabled
+        else (
+            features[name].get("attempted") == 0
+            and features[name].get("succeeded") == 0
+            and features[name].get("feedback_exposed_requests") == 0
+            and not features[name].get("incomplete")
+        )
+        for name, enabled in expected_features.items()
+    )
+    exposed = features["public_waveform"].get("feedback_exposed_requests")
+    shared = (
+        not expected_features["public_waveform"]
+        or backend != "evolution"
+        or (type(exposed) is int and exposed > 0)
+    )
+    return bool(observed and shared and score is not None)
+
+
 def read_combined(root: Path) -> dict:
     """Read existing terminal receipts only. Missing evidence is not a model zero."""
     from combined_tool_evidence import collect_feature_use
@@ -527,22 +553,12 @@ def read_combined(root: Path) -> dict:
         expected_features=expected_features,
     )
     features = result["feature_use"]["features"]
-    observed = all(
-        (features[name].get("succeeded", 0) > 0 and not features[name].get("incomplete"))
-        if enabled else (
-            features[name].get("attempted") == 0
-            and features[name].get("succeeded") == 0
-            and features[name].get("feedback_exposed_requests") == 0
-            and not features[name].get("incomplete")
-        )
-        for name, enabled in expected_features.items()
+    result["condition_acceptance_passed"] = condition_acceptance_passed(
+        features,
+        expected_features=expected_features,
+        backend=manifest["backend"],
+        score=result["score"],
     )
-    shared = (
-        not intervention["public_waveform"]
-        or manifest["backend"] != "evolution"
-        or features["public_waveform"].get("feedback_exposed_requests", 0) > 0
-    )
-    result["condition_acceptance_passed"] = bool(observed and shared and result["score"] is not None)
     result["combined_acceptance_passed"] = bool(
         intervention["name"] == "rag-waveform" and result["condition_acceptance_passed"]
     )

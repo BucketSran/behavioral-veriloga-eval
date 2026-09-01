@@ -353,6 +353,31 @@ def test_combined_budget_failure_stops_before_extra_transport(tmp_path, monkeypa
     assert report["cost"]["transport_reservations"] == expected_sent
 
 
+def test_incomplete_evolution_waveform_feedback_fails_condition_acceptance_closed():
+    module = importlib.import_module("run_combined_tools")
+    features = {
+        "offline_docs": {
+            "attempted": 1,
+            "succeeded": 1,
+            "feedback_exposed_requests": 1,
+            "incomplete": [],
+        },
+        "public_waveform": {
+            "attempted": None,
+            "succeeded": None,
+            "feedback_exposed_requests": None,
+            "incomplete": ["round-0000/branch-00/public-validation.json"],
+        },
+    }
+
+    assert not module.condition_acceptance_passed(
+        features,
+        expected_features={"offline_docs": True, "public_waveform": True},
+        backend="evolution",
+        score=1.0,
+    )
+
+
 @pytest.mark.parametrize("backend,live,intervention", [
     ("native-reasoning", False, "rag-waveform"),
     ("evolution", False, "rag-waveform"),

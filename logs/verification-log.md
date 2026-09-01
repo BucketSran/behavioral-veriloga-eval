@@ -1,5 +1,27 @@
 # Verification Log
 
+## 2026-09-01 - Combined Evolution report fails closed on incomplete waveform evidence
+
+- A one-use real-model `evolution + rag-waveform` run completed candidate
+  generation, final freeze and EVAS 0.8.7 trusted replay, but its read-only
+  report crashed because two round-0 public-waveform receipts were absent and
+  `feedback_exposed_requests=null` was compared directly with zero.
+- The new regression first failed with a missing fail-closed acceptance API.
+  The reader now treats missing, null or incomplete enabled-feature evidence as
+  condition non-acceptance; it preserves the valid final score and does not
+  rerun the model, public validator or final judge.
+- Focused RED/GREEN:
+  `PYTHONPATH=benchmark-vabench-release-v4 .venv/bin/python -m pytest -q
+  tests/test_agent_harness_combined_tools.py -k
+  incomplete_evolution_waveform_feedback` changed from **1 failed** to
+  **1 passed**.
+- Combined reporting regressions:
+  `PYTHONPATH=benchmark-vabench-release-v4 .venv/bin/python -m pytest -q
+  tests/test_agent_harness_combined_tools.py
+  tests/test_agent_harness_combined_tool_evidence.py
+  tests/test_agent_harness_comparison_live.py` reports
+  **57 passed / 9 optional skips**. Ruff 0.12.12 and `git diff --check` pass.
+
 ## 2026-09-01 - Real-model differential and incremental-study preparation
 
 - Frozen study design: `plans/real-model-differential-and-incremental-study.md`.
