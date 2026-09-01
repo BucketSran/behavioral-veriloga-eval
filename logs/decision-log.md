@@ -1,5 +1,27 @@
 # Decision Log
 
+## 2026-09-01 - Separate workflow differential from tool/backend increments
+
+- Execute the user's first two requested evidence items as separate diagnostics:
+  the existing family001 six-cell legacy/native comparison, then a family001
+  DUT 2×2 Reasoning/Evolution × baseline/RAG-waveform matrix. Do not pool their
+  estimands or call either a paper-baseline reproduction.
+- Reuse existing engines, guards, readers and final EVAS 0.8.7 authority. Add
+  only an explicit no-tools intervention and condition-aware evidence/reporting;
+  do not introduce another scheduler, judge or dependency.
+- A baseline is valid only when both public tool surfaces show zero use and no
+  incomplete evidence. Tool-enabled success still requires actual retrieval,
+  waveform and (for Evolution) next-round exposure. Keep final scores out of
+  generation memory.
+- Record the current 2026-09-01 DeepSeek V4 Flash alias/version and official
+  full peak/off-peak CNY/USD schedule, while retaining conservative peak-rate
+  reservations. The alias remains mutable provider identity, not a snapshot.
+- No paid launch follows from this implementation. Require an exact aggregate
+  cap and external owner-only credential path. Study 2 has four independent
+  root guards, so the sum of frozen caps—not one per-root number—is the spending
+  authority. Full preregistration and claim boundary:
+  `plans/real-model-differential-and-incremental-study.md`.
+
 ## 2026-09-01 - Retire synthetic training; narrow the active surface
 
 - User approved conservative slimming after the feature-value review. Remove

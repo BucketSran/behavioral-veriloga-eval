@@ -2,6 +2,22 @@
 
 Updated: 2026-09-01
 
+## Real-model diagnostic assignment — implementation closed
+
+Base `5da682b9dadcc1f3e9ad0eb368c93a98b69dcc88`. Main exclusively owns provider
+profile refresh, legacy/native six-cell preparation, combined baseline/tool
+conditions, exact tests, plans/logs/docs and fork-only Git publication. No
+delegated writer is active. No paid call, credential read, r53/EVAS mutation,
+old-tree write or upstream push is authorized. Paid execution requires a new
+exact aggregate fee cap and an external owner-only credential-file path.
+
+Acceptance is defined in `real-model-differential-and-incremental-study.md`:
+free targeted and real Docker evidence must pass, results must keep both
+estimands separate, and baseline must prove zero RAG/waveform use. Main owns the
+only integration commits. Provider contract source is `0b01ee90fe`; matched
+baseline/reporting source is `8c6796ac3c`. The implementation assignment is
+closed; main owns only this documentation record and fork publication.
+
 ## Latest cleanup assignment — closed
 
 Base `5d2a39fe0dde076654e362716456b1a8cedc1547`; scope and acceptance are in

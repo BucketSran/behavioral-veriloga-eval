@@ -89,7 +89,9 @@ never sources shell. Known provider environment keys are removed before runtime
 work. `prepare` also clears those names before local executable inspection.
 
 The dated v1 provider profile permits launch only on its reviewed UTC day,
-2026-08-31; old profiles stay readable but must not be automatically refreshed.
+2026-09-01; old profiles stay readable but must not be automatically refreshed.
+It records the complete official CNY/USD peak and off-peak schedule while the
+spending guard reserves conservatively at the peak cache-miss/output rates.
 The operator receipt prevents accidental unapproved/repeated starts, not a
 host-authenticated identity check. Metadata checks retain only currency,
 availability and hashes; the reused conservative preflight requires balance
@@ -358,12 +360,22 @@ the existing reviewed DeepSeek profile and disabled thinking.
 
 - `prepare` freezes a single family/form, corpus profile, runtime IDs, source,
   rounds/branches and model/tool/public budgets without reading credentials.
+  `--intervention baseline` freezes Bash-only generation with zero docs/waveform
+  use; `--intervention rag-waveform` (the compatibility default) enables both.
 - `inspect` reads that preparation; `run` requires exact manifest hash, cap,
   currency and an external owner-only credential file. No automatic resume.
 - `report` validates existing receipts without model/tool/freeze/judge reentry;
   reports actual successful retrieval, waveform use, and Evolution feedback
   exposure separately from declared capability and task score. Missing evidence
   is not a model zero. All branches' call and conservative cost counts remain.
+
+Use four separate roots for the preregistered 2×2 diagnostic: native Reasoning
+and Evolution, each with `baseline` and `rag-waveform`. The read-only ledger puts
+the intervention in the record identity and report group. Baseline acceptance
+requires zero attempts/exposure for both disabled tools; combined acceptance is
+reserved for the enabled condition. This supports a matched combined-surface
+contrast, not separate attribution to RAG versus waveform. See
+[the active study](../../../plans/real-model-differential-and-incremental-study.md).
 
 Run `.venv/bin/python benchmark-vabench-release-v4/operations/calibration_pilot/run_combined_tools.py --help`
 from the repository root; each subcommand has its own `--help`. Preparation/run
@@ -375,18 +387,19 @@ also caps each branch across all rounds and retains unknown-cost reservations.
 `--public-calls` is a ceiling: the current coordinator validates each candidate
 once, not repeated retries until the allowance is used.
 
-The provider profile is dated **2026-08-31 UTC** and expires after that UTC day.
+The provider profile is dated **2026-09-01 UTC** and expires after that UTC day.
 Before a later live run, independently review provider model/rates/decoding,
 update the dated service contract, and freeze a fresh root; do not just edit an
 old manifest or bypass expiry. This implementation authorizes no paid run.
 
 Reviewed v2 corpus permission for local model context does not imply permission
 to send it to an API. Live preparation and launch both check this before keys.
-The recommended veriloga-skills/Cadence materials are not yet imported: source
-pins, allowlist and rights/source-path requirements are recorded in
+Four authorized, pinned general veriloga-skills files are available through the
+local ignored corpus path and committed manifest; Cadence material was not found
+and remains omitted. Source pins, allowlist and rights/source-path requirements are recorded in
 [AA-VAE-074](../../../docs/alphaapollo-migration/features/AA-VAE-074-reviewed-local-docs.md).
-All automated combined acceptance uses synthetic documents/provider replies
-with real Docker and EVAS 0.8.7. It proves wiring, not retrieval quality,
+Automated combined acceptance uses synthetic provider replies with reviewed
+local documents plus real Docker and EVAS 0.8.7. It proves wiring, not retrieval quality,
 individual-feature benefit, independent hidden stimuli, or a model ranking.
 
 ## Opt-in public validation observations

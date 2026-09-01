@@ -1,5 +1,59 @@
 # Verification Log
 
+## 2026-09-01 - Real-model differential and incremental-study preparation
+
+- Frozen study design: `plans/real-model-differential-and-incremental-study.md`.
+  Study 1 is the existing family001 DUT/bugfix/Testbench × legacy/native six-cell
+  workflow differential. Study 2 is family001 DUT Reasoning/Evolution × explicit
+  baseline/RAG-waveform. The latter supports combined-surface contrasts only,
+  not individual RAG versus waveform attribution or a population claim.
+- Official DeepSeek model/pricing pages were freshly reviewed on 2026-09-01.
+  The profile records `deepseek-v4-flash`, documented
+  `DeepSeek-V4-Flash-0731`, thinking disabled and complete CNY/USD peak/off-peak
+  schedules. Runtime reservation remains at the conservative peak miss/output
+  rates. No provider request or balance preflight occurred.
+- Vertical REDs covered the stale review date, missing baseline intervention,
+  disabled-feature evidence semantics and missing read-only intervention labels.
+  The corresponding pre-compatibility focused GREEN suite reported
+  **112 passed / 19 optional skips**. Final totals, including strict empty-map
+  rejection and historical profile/manifest read compatibility, are recorded
+  below.
+- The first real Docker run from pytest's default macOS `/private/var` temp alias
+  failed before model execution because Docker Desktop could not mount that host
+  alias. Re-running under the explicit real path
+  `/Users/bucketsran/Documents/TsingProject/vaevas-docker-pytest.Nd0RDG` made the
+  environment valid and exposed one actual runtime defect: Evolution baseline
+  serialized `extensions={}`, which the terminal evidence reader correctly
+  rejects. Baseline now omits the field; a focused real Docker repeat passed.
+- A subsequent full run intentionally detected `combined source drift` because
+  source was edited while its root was live; no guard was weakened. The final
+  stable-source invocation
+  `VABENCH_TEST_DOCKER_RUNTIME=1 .venv/bin/python -m pytest -q
+  tests/test_agent_harness_comparison_live.py
+  tests/test_agent_harness_combined_tools.py --basetemp
+  /Users/bucketsran/Documents/TsingProject/vaevas-docker-pytest.Nd0RDG`
+  initially reported **50 passed** in 201.43 s. After adding historical-read
+  compatibility, the final stable-source repeat reports **52 passed** in
+  187.22 s. It covers all six comparison cells plus
+  native/Evolution baseline and tool-enabled conditions with real Docker and
+  EVAS 0.8.7; model replies are deterministic fixtures, so cost is zero.
+- Read-only reporting now retains intervention identity/group, condition
+  acceptance, actual feature counters and costs without reentering execution.
+  Disabled features must have zero attempts/success/exposure; enabled features
+  require complete successful evidence. Historical rag-waveform scope strings
+  remain readable.
+- Ruff 0.12.12 and `git diff --check` pass. Local corpus text and both pinned
+  runtime images are present; `.venv/bin/evas` reports 0.8.7. No r53 release or
+  EVAS repository file changed, no credential contents were read, and no paid
+  call was authorized or made. A live run remains blocked on an exact aggregate
+  fee cap plus the external owner-only credential-file path.
+- Final provider/comparison/combined/report plus documentation/navigation
+  invocation: **147 passed / 19 optional skips** in 15.05 s. Ruff 0.12.12 and
+  `git diff --check` pass on the final source and test set.
+- Source commits: `0b01ee90fe` refreshes the provider contract without enabling
+  launch; `8c6796ac3c` adds matched baseline conditions and intervention-aware
+  read-only reporting. Documentation/publication is a separate final commit.
+
 ## 2026-09-01 - Cleanup maintenance-policy closeout
 
 - Scope commit `b27cebb066`; reviewed retirement/navigation implementation

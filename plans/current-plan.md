@@ -48,17 +48,23 @@ These are implemented capabilities, not a to-do list to rebuild.
 
 No implementation remains open in this slice; the next study is a separate decision.
 
-## Next decision: evidence before more features
+## Active study: evidence before more features
 
-After reviewing the cleanup, choose one bounded real-model study, not another
-blanket feature-completion pass. Existing entrypoints support either the
-legacy/native workflow comparison or separate combined-tools acceptance.
+The next evidence slice is now preregistered as
+[a differential and incremental study](real-model-differential-and-incremental-study.md):
+first the family001 six-cell legacy/native workflow comparison, then a separate
+family001 DUT 2×2 native-Reasoning/Evolution × baseline/RAG-waveform diagnostic.
+The implementation and free Docker gates are complete. A paid launch remains
+blocked until the user supplies an exact aggregate fee cap and the path to an
+external owner-only DeepSeek credential file.
 
 Before execution, freshly review model/service identity, dated provider profile,
 rates/decoding and fee authority; freeze task roster, budget and information
 surfaces. The stopped DeepSeek pilot is immutable and grants no new spending.
-Combined success checks integration; attributing gains to a backend, RAG or
-waveform requires a separate matched comparison.
+Combined success checks integration. The new explicit baseline permits matched
+single-task contrasts, but does not identify RAG versus waveform individually;
+that would require a later RAG-only/waveform-only ablation justified by these
+first observations.
 
 Remaining evidence gaps, not missing core wiring:
 
