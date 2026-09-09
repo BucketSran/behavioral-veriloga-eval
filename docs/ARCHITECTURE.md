@@ -80,17 +80,35 @@ controller 协调终止和 judge；具体冻结与 replay 实现仍在 operation
 
 ## 仍然存在的结构问题
 
-这次整理导航，不宣称已经完成运行代码重构：
+导航整理之后，已完成一块评分依赖提取，见下面的对照；不是全仓重构：
 
 1. `run_native_mini_swe.py` 实际也装配 Reasoning、OneShot 和可选工具，名字窄于职责。
-2. `run_campaign.py` 同时承担运行协调和被其他脚本复用的底层操作；例如
-   `score_campaign.py` 动态加载它。这不是理想的单向依赖。
+2. `run_campaign.py` 仍有可继续提取的公开执行和历史解析逻辑；评分器的冷加载与
+   单 native cell 回读已不再依赖这个启动器。batch-attempt 回读与 ledger 写入路径
+   仍会延迟加载已有编排模块，不能宣称整个报告依赖图都已解耦。
 3. `calibration_pilot/` 混合了日常运行与具名实验。仅改目录名会牵动脚本导入、
    测试、CLI 和运行 manifest 的源文件哈希，不能视作纯排版。
 
-如果下一步确实要改运行代码，优先找出上述模块的一块独立职责，先确定调用者、
+后续修改仍应找出上述模块的一块独立职责，先确定调用者、
 兼容导出和证据身份，再逐块迁移；不要先设计一套空目录或按行数拆文件。
 已有分层清楚的工具 parser 不需要为形式统一再包一层。
+
+## 已落地：评分不再借启动器取共享函数
+
+原来：`score_campaign → 动态加载 run_campaign`，读取 native 配置时还会导入
+`run_native_mini_swe`。现在，两侧直接复用已有 operations 层内的明确所有者：
+
+| 所有者 | 从大入口移出的职责 |
+| --- | --- |
+| `submission_contract.py` | 声明的候选路径、提交工具 schema、源码/include 检查、冻结前 artifact gate |
+| `campaign_telemetry.py` | 模型输出额度命中、EVAS 调用与候选变更统计；不把 Bash marker 升格为可信计数 |
+| `native_contracts.py` | backend profile、OneShot 提交描述、声明的信息可见面；不启动模型或环境 |
+| `final_replay.py` | EVAS 身份核对、命令执行、单次终评限制和 replay；不是公开反馈工具 |
+
+`run_campaign` 和 native launcher 保留原函数名的兼容导出；终评执行注入点也保留。
+没有增加一套 agent 循环、工具协议或评分规则。新源码进入运行身份哈希，已有冻结
+记录不改写。具体迁移及验证见
+[AA-VAE-082](alphaapollo-migration/features/AA-VAE-082-scoring-dependency-extraction.md)。
 
 ## 本次采用的方法
 

@@ -12,6 +12,8 @@ Paths remain stable for existing callers; this is not a new launcher/package.
 | Legacy agent/runtime and reused bridges | [mini_swe_vabench.py](mini_swe_vabench.py) |
 | Native batch and fresh attempts | [run_native_batch.py](run_native_batch.py), [run_native_attempts.py](run_native_attempts.py) |
 | Native policy/environment/tool assembly | [run_native_mini_swe.py](run_native_mini_swe.py): mini-swe, Reasoning and OneShot despite its historical name |
+| Shared declarations and submission gate | [native_contracts.py](native_contracts.py), [submission_contract.py](submission_contract.py): no launcher dependency |
+| Shared campaign telemetry | [campaign_telemetry.py](campaign_telemetry.py): diagnostics, not process authority |
 | Native episode and terminal judge wiring | [native_episode.py](native_episode.py) |
 | Public candidate feedback | [public_validation.py](public_validation.py), [public_waveform.py](public_waveform.py) |
 | Freeze, final replay and score verification | [result_protocol.py](result_protocol.py), [final_replay.py](final_replay.py), [score_campaign.py](score_campaign.py) |
@@ -20,10 +22,14 @@ Paths remain stable for existing callers; this is not a new launcher/package.
 
 The shared contracts/controller/tools live in
 [`runners/agent_harness`](../../../runners/agent_harness/README.md), outside v4.
-`run_campaign.py` still exposes operations consumed by other scripts, including
-the scorer; this map describes current ownership, not a completed dependency
-inversion. Separate named experiment entrypoints are listed in the runner guide
-below. Spectre scoring remains conditional, not the routine development path.
+`score_campaign.py` imports these owners directly for single-cell scoring and
+native evidence reading. Old campaign/launcher function imports remain as
+compatibility exports. Batch-attempt reading and ledger writing still lazily
+load orchestration modules; this is not whole-graph dependency inversion.
+Source identity/compatibility details:
+[AA-VAE-082](../../../docs/alphaapollo-migration/features/AA-VAE-082-scoring-dependency-extraction.md).
+Separate named experiment entrypoints are listed in the runner guide below.
+Spectre scoring remains conditional, not the routine development path.
 
 ## Start here
 

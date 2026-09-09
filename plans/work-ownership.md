@@ -2,7 +2,7 @@
 
 Updated: 2026-09-09
 
-## Scoring dependency extraction — active
+## Scoring dependency extraction — closed
 
 Base `494276a79de83028ed345b68397e8635eeb357db`. Main alone owns the extraction
 of submission contracts, campaign telemetry and native declarations from the
@@ -19,6 +19,11 @@ evidence reading, source identity coverage, focused protocol tests and a free
 r53 three-arm Docker/EVAS smoke. Batch-attempt orchestration decoupling is not
 part of this slice. No paid calls, credentials, r53/EVAS edits, old-tree writes,
 external business-code copying, wave-mcp implementation or upstream push.
+
+Implementation and verification landed in `532a5e4493`. The independent
+read-only review found no blocking issue; no delegate made edits. Runtime work
+is closed. Main owns this final navigation/status record and fork publication;
+no broader refactor or delegated writing assignment is activated.
 
 ## Architecture navigation assignment — closed
 

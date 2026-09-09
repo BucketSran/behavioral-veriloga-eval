@@ -1,5 +1,16 @@
 # Verification Log
 
+## 2026-09-09 - Close extraction navigation and ownership
+
+- Runtime/test/evidence commit: `532a5e4493`. Updated architecture and owner-local
+  module maps, migration index and the current plan to point at actual owners
+  and distinguish remaining batch/launcher debt from the completed slice.
+- Closed the sole-writer assignment after independent review. This follow-up
+  does not change runtime bytes, generated evidence, budget or scoring policy.
+  Final CI/navigation/output/count checks: **82 passed**; local documentation
+  links and `git diff --check` passed. Current plan is 117 lines. These checks
+  are separate from the runtime evidence below; hosted CI is not yet observed.
+
 ## 2026-09-09 - Scoring dependency extraction (AA-VAE-082)
 
 - Base `494276a79de83028ed345b68397e8635eeb357db`; fetched origin/upstream

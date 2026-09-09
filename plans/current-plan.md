@@ -34,13 +34,23 @@ Code and per-feature evidence: [migration ledger](../docs/alphaapollo-migration/
 Corpus activation: [reviewed source scope](veriloga-corpus-activation.md).
 These are implemented capabilities, not a to-do list to rebuild.
 
+## Latest completed runtime slice
+
+`532a5e4493` extracts shared submission contracts, telemetry, native declarations
+and replay execution from large launchers into owning modules. Old function
+imports, CLI behavior and public/final boundaries remain; new source identities
+are bound without rewriting historical evidence. Compatibility/protocol checks,
+two free three-arm Docker smokes and independent review are recorded in the
+verification log, including unavailable historical fixtures. This slice is
+closed; batch-attempt imports and debug/MCP tools are not part of its claims.
+
 ## Latest completed maintenance slice
 
 The [architecture reading map](../docs/ARCHITECTURE.md) and owner-local module
 maps now distinguish the shared harness from v4 runtime assembly. Duplicate
 migration-index status summaries and the stale root backend status are removed.
-This is navigation cleanup, not runtime relocation or a new debug capability;
-the structural debt listed in the map remains a separate implementation scope.
+The map now reflects the extraction above and names the remaining structural
+debt. It is not a new debug capability or authority for another broad refactor.
 
 The earlier [mainline cleanup](mainline-scope-cleanup.md) is closed. Its retired
 synthetic-training prototypes, recovery links and verification remain in the
