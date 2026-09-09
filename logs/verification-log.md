@@ -1,5 +1,57 @@
 # Verification Log
 
+## 2026-09-09 - Public comparator debug case
+
+- Base `8e0f41fe92c84c7bd1e2f5a423487eb3589e91fe`; fetched origin/upstream:
+  `origin/main...HEAD=0/0`, `upstream/main...HEAD=0/195`. Fork contains upstream
+  history, not identical contents. Separate EVAS working tree is clean/synced;
+  no evaluator or old-tree changes.
+- Added only `tests/test_public_debug_case_study.py` and case/navigation/record
+  docs. No production runner/schema/tool or original example change.
+- Final command, with a fresh mktemp root under v4 reports:
+  `VABENCH_TEST_DOCKER_RUNTIME=1 .venv/bin/python -m pytest -q
+  tests/test_public_debug_case_study.py --basetemp <root>/pytest
+  --junitxml <root>/junit.xml`: **3 passed in 12.72s**. Real pinned Docker/EVAS,
+  no model API. The other two tests check the one-predicate mutation and an
+  explicitly synthetic temporal-summary counterexample.
+- Faulty and repaired EVAS runs both exit 0. The public example checker fails
+  before repair (before-swap HIGH 0%, after-swap LOW 34%) and passes after.
+  Six scripted policy calls, exact next-observation identity/payload/candidate
+  joins and valid trajectory semantics; no freeze or final judge. Expected
+  terminal is `budget_exhausted / max_steps_exhausted`, not a benchmark result.
+- Final evidence root: `benchmark-vabench-release-v4/reports/public-debug-case-20260909.E0Oimv/`.
+  Evidence files below are relative to
+  `pytest/test_public_comparator_debug_l0/public-debug-case/evidence/`:
+
+  | Evidence | SHA-256 |
+  | --- | --- |
+  | `case-report.json` | `0dc4a441b931074cd4b0dffd53258aaae52cf1854b32c8bd5b931af8cd5b993a` |
+  | `trajectory.jsonl` | `6cf94c692efa41f831cde40440648ebeccd7a063ce3554f75e47ece62f6de2c0` |
+  | `policy-observations.json` | `cefc58d557ad89ba14f67be3b9ed9f8bb84d0d4ac89c36c6c52f00960b12fa09` |
+
+  Test source SHA-256: `b64aea6b1cc5e2b4b8e3591c6cfe26e77d24f203cb4a2e887d9f72bcd7a1f7a9`.
+  JUnit SHA-256: `e868c925539dac2eabe2971a4e144b638e9b7b3d91cbfadd28e87c15353c8400`.
+  Two earlier successful fresh-root runs (`Xq2Sha`, `4ZhNu9`) produced the same
+  faulty/repaired CSV hashes; their test-source hashes predate final assertions
+  or import-only lint cleanup and are not the final source-bound record.
+- Initial case-test failures were wrong assumptions about parser `available`
+  status and trajectory hash-only records. Tests were corrected to existing
+  contracts; no production bug fix is claimed. `BmGVEq` retains that incomplete
+  assertion run and is not reported as passing.
+- `uvx --offline ruff==0.16.5 check tests/test_public_debug_case_study.py` and
+  Python compilation pass. Entrypoint/navigation, cleanup and count checks:
+  **59 passed**. No dedicated layout script exists. The new Docker test stays
+  opt-in; skipping it on a default run is not execution evidence.
+  Final combined default invocation after documentation edits: **61 passed,
+  1 skipped** (the separately executed Docker case). Changed-note/index/plan
+  local links, `git diff --check` and the 124-line current-plan limit pass.
+- Independent read-only review found no blocker and corrected the note's PWL
+  input transition timing. No registered waveform-tool, structured public
+  validator, Evolution, model-quality, comprehensive anti-hack or Spectre claim.
+  Raw waveforms/logs/observations remain ignored and uncommitted. No paid call,
+  credential read, private-project import or upstream push. Hosted CI for this
+  new slice has not yet been observed at this checkpoint.
+
 ## 2026-09-09 - Close extraction navigation and ownership
 
 - Runtime/test/evidence commit: `532a5e4493`. Updated architecture and owner-local

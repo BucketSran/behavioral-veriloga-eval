@@ -59,6 +59,13 @@ authorizes the next paid study or a broader runtime refactor.
 
 ## Active study: evidence before more features
 
+The free [public comparator debug case](../docs/alphaapollo-migration/experiments/public-comparator-debug-case-20260909.md)
+is complete: existing Bash/logs/public example checks suffice for one injected
+polarity error, with feedback delivered to the next scripted policy call.
+No model autonomy, registered waveform-tool/Evolution or final-score claim.
+Do not activate wave-mcp-like tools from this case alone; require a concrete
+remaining diagnostic need. Tests and exact evidence are in the dated note/log.
+
 The preregistered
 [differential and incremental study](real-model-differential-and-incremental-study.md)
 has executed once under a CNY 30 ceiling. Study 1 completed the matched DUT and

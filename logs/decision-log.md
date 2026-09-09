@@ -1,5 +1,25 @@
 # Decision Log
 
+## 2026-09-09 - Diagnose a public example before adding debug tools
+
+- User selected a bounded case study, not wave-mcp implementation. Copy the
+  existing non-scored cmp_ideal example and reverse one comparator predicate;
+  preserve original examples, sealed r53, EVAS 0.8.7 and all production code.
+- Reuse Controller, mini-swe bridges and real Docker Bash execution. The known
+  scripted repair is not an LLM action-discovery experiment. The existing
+  example validator is explicitly public case input, not a hidden checker or
+  a new benchmark capability. Stop at the declared step limit without freeze
+  or final judge; this diagnostic does not contribute benchmark records.
+- Evidence distinguishes simulator success from public functional failure;
+  existing logs/checks diagnose this case and reach the next policy invocation.
+  The waveform parser runs offline, not as a registered tool or trusted receipt.
+- Do not add a new debug tool solely from this case. Summary statistics omit
+  general temporal relationships, but current public logs/checks suffice here.
+  Natural model use, structured validator/Evolution paths and broader utility
+  remain untested. A future paid study needs its own frozen scope and budget.
+- Code, public sources, six-step trace and limits are in the
+  [case study](../docs/alphaapollo-migration/experiments/public-comparator-debug-case-20260909.md).
+
 ## 2026-09-09 - Extract scoring dependencies without changing evaluation policy
 
 - Apply the authorized AlphaApollo/write-clear-code layering method to our

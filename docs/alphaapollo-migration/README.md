@@ -38,6 +38,9 @@ AI-native benchmark、agent harness、trajectory、评分与结果生成链路�
 - 真实模型实验支持什么结论：查
   [2026-09-01 工作流/工具诊断](experiments/real-model-differential-and-tools-20260901.md)。
   启用工具不等于实际使用工具，更不等于证明工具有效。
+- 为什么先做案例再加调试工具：查
+  [公开比较器调试案例](experiments/public-comparator-debug-case-20260909.md)。
+  真实 EVAS + 脚本 policy；不代表模型自主修复或正式评分。
 - 具体提交的验证结果：查 [verification log](../../logs/verification-log.md)。
 
 2026-09-09：索引删除了重复的逐功能进度摘要，独立笔记、实验和恢复点全部保留。

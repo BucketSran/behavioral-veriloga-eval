@@ -2,6 +2,21 @@
 
 Updated: 2026-09-09
 
+## Public comparator debug case — closed
+
+Base `8e0f41fe92c84c7bd1e2f5a423487eb3589e91fe`. Main is the sole writer for
+`tests/test_public_debug_case_study.py`, the dated public comparator case note,
+migration README navigation, current plan and shared decision/verification logs.
+Scope/acceptance are in
+`../docs/alphaapollo-migration/experiments/public-comparator-debug-case-20260909.md`.
+Use only copied public examples and existing runtime components. No production
+runtime/tool/schema, r53, EVAS, old-tree or paid/provider work. An independent
+reviewer may inspect the stable case and evidence read-only; no delegated edits.
+Main alone owns Git integration and BucketSran publication.
+The case, three focused tests and independent read-only review are complete.
+No delegate edited files. Main owns final records/publication only; no runtime
+tool implementation or paid study is activated by closure.
+
 ## Scoring dependency extraction — closed
 
 Base `494276a79de83028ed345b68397e8635eeb357db`. Main alone owns the extraction
