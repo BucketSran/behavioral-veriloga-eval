@@ -2,6 +2,24 @@
 
 Updated: 2026-09-09
 
+## Scoring dependency extraction — active
+
+Base `494276a79de83028ed345b68397e8635eeb357db`. Main alone owns the extraction
+of submission contracts, campaign telemetry and native declarations from the
+campaign/launcher entrypoints, and replay execution into `final_replay.py`.
+Owned files: these calibration-pilot producers/consumers and new owner modules,
+affected regression tests, evaluator-closure CI, architecture/module maps,
+AA-VAE-082 migration note, current plan and shared logs. Main owns all Git work.
+An independent reviewer may inspect the stable diff read-only; no delegated
+writer is authorized.
+
+Acceptance: existing import/CLI compatibility, unchanged submission/telemetry
+and score semantics, no direct scorer-to-launcher dependency for single-cell
+evidence reading, source identity coverage, focused protocol tests and a free
+r53 three-arm Docker/EVAS smoke. Batch-attempt orchestration decoupling is not
+part of this slice. No paid calls, credentials, r53/EVAS edits, old-tree writes,
+external business-code copying, wave-mcp implementation or upstream push.
+
 ## Architecture navigation assignment — closed
 
 Base `b21d8462e7`. The current main coordinator is the sole writer and Git owner

@@ -7,7 +7,6 @@ from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 import hashlib
-import importlib.util
 import json
 import os
 from pathlib import Path
@@ -22,11 +21,18 @@ HERE = Path(__file__).resolve().parent
 REPOSITORY_ROOT = HERE.parents[2]
 if str(REPOSITORY_ROOT) not in sys.path:
     sys.path.insert(0, str(REPOSITORY_ROOT))
-RUNNER_PATH = HERE / "run_campaign.py"
-SPEC = importlib.util.spec_from_file_location("v4_calibration_runner", RUNNER_PATH)
-assert SPEC and SPEC.loader
-RUNNER = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(RUNNER)
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
+
+import result_protocol as RESULT_PROTOCOL  # noqa: E402
+import final_replay  # noqa: E402
+from submission_contract import submission_artifact_gate  # noqa: E402
+from campaign_telemetry import model_event_hit_limit, summarize_evas_invocations  # noqa: E402
+from native_contracts import (  # noqa: E402
+    backend_profile as _backend_profile,
+    declared_information_surface,
+    submit_artifacts_tool_descriptor as _submit_artifacts_tool_descriptor,
+)
 
 ARTIFACT_READY = {"submitted", "submitted_at_budget", "workspace_ready"}
 DEFAULT_TRUSTED_REPLAY_TIMEOUT_S = 150
@@ -61,14 +67,14 @@ def native_launcher_profile_config_sha256(manifest: dict[str, Any]) -> str:
     """Return the manifest identity used before profile receipt fields are added."""
     profile_bound_manifest = dict(manifest)
     profile_bound_manifest.pop("public_validation_profile_sha256", None)
-    return RUNNER.RESULT_PROTOCOL.canonical_sha256(profile_bound_manifest)
+    return RESULT_PROTOCOL.canonical_sha256(profile_bound_manifest)
 
 
 def resolve_cli_path(path: Path) -> Path:
     """Resolve a CLI path from the user's cwd before worker cwd changes.
 
-    The scoring adapter is executed by ``run_campaign.command_result`` with
-    ``cwd=RUNNER.REPO``.  If the campaign output remains relative to the caller
+    The scoring adapter is executed by ``final_replay.command_result`` with
+    ``cwd=REPOSITORY_ROOT``.  If the campaign output remains relative to the caller
     cwd, the adapter receives a relative ``VABENCH_RUNTIME_DIR`` and can resolve
     it against the wrong directory.  Always materialize filesystem paths before
     launching any judge process.
@@ -87,7 +93,7 @@ def resolve_command_path_token(token: str) -> str:
     - from the benchmark repo root: ``benchmark-vabench-release-v4/...``;
     - from the workspace root: ``behavioral-veriloga-eval/...``.
 
-    The judge command runs with ``cwd=RUNNER.REPO`` regardless of where
+    The judge command runs with ``cwd=REPOSITORY_ROOT`` regardless of where
     ``score_campaign.py`` was invoked.  Normalizing existing path tokens avoids
     accidental double-prefixes such as
     ``behavioral-veriloga-eval/behavioral-veriloga-eval/...`` while preserving
@@ -101,7 +107,7 @@ def resolve_command_path_token(token: str) -> str:
     if "/" not in token and "\\" not in token:
         return token
 
-    for base in (Path.cwd(), RUNNER.REPO, HERE):
+    for base in (Path.cwd(), REPOSITORY_ROOT, HERE):
         resolved = (base / candidate).resolve()
         if resolved.exists():
             return str(resolved)
@@ -141,7 +147,7 @@ def attach_failure_taxonomy(
             else None
         )
         model_status = recorded_model_status or fallback_model_status
-        taxonomy = RUNNER.RESULT_PROTOCOL.terminal_failure_taxonomy(
+        taxonomy = RESULT_PROTOCOL.terminal_failure_taxonomy(
             str(model_status), submission, replay
         )
     row["failure_taxonomy"] = taxonomy
@@ -185,7 +191,7 @@ def event_telemetry(events: list[dict[str, Any]]) -> dict[str, Any]:
         output_tokens += output
         reasoning_tokens += reasoning
         visible_tokens += visible
-        output_limit_hits += RUNNER.model_event_hit_limit(event)
+        output_limit_hits += model_event_hit_limit(event)
     return {
         "model_calls": sum(event.get("type") == "model" for event in events),
         "model_elapsed_s": sum(
@@ -255,7 +261,7 @@ def trusted_replay_input_signature(
         "schema_version": "vabench-trusted-replay-input-signature-v1",
         "cell": result.get("cell") or {},
         "submission_tree_sha256": final_submission.get("tree_sha256"),
-        "evaluator_manifest": RUNNER.RESULT_PROTOCOL.hash_test_tree(
+        "evaluator_manifest": RESULT_PROTOCOL.hash_test_tree(
             runtime / "evaluator"
         ),
         "evaluator": {
@@ -293,7 +299,7 @@ def trusted_replay_is_exactly_reusable(
 
 def normalize_trusted_replay_watchdog(replay: dict[str, Any]) -> None:
     """The outer judge watchdog is evaluator infrastructure, not DUT runtime."""
-    RUNNER.RESULT_PROTOCOL.normalize_trusted_replay_watchdog(replay)
+    RESULT_PROTOCOL.normalize_trusted_replay_watchdog(replay)
 
 
 def evaluate_cell(
@@ -324,7 +330,7 @@ def evaluate_cell(
             raise ValueError("final judge already executed; bound scoring cannot promote or rerun legacy evidence")
     runtime = result_path.parents[1].resolve()
     telemetry = event_telemetry(result.get("events") or [])
-    artifact_gate = RUNNER.submission_artifact_gate(runtime)
+    artifact_gate = submission_artifact_gate(runtime)
     output_tokens = result.get("output_tokens")
     if not isinstance(output_tokens, int):
         provider_total = telemetry["provider_output_tokens_total"]
@@ -364,7 +370,7 @@ def evaluate_cell(
         cell, timeout_s, testbench_timeout_s
     )
     if command and evas_command and artifact_gate["passed"]:
-        final_submission = RUNNER.RESULT_PROTOCOL.snapshot_submission(
+        final_submission = RESULT_PROTOCOL.snapshot_submission(
             runtime, artifact_gate
         )
         replay_signature, replay_signature_sha = trusted_replay_input_signature(
@@ -415,14 +421,14 @@ def evaluate_cell(
             raise ValueError("an explicit EVAS command is required for trusted replay")
         expected_identity = result.get("evas_identity")
         if expected_identity:
-            RUNNER.validate_pinned_evas_identity(evas_command, expected_identity)
+            final_replay.validate_pinned_evas_identity(evas_command, expected_identity)
         if final_submission is None:
-            final_submission = RUNNER.RESULT_PROTOCOL.snapshot_submission(
+            final_submission = RESULT_PROTOCOL.snapshot_submission(
                 runtime, artifact_gate
             )
         authority = ({"final_test_profile": final_test_profile, "episode_context": episode_context}
                      if bound else {})
-        replay = RUNNER.run_trusted_replay(
+        replay = final_replay.run_trusted_replay(
             runtime, command, replay_timeout_s, evas_command, final_submission, **authority
         )
         normalize_trusted_replay_watchdog(replay)
@@ -433,7 +439,7 @@ def evaluate_cell(
         model_status = str(
             (experiment.get("model_execution") or {}).get("status") or "completed"
         )
-        experiment = RUNNER.RESULT_PROTOCOL.build_experiment_result(
+        experiment = RESULT_PROTOCOL.build_experiment_result(
             cell=cell,
             model_status=model_status,
             messages=list(checkpoint.get("messages") or []),
@@ -543,7 +549,7 @@ def read_native_cell(
             "score": None,
             "output_tokens": None,
             "telemetry": event_telemetry([]),
-            "evas_usage": RUNNER.summarize_evas_invocations([]),
+            "evas_usage": summarize_evas_invocations([]),
             "incidents": [
                 {"category": incident["category"]}
                 for incident in dispatch.get("incidents") or []
@@ -585,7 +591,6 @@ def read_native_cell(
     request = read_json(evidence("evidence/native-episode/request.json"))
     if request["backend_profile_sha256"] != backend_profile_sha256(manifest["backend_profile"]):
         raise ValueError("native backend identity mismatch")
-    from run_native_mini_swe import _backend_profile
     backend_profile = manifest["backend_profile"]
     family = backend_profile.get("backend_family")
     if family not in {"mini_swe", "alphaapollo_reasoning"}:
@@ -656,7 +661,6 @@ def read_native_cell(
             raise ValueError("native authority/config mismatch")
     from runners.agent_harness.backends.mini_swe import mini_swe_bash_tool_descriptor
     from runners.agent_harness.tool_registry import ToolRegistry
-    from run_native_mini_swe import _submit_artifacts_tool_descriptor
     condition = cell["experimental_arm"]
     descriptors = (
         [_submit_artifacts_tool_descriptor(runtime)] if condition == "OneShot"
@@ -713,7 +717,7 @@ def read_native_cell(
     if docs_descriptor is not None:
         descriptors.append(docs_descriptor)
     declared_surface = manifest.get("declared_information_surface")
-    if declared_surface is not None and declared_surface != RUNNER.declared_information_surface(
+    if declared_surface is not None and declared_surface != declared_information_surface(
         condition, extensions=extensions,
     ):
         raise ValueError("native declared information surface differs from supported policy")
@@ -737,7 +741,7 @@ def read_native_cell(
         "output_tokens": metering["provider"]["usage"]["completion_tokens"],
         "telemetry": telemetry,
         "metering": metering,
-        "evas_usage": RUNNER.summarize_evas_invocations(result["evas_invocations"]),
+        "evas_usage": summarize_evas_invocations(result["evas_invocations"]),
         "incidents": [{"category": incident["category"]} for incident in outcome["incidents"]],
         "native_evidence": {
             "files": hashes, "artifact_path": result["artifact_path"],
@@ -817,7 +821,7 @@ def read_native_cell(
     frozen_root = runtime / "evidence/final_submission"
     if frozen_root.is_symlink() or any(path.is_symlink() for path in frozen_root.rglob("*")):
         raise ValueError("native frozen submission must not use symlinks")
-    frozen = RUNNER.RESULT_PROTOCOL.hash_test_tree(frozen_root)
+    frozen = RESULT_PROTOCOL.hash_test_tree(frozen_root)
     if frozen["tree_sha256"] != artifact["submission"]["tree_sha256"]:
         raise ValueError("native frozen submission mismatch")
     row["native_evidence"]["artifact_sha256"] = artifact["artifact_sha256"]

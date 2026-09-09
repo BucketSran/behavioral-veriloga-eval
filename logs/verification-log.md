@@ -1,5 +1,70 @@
 # Verification Log
 
+## 2026-09-09 - Scoring dependency extraction (AA-VAE-082)
+
+- Base `494276a79de83028ed345b68397e8635eeb357db`; fetched origin/upstream
+  baseline was `main...origin/main=0/0`, `upstream/main...main=0/193`.
+  Fork contains upstream history, not identical contents. EVAS audit reports
+  its existing branch clean/synced; no EVAS source or old-tree changes.
+- RED: new compatibility/import tests initially **2 failed, 1 passed**.
+  GREEN: shared owner aliases, independent-interpreter scorer/CLI/native read,
+  unchanged source bytes, final reservation/exception identity and new source
+  drift guards. Existing replay-reuse test now patches `SCORER.final_replay`,
+  not the removed dynamic-loader implementation detail. Updated waveform
+  fixtures to include the extracted source; added explicit old/new profile
+  compatibility and tamper rejection tests (no rejudge).
+- Final regression command: `PYTHONPATH=benchmark-vabench-release-v4
+  .venv/bin/python -m pytest -q tests/test_agent_harness_*.py
+  tests/test_evaluator_environment_contract.py
+  tests/test_v4_r53_active_entrypoints.py tests/test_v4_r53_clean_room_smoke.py
+  tests/test_mini_swe_vabench.py tests/test_score_campaign_reuse.py
+  benchmark-vabench-release-v4/scripts/tests/test_v4_experiment_result_protocol.py
+  -k 'not test_single_task_hidden_scoring_smoke_binds_claim_boundary'`:
+  **1,457 passed, 70 skipped, 1 deselected**. Skips are opt-in tests, not claimed
+  executed; the deselected test needs sparse-excluded V3 assets.
+- Separate CI/navigation/output/count checks: **82 passed**. Calibration
+  Python compilation, workflow YAML parse, changed-doc local links and
+  `git diff --check` passed. No dedicated `scripts/check_repo_layout.py` exists;
+  current layout/runtime-contract tests were used. Plan is below 150 lines.
+- Historical calibration suite: **74 passed, 24 failed, 12 setup errors**.
+  Failures require sparse-excluded old benchmark/r49/r52 task assets; r45
+  materialization fails on absent provenance registry metadata. A representative
+  legacy/V3 file and registry remain in HEAD (verified with `git cat-file -e`).
+  No historical checkout restoration, production workaround or skip change was
+  made. Thus the full historical local gate is not reported green.
+- Real Docker 29.5.2 + host `evas-sim 0.8.7` scripted checks, no model API:
+  `scripts/run_v4_r53_clean_room_smoke.py` with explicit absolute EVAS path,
+  `--sandbox docker --bound-final-authority --json`, once with default backends
+  and once with `--agentic-backend native-mini-swe`: **PASS / PASS**. Both run
+  v4-001 across three arms; the latter is explicitly mixed-backend connectivity,
+  not three native arms or a matched workflow-effect experiment. All six frozen
+  incomplete candidates yield the expected `behavior_failure`. Trajectory,
+  isolation, immutable sidecars and connectivity claim gates pass; model/paper
+  claims remain disallowed.
+- Additional real waveform integration: `VABENCH_TEST_DOCKER_RUNTIME=1
+  .venv/bin/python -m pytest -q tests/test_agent_harness_waveform_integration.py
+  -k 'test_real_waveform_feedback_freeze_final_score and v4-001'` with a fresh
+  physical report-root basetemp: **3 passed, 31 deselected**. Covers mini-swe,
+  Reasoning native tool calls and Reasoning strict JSON through public waveform
+  feedback, freeze, final judgment and verified read.
+- Local ignored evidence root:
+  `benchmark-vabench-release-v4/reports/scoring-extraction-20260909.2z5VDA/`.
+  `final-regressions.xml` records the final gate; `historical.xml` records the
+  unavailable-fixture failures. Smoke stdout recorded PASS; persisted score
+  report SHA-256 values are:
+
+  | Relative file | SHA-256 |
+  | --- | --- |
+  | `legacy/SCORE_EVAS_0_8_7.json` | `220a42e6b0bf04072a4b2923af551f5275d6556016f2a4973494ce0b155f02c9` |
+  | `native/SCORE_EVAS_0_8_7.json` | `074c7e04092ab9338a9944895a83a06ba12b8968b683d4b5db04f111b81f82e9` |
+
+- Independent read-only reviewer `scoring_boundary_review` found no blocking
+  issue, including AST comparison of moved bodies, cwd, final authority,
+  compatibility hooks and historical source projections. No delegated edits
+  or Git mutations. No throughput/model-quality/anti-hack/Spectre claim, paid
+  call, credential read, release mutation, evaluator update or upstream push.
+  Hosted CI for the new commit has not yet been observed at this checkpoint.
+
 ## 2026-09-09 - Deduplicate migration navigation
 
 - Follow-up to `58d9d913a7`: migration index, migration mainline and current plan

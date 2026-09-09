@@ -1,5 +1,29 @@
 # Decision Log
 
+## 2026-09-09 - Extract scoring dependencies without changing evaluation policy
+
+- Apply the authorized AlphaApollo/write-clear-code layering method to our
+  existing implementation: scoring and generation import shared owners, rather
+  than scoring loading the campaign and native launcher to obtain primitives.
+  No external business implementation, agent framework or dependency is copied.
+- Move submission checks/schema, campaign telemetry and native declarations to
+  three cohesive modules inside the existing calibration directory; move EVAS
+  identity, command execution and replay lifecycle into the existing final
+  bridge. Preserve old runner/launcher function imports and the legacy replay
+  execution injection seam. The removed `SCORER.RUNNER` implementation detail
+  has one internal test consumer, now targeting the replay owner directly.
+- Extend native/Evolution/final/waveform source identities to cover moved code.
+  Historical waveform evidence retains its stored source projection; no old
+  record is rebound to current source or rescored. Keep profile/exception/
+  reservation identity and execution cwd unchanged.
+- Stop at the single-cell scoring seam. Batch-attempt/ledger lazy imports,
+  remaining public execution helpers and the historical directory/launcher
+  names are not claimed fixed. New wave-mcp/debug features remain deferred.
+- Keep r53, EVAS 0.8.7, legacy default, schemas, budgets, score semantics and
+  public/final isolation fixed. No paid run, credential read, EVAS/old-tree
+  modification or upstream publication. Do not restore sparse historical
+  benchmark assets merely to make unrelated local fixtures available.
+
 ## 2026-09-09 - Keep migration history separate from current navigation
 
 - Replace the migration index's rolling feature summaries with question-based

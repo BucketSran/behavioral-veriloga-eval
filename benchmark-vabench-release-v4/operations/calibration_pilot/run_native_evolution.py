@@ -1380,7 +1380,10 @@ def _source_identity() -> dict[str, str]:
         sources[name] = hashlib.sha256(path.read_bytes()).hexdigest()
     for path in sorted((REPO / "runners/agent_harness").rglob("*.py")):
         sources[str(path.relative_to(REPO))] = hashlib.sha256(path.read_bytes()).hexdigest()
-    for name in ("run_campaign.py", "result_protocol.py"):
+    for name in (
+        "run_campaign.py", "result_protocol.py", "submission_contract.py",
+        "campaign_telemetry.py", "native_contracts.py",
+    ):
         sources[name] = hashlib.sha256((HERE / name).read_bytes()).hexdigest()
     for name in ("public_waveform_tool.py", "waveform_summary.py"):
         path = REPO / "runners" / "agent_harness" / "tools" / name

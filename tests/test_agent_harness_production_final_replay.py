@@ -138,6 +138,37 @@ def test_bound_replay_is_persistently_single_use_and_blocks_legacy_bypass(replay
     assert (runtime / "evidence/trusted_replay_result.json").read_bytes() == output
 
 
+def test_extracted_replay_preserves_exception_identity_and_shared_reservation(replay_case):
+    runtime, frozen, executable, _, command, context, profile = replay_case
+    assert runner.FinalReplayReservedError is final_replay.FinalReplayReservedError
+    assert runner.command_result is final_replay.command_result
+    assert runner._run_trusted_replay is final_replay._run_trusted_replay
+    replay = final_replay.run_trusted_replay(
+        runtime, command, 10, str(executable), frozen,
+        final_test_profile=profile, episode_context=context,
+    )
+    assert replay["status"] == "behavior_failure"
+    with pytest.raises(runner.FinalReplayReservedError):
+        runner.run_trusted_replay(runtime, command, 10, str(executable), frozen)
+
+
+@pytest.mark.parametrize("source", [
+    "submission_contract.py", "campaign_telemetry.py", "native_contracts.py", "final_replay.py",
+])
+def test_extracted_sources_remain_bound_to_final_authority(replay_case, monkeypatch, source):
+    runtime, *_ = replay_case
+    identity = final_replay._file_identity
+
+    def changed_identity(path):
+        observed = identity(path)
+        return {**observed, "sha256": "f" * 64} if path.name == source else observed
+
+    monkeypatch.setattr(final_replay, "_file_identity", changed_identity)
+    with pytest.raises(ValueError, match="drift"):
+        run_bound(replay_case)
+    assert not (runtime / "judge-called").exists()
+
+
 @pytest.mark.parametrize("target", ["candidate", "checker", "command"])
 def test_bound_replay_rejects_post_execution_drift_and_stays_reserved(
     replay_case, monkeypatch, target

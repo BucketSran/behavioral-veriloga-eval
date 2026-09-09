@@ -37,7 +37,7 @@ MAX_TREE_BYTES = 16 * 1024 * 1024
 
 def read_native_waveform_evidence(*, runtime, manifest, profile, events, private):
     """Read-only joins for the explicit intervention; never run a checker here."""
-    from run_campaign import expected_candidate_artifacts
+    from submission_contract import expected_candidate_artifacts
     from runners.agent_harness.tools.public_waveform_tool import (
         INTERVENTION, TOOL_NAME, validate_waveform_observation,
     )
@@ -59,7 +59,12 @@ def read_native_waveform_evidence(*, runtime, manifest, profile, events, private
     expected_runtime = canonical_sha256({
         "source_sha256": sources["public_waveform.py"], "environment_sha256": sources["mini_swe_vabench.py"],
         "parser_sha256": sources["waveform_summary.py"],
-        "contract_sources": {name: sources[name] for name in ("public_validation.py", "run_campaign.py")},
+        "contract_sources": {
+            name: sources[name]
+            for name in ("public_validation.py", "run_campaign.py", "submission_contract.py")
+            # Historical receipts predate extraction and retain their original identity.
+            if name != "submission_contract.py" or name in sources
+        },
         "waveform_policy_sha256": waveform.waveform_policy_sha256(),
         "timeout_s": min(manifest["tool_timeout_s"], 120), "submission_read_only": True,
         "max_entries": MAX_FILES, "max_file_bytes": MAX_FILE_BYTES, "max_tree_bytes": MAX_TREE_BYTES,
@@ -293,7 +298,7 @@ class IsolatedPublicWaveformExecutor:
                 "environment_sha256": hashlib.sha256(Path(mini.__file__).read_bytes()).hexdigest(),
                 "parser_sha256": hashlib.sha256(Path(waveform.__file__).read_bytes()).hexdigest(),
                 "contract_sources": {name: hashlib.sha256((Path(__file__).parent / name).read_bytes()).hexdigest()
-                                     for name in ("public_validation.py", "run_campaign.py")},
+                                     for name in ("public_validation.py", "run_campaign.py", "submission_contract.py")},
                 "waveform_policy_sha256": waveform.waveform_policy_sha256(),
                 "timeout_s": timeout_s, "submission_read_only": True,
                 "max_entries": MAX_FILES, "max_file_bytes": MAX_FILE_BYTES, "max_tree_bytes": MAX_TREE_BYTES,

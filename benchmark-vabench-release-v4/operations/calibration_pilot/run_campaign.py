@@ -27,6 +27,26 @@ REPO = PACKAGE.parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 import result_protocol as RESULT_PROTOCOL  # noqa: E402
+import final_replay as FINAL_REPLAY  # noqa: E402
+from final_replay import (  # noqa: E402
+    FinalReplayReservedError,
+    _run_trusted_replay,
+    assert_final_replay_not_started,
+    command_result,
+    load_trusted_replay_adapter_result,
+    resolve_pinned_evas_identity,
+    validate_pinned_evas_identity,
+)
+from submission_contract import (  # noqa: E402
+    PUBLIC_INCLUDE_RE,
+    expected_candidate_artifacts,
+    safe_relative,
+    submission_artifact_gate,
+    submission_source_diagnostics,
+    submit_artifacts_tool_schema,
+)
+from campaign_telemetry import model_event_hit_limit, summarize_evas_invocations  # noqa: E402
+from native_contracts import declared_information_surface  # noqa: E402
 from experiment_policy import (  # noqa: E402
     experiment_policy_sha256,
     load_experiment_policy,
@@ -140,9 +160,6 @@ PROMPT_EMBEDDED_TASK_FILES = {
     "task/solver_contract.json",
     "task/public_contract.json",
 }
-PUBLIC_INCLUDE_RE = re.compile(
-    r"\b(?:ahdl_include|include)\s+[\"']([^\"']+)[\"']", re.IGNORECASE
-)
 PUBLIC_ESCAPE_RE = re.compile(
     r"\b(?:shell|system|exec|spawn|unix|socket|tcp|udp|https?|ftp|curl|wget|ocean|skill|ipcBeginProcess)\b",
     re.IGNORECASE,
@@ -168,35 +185,6 @@ of every artifact named by the function schema. Do not add undeclared paths.
 This function is only an output transport: it does not execute the candidate,
 reveal diagnostics, or provide checker feedback.
 """
-
-
-def declared_information_surface(
-    condition: str, *, evolution: bool = False, extensions: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    """Disclose expected access, not observed image contents or a fairness proof."""
-    return {
-        "schema_version": "vaevas-declared-information-surface-v1",
-        "evidence_kind": "declared_expected_policy",
-        "logical_condition": condition,
-        "generation_export_arm": "Agent-No-EVAS" if evolution else condition,
-        "generation_bash_available": condition != "OneShot",
-        "generation_evas_available": condition == "Agentic" and not evolution,
-        "public_validation_access": (
-            "coordinator_after_branch" if evolution else "in_episode" if condition == "Agentic" else "none"
-        ),
-        "extension_interventions": {
-            name: profile["intervention"] for name, profile in sorted((extensions or {}).items())
-        },
-        "final_feedback_may_reenter_generation": False,
-        "information_parity_established": False,
-        "observed_image_audit": False,
-        "uncontrolled_or_intentional_differences": [
-            "condition_specific_prompt_and_tool_guidance",
-            "installed_runtime_examples_may_differ",
-            "model_backend_and_budget_require_separate_matching",
-            "extensions_require_separate_comparison_protocol",
-        ],
-    }
 
 
 class ProviderRequestTimeout(TimeoutError):
@@ -303,40 +291,6 @@ def summarize_public_agent_images(results: list[dict[str, Any]]) -> dict[str, An
     }
 
 
-def resolve_pinned_evas_identity(command: str) -> dict[str, Any]:
-    argv = shlex.split(command)
-    if not argv or not Path(argv[0]).is_absolute():
-        raise SystemExit("--evas-command must start with an absolute executable path")
-    identity = RESULT_PROTOCOL.evas_identity(argv)
-    if not identity.get("available"):
-        raise SystemExit(
-            "configured EVAS is unavailable or has no version identity: "
-            f"{identity.get('error') or identity.get('version_output') or command}"
-        )
-    return identity
-
-
-def validate_pinned_evas_identity(
-    command: str, expected: dict[str, Any] | None
-) -> dict[str, Any]:
-    if not isinstance(expected, dict) or not expected.get("available"):
-        raise SystemExit("campaign is missing its pinned EVAS identity")
-    observed = resolve_pinned_evas_identity(command)
-    fields = (
-        "command",
-        "resolved_executable",
-        "executable_sha256",
-        "version_output",
-        "sha256",
-    )
-    mismatches = [
-        field for field in fields if observed.get(field) != expected.get(field)
-    ]
-    if mismatches:
-        raise SystemExit("EVAS identity mismatch: " + ", ".join(mismatches))
-    return observed
-
-
 def file_digest_summary(path: Path) -> dict[str, Any]:
     data = path.read_bytes()
     return {
@@ -403,63 +357,6 @@ def provider_response_metadata(response: dict[str, Any]) -> dict[str, Any]:
         "model": response.get("model"),
         "created": response.get("created"),
         "system_fingerprint": response.get("system_fingerprint"),
-    }
-
-
-def model_event_hit_limit(event: dict[str, Any]) -> bool:
-    if event.get("finish_reason") == "length":
-        return True
-    requested = event.get("requested_max_tokens")
-    generated = event.get("provider_output_tokens")
-    return (
-        isinstance(requested, int)
-        and requested > 0
-        and isinstance(generated, int)
-        and generated >= requested
-    )
-
-
-def summarize_evas_invocations(invocations: list[dict[str, Any]]) -> dict[str, Any]:
-    statuses = [str(row.get("status") or "unknown") for row in invocations]
-    candidate_tree_hash_call_counts: dict[str, int] = {}
-    modified_rerun_count = 0
-    unchanged_repeat_count = 0
-    previous_hash: str | None = None
-    for row in invocations:
-        raw_hash = row.get("candidate_tree_sha256")
-        candidate_hash = raw_hash if isinstance(raw_hash, str) and raw_hash else None
-        if candidate_hash is None:
-            previous_hash = None
-            continue
-        candidate_tree_hash_call_counts[candidate_hash] = (
-            candidate_tree_hash_call_counts.get(candidate_hash, 0) + 1
-        )
-        if previous_hash is not None:
-            if candidate_hash == previous_hash:
-                unchanged_repeat_count += 1
-            else:
-                modified_rerun_count += 1
-        previous_hash = candidate_hash
-    return {
-        "schema_version": "v4-direct-evas-usage-v2",
-        "calls_executed": len(invocations),
-        "calls_succeeded": statuses.count("succeeded"),
-        "calls_failed": statuses.count("failed"),
-        "calls_timed_out": statuses.count("timed_out"),
-        "calls_interrupted": statuses.count("interrupted"),
-        "last_status": statuses[-1] if statuses else None,
-        "candidate_tree_schema_version": CANDIDATE_TREE_SCHEMA_VERSION,
-        "calls_with_candidate_tree_hash": sum(
-            candidate_tree_hash_call_counts.values()
-        ),
-        "unique_candidate_tree_hashes": list(
-            candidate_tree_hash_call_counts
-        ),
-        "candidate_tree_hash_call_counts": candidate_tree_hash_call_counts,
-        "modified_rerun_count": modified_rerun_count,
-        "unchanged_repeat_count": unchanged_repeat_count,
-        **({"untrusted_operation_summary": summarize_evas_operations(invocations)}
-           if any("operation" in row for row in invocations) else {}),
     }
 
 
@@ -667,13 +564,6 @@ def validate_campaign_cells(cells: list[dict[str, Any]], release: Path) -> None:
         if str(cell.get("form")) != str(task["form"]):
             raise ValueError(f"campaign form mismatch for {cell_id}")
         cell_per_turn_max_tokens(cell)
-
-
-def safe_relative(raw: str) -> Path:
-    path = Path(raw.replace("\\", "/"))
-    if not path.parts or path.is_absolute() or ".." in path.parts:
-        raise ValueError(f"unsafe relative path: {raw!r}")
-    return path
 
 
 def submission_relative(raw: str) -> Path:
@@ -1002,59 +892,6 @@ TEXT_SKILL_EXTENSIONS = {".md", ".txt", ".yaml", ".yml", ".json", ".va"}
 MAX_SKILL_FILE_BYTES = 256 * 1024
 
 
-def command_result(
-    command: str,
-    runtime: Path,
-    timeout_s: float,
-    submission_dir: Path | None = None,
-    extra_env: dict[str, str] | None = None,
-) -> dict[str, Any]:
-    effective_submission = submission_dir or runtime / "public" / "submission"
-    env = os.environ.copy()
-    env.update({
-        "VABENCH_RUNTIME_DIR": str(runtime),
-        "VABENCH_PUBLIC_DIR": str(runtime / "public"),
-        "VABENCH_SUBMISSION_DIR": str(effective_submission),
-        "VABENCH_FINAL_SUBMISSION_DIR": str(effective_submission),
-        "VABENCH_EVALUATOR_DIR": str(runtime / "evaluator"),
-        "VABENCH_TRUSTED_REPLAY_RESULT": str(
-            runtime / "evidence" / "trusted_replay_result.json"
-        ),
-    })
-    env.update(extra_env or {})
-    started = time.monotonic()
-    try:
-        completed = subprocess.run(
-            shlex.split(command), cwd=REPO, env=env, text=True,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout_s, check=False,
-        )
-    except subprocess.TimeoutExpired as exc:
-        stdout = exc.stdout.decode(errors="replace") if isinstance(exc.stdout, bytes) else exc.stdout
-        stderr = exc.stderr.decode(errors="replace") if isinstance(exc.stderr, bytes) else exc.stderr
-        return {
-            "execution_status": "timeout",
-            "returncode": None,
-            "stdout": (stdout or "")[-12000:],
-            "stderr": (stderr or "")[-4000:],
-            "elapsed_s": time.monotonic() - started,
-        }
-    except OSError as exc:
-        return {
-            "execution_status": "launch_error",
-            "returncode": None,
-            "stdout": "",
-            "stderr": str(exc)[:4000],
-            "elapsed_s": time.monotonic() - started,
-        }
-    return {
-        "execution_status": "completed",
-        "returncode": completed.returncode,
-        "stdout": completed.stdout[-12000:],
-        "stderr": completed.stderr[-4000:],
-        "elapsed_s": time.monotonic() - started,
-    }
-
-
 def argv_result(argv: list[str], runtime: Path, timeout_s: int) -> dict[str, Any]:
     """Run one operator-selected executable with benchmark-controlled arguments."""
     started = time.monotonic()
@@ -1100,58 +937,6 @@ def confined_path(root: Path, relative: str) -> Path:
     path = root / safe_relative(relative)
     path.resolve().relative_to(root.resolve())
     return path
-
-
-def submission_source_diagnostics(runtime: Path) -> list[str]:
-    """Reject candidate filesystem/include escapes before trusted execution."""
-    submission = runtime / "public" / "submission"
-    expected = set(expected_candidate_artifacts(runtime))
-    diagnostics: list[str] = []
-    if not submission.is_dir():
-        return diagnostics
-    for path in sorted(submission.rglob("*")):
-        relative = path.relative_to(submission).as_posix()
-        if path.is_symlink():
-            diagnostics.append(f"symlink_not_allowed:{relative}")
-            continue
-        if not path.is_file() or path.suffix.lower() not in {".va", ".scs"}:
-            continue
-        if path.stat().st_size > 1_000_000:
-            diagnostics.append(f"source_too_large:{relative}")
-            continue
-        try:
-            text = path.read_text(encoding="utf-8")
-        except UnicodeDecodeError:
-            diagnostics.append(f"source_not_utf8:{relative}")
-            continue
-        uncommented = re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)
-        uncommented = "\n".join(
-            line.split("//", 1)[0] for line in uncommented.splitlines()
-        )
-        for raw in PUBLIC_INCLUDE_RE.findall(uncommented):
-            normalized = raw.replace("\\", "/")
-            include = Path(normalized)
-            if normalized in {"constants.vams", "disciplines.vams"}:
-                continue
-            if (
-                path.name == "testbench.scs"
-                and not include.is_absolute()
-                and ".." not in include.parts
-                and include.parts
-                and include.parts[0] == "dut"
-            ):
-                continue
-            if include.is_absolute() or ".." in include.parts:
-                diagnostics.append(f"unsafe_source_include:{relative}:{raw}")
-                continue
-            try:
-                target = safe_relative((Path(relative).parent / include).as_posix()).as_posix()
-            except ValueError:
-                diagnostics.append(f"unsafe_source_include:{relative}:{raw}")
-                continue
-            if target not in expected:
-                diagnostics.append(f"undeclared_source_include:{relative}:{raw}")
-    return diagnostics
 
 
 def validate_public_testbench(candidate: Path) -> None:
@@ -1355,32 +1140,6 @@ def run_public_evas(
     return result
 
 
-def load_trusted_replay_adapter_result(runtime: Path) -> dict[str, Any] | None:
-    path = runtime / "evidence" / "trusted_replay_result.json"
-    if not path.is_file():
-        return None
-    try:
-        value = read_json(path)
-    except (OSError, json.JSONDecodeError):
-        return {"status": "infrastructure_failure", "diagnostics": ["invalid_result_json"]}
-    if not isinstance(value, dict):
-        return {
-            "status": "infrastructure_failure",
-            "diagnostics": ["trusted_replay_result_must_be_an_object"],
-        }
-    return value
-
-
-class FinalReplayReservedError(RuntimeError):
-    """A terminal scoring runtime cannot reenter generation or final judging."""
-
-
-def assert_final_replay_not_started(runtime: Path) -> None:
-    reservation = runtime / "evidence/bound-final-test"
-    if reservation.exists() or reservation.is_symlink():
-        raise FinalReplayReservedError("final replay already reserved; model reentry and in-place retry are forbidden")
-
-
 def run_trusted_replay(
     runtime: Path,
     command: str | None,
@@ -1391,48 +1150,11 @@ def run_trusted_replay(
     final_test_profile: dict[str, Any] | None = None,
     episode_context: Any = None,
 ) -> dict[str, Any]:
-    assert_final_replay_not_started(runtime)
-    if final_test_profile is not None or episode_context is not None:
-        if final_test_profile is None or episode_context is None or not command or final_submission is None:
-            raise ValueError("bound replay requires profile, context, command and frozen submission")
-        from final_replay import execute_bound_replay
-
-        return execute_bound_replay(
-            runtime=runtime, command=command, timeout_s=timeout_s, evas_command=evas_command,
-            final_submission=final_submission, final_test_profile=final_test_profile,
-            context=episode_context, execute=_run_trusted_replay,
-        )
-    return _run_trusted_replay(runtime, command, timeout_s, evas_command, final_submission)
-
-
-def _run_trusted_replay(
-    runtime: Path, command: str | None, timeout_s: int, evas_command: str,
-    final_submission: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    result_path = runtime / "evidence" / "trusted_replay_result.json"
-    result_path.parent.mkdir(parents=True, exist_ok=True)
-    result_path.unlink(missing_ok=True)
-    test_manifest = RESULT_PROTOCOL.hash_test_tree(runtime / "evaluator")
-    identity = RESULT_PROTOCOL.evas_identity(shlex.split(evas_command))
-    submission_dir = runtime / "evidence" / "final_submission"
-    command_record = (
-        command_result(
-            command,
-            runtime,
-            timeout_s,
-            submission_dir,
-            {"VABENCH_EVAS_COMMAND": evas_command},
-        )
-        if command
-        else None
-    )
-    adapter_result = load_trusted_replay_adapter_result(runtime) if command else None
-    return RESULT_PROTOCOL.trusted_replay(
-        command_record,
-        adapter_result,
-        test_manifest,
-        identity,
-        (final_submission or {}).get("tree_sha256"),
+    """Compatibility facade retaining the legacy replay-execution injection seam."""
+    return FINAL_REPLAY.run_trusted_replay(
+        runtime, command, timeout_s, evas_command, final_submission,
+        final_test_profile=final_test_profile, episode_context=episode_context,
+        _execute=_run_trusted_replay,
     )
 
 
@@ -1955,46 +1677,6 @@ def read_skill_lookup_events(runtime: Path) -> list[dict[str, Any]]:
     return events
 
 
-def expected_candidate_artifacts(runtime: Path) -> list[str]:
-    policy_path = runtime / "evaluator" / "score_policy.json"
-    if not policy_path.is_file():
-        return []
-    policy = read_json(policy_path)
-    return [safe_relative(str(item)).as_posix() for item in policy.get("candidate_artifacts") or []]
-
-
-def submit_artifacts_tool_schema(runtime: Path) -> dict[str, Any]:
-    expected = expected_candidate_artifacts(runtime)
-    if not expected:
-        raise ValueError("submit_artifacts requires declared candidate artifacts")
-    return {
-        "type": "function",
-        "function": {
-            "name": "submit_artifacts",
-            "description": (
-                "Submit the complete final candidate bundle. This output-only "
-                "transport returns no execution or checker feedback."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "artifacts": {
-                        "type": "object",
-                        "properties": {
-                            path: {"type": "string", "minLength": 1}
-                            for path in expected
-                        },
-                        "required": expected,
-                        "additionalProperties": False,
-                    }
-                },
-                "required": ["artifacts"],
-                "additionalProperties": False,
-            },
-        },
-    }
-
-
 def validated_artifact_mapping(
     pairs: list[tuple[str, str]], expected: list[str]
 ) -> dict[str, str] | None:
@@ -2272,65 +1954,6 @@ def direct_protocol_compliant(protocol: str) -> bool:
 
 def extract_direct(text: str, runtime: Path) -> list[str]:
     return extract_direct_with_protocol(text, runtime)[0]
-
-
-def submission_artifact_gate(runtime: Path) -> dict[str, Any]:
-    expected = expected_candidate_artifacts(runtime)
-    expected_set = set(expected)
-    submission = runtime / "public" / "submission"
-    diagnostics: list[str] = []
-    actual: set[str] = set()
-    allowed_directories: set[str] = set()
-    for raw in expected:
-        parent = Path(raw).parent
-        while parent != Path("."):
-            allowed_directories.add(parent.as_posix())
-            parent = parent.parent
-
-    if not expected:
-        diagnostics.append("missing_candidate_artifact_contract")
-    if len(expected_set) != len(expected):
-        diagnostics.append("duplicate_candidate_artifact_contract")
-    if not submission.is_dir():
-        diagnostics.append("missing_submission_directory")
-    else:
-        for path in sorted(submission.rglob("*")):
-            relative = path.relative_to(submission).as_posix()
-            if path.is_symlink():
-                diagnostics.append(f"symlink_not_allowed:{relative}")
-            elif path.is_file():
-                actual.add(relative)
-            elif path.is_dir():
-                if relative not in allowed_directories:
-                    diagnostics.append(f"undeclared_directory:{relative}")
-            else:
-                diagnostics.append(f"non_regular_artifact:{relative}")
-
-    diagnostics.extend(
-        f"missing_artifact_path:{relative}" for relative in sorted(expected_set - actual)
-    )
-    diagnostics.extend(
-        f"undeclared_artifact_path:{relative}" for relative in sorted(actual - expected_set)
-    )
-    diagnostics.extend(
-        diagnostic
-        for diagnostic in submission_source_diagnostics(runtime)
-        if diagnostic not in diagnostics
-    )
-    passed = not diagnostics
-    artifacts = {
-        relative: hashlib.sha256((submission / relative).read_bytes()).hexdigest()
-        for relative in expected
-        if passed
-    }
-    return {
-        "schema_version": "v4-submission-artifact-gate-v1",
-        "passed": passed,
-        "expected_artifacts": expected,
-        "observed_artifacts": sorted(actual),
-        "artifact_sha256": artifacts,
-        "diagnostics": diagnostics,
-    }
 
 
 def submission_complete(runtime: Path) -> bool:

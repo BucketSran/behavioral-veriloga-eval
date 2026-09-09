@@ -17,6 +17,8 @@ import re
 import shlex
 import shutil
 import sys
+import subprocess
+import time
 from typing import Any, Callable
 
 import result_protocol as protocol
@@ -78,6 +80,9 @@ def _observed_authority(
             for name in (
                 "final_replay.py",
                 "run_campaign.py",
+                "submission_contract.py",
+                "campaign_telemetry.py",
+                "native_contracts.py",
                 "result_protocol.py",
             )
         ],
@@ -335,3 +340,173 @@ def execute_bound_replay(
         "task_id": context.task_id,
     }
     return replay
+
+
+def resolve_pinned_evas_identity(command: str) -> dict[str, Any]:
+    argv = shlex.split(command)
+    if not argv or not Path(argv[0]).is_absolute():
+        raise SystemExit("--evas-command must start with an absolute executable path")
+    identity = protocol.evas_identity(argv)
+    if not identity.get("available"):
+        raise SystemExit(
+            "configured EVAS is unavailable or has no version identity: "
+            f"{identity.get('error') or identity.get('version_output') or command}"
+        )
+    return identity
+
+
+def validate_pinned_evas_identity(
+    command: str, expected: dict[str, Any] | None
+) -> dict[str, Any]:
+    if not isinstance(expected, dict) or not expected.get("available"):
+        raise SystemExit("campaign is missing its pinned EVAS identity")
+    observed = resolve_pinned_evas_identity(command)
+    fields = (
+        "command",
+        "resolved_executable",
+        "executable_sha256",
+        "version_output",
+        "sha256",
+    )
+    mismatches = [
+        field for field in fields if observed.get(field) != expected.get(field)
+    ]
+    if mismatches:
+        raise SystemExit("EVAS identity mismatch: " + ", ".join(mismatches))
+    return observed
+
+
+def command_result(
+    command: str,
+    runtime: Path,
+    timeout_s: float,
+    submission_dir: Path | None = None,
+    extra_env: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    effective_submission = submission_dir or runtime / "public" / "submission"
+    env = os.environ.copy()
+    env.update({
+        "VABENCH_RUNTIME_DIR": str(runtime),
+        "VABENCH_PUBLIC_DIR": str(runtime / "public"),
+        "VABENCH_SUBMISSION_DIR": str(effective_submission),
+        "VABENCH_FINAL_SUBMISSION_DIR": str(effective_submission),
+        "VABENCH_EVALUATOR_DIR": str(runtime / "evaluator"),
+        "VABENCH_TRUSTED_REPLAY_RESULT": str(
+            runtime / "evidence" / "trusted_replay_result.json"
+        ),
+    })
+    env.update(extra_env or {})
+    started = time.monotonic()
+    try:
+        completed = subprocess.run(
+            shlex.split(command), cwd=REPO, env=env, text=True,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout_s, check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        stdout = exc.stdout.decode(errors="replace") if isinstance(exc.stdout, bytes) else exc.stdout
+        stderr = exc.stderr.decode(errors="replace") if isinstance(exc.stderr, bytes) else exc.stderr
+        return {
+            "execution_status": "timeout",
+            "returncode": None,
+            "stdout": (stdout or "")[-12000:],
+            "stderr": (stderr or "")[-4000:],
+            "elapsed_s": time.monotonic() - started,
+        }
+    except OSError as exc:
+        return {
+            "execution_status": "launch_error",
+            "returncode": None,
+            "stdout": "",
+            "stderr": str(exc)[:4000],
+            "elapsed_s": time.monotonic() - started,
+        }
+    return {
+        "execution_status": "completed",
+        "returncode": completed.returncode,
+        "stdout": completed.stdout[-12000:],
+        "stderr": completed.stderr[-4000:],
+        "elapsed_s": time.monotonic() - started,
+    }
+
+
+def load_trusted_replay_adapter_result(runtime: Path) -> dict[str, Any] | None:
+    path = runtime / "evidence" / "trusted_replay_result.json"
+    if not path.is_file():
+        return None
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"status": "infrastructure_failure", "diagnostics": ["invalid_result_json"]}
+    if not isinstance(value, dict):
+        return {
+            "status": "infrastructure_failure",
+            "diagnostics": ["trusted_replay_result_must_be_an_object"],
+        }
+    return value
+
+
+class FinalReplayReservedError(RuntimeError):
+    """A terminal scoring runtime cannot reenter generation or final judging."""
+
+
+def assert_final_replay_not_started(runtime: Path) -> None:
+    reservation = runtime / "evidence/bound-final-test"
+    if reservation.exists() or reservation.is_symlink():
+        raise FinalReplayReservedError("final replay already reserved; model reentry and in-place retry are forbidden")
+
+
+def run_trusted_replay(
+    runtime: Path,
+    command: str | None,
+    timeout_s: int,
+    evas_command: str,
+    final_submission: dict[str, Any] | None = None,
+    *,
+    final_test_profile: dict[str, Any] | None = None,
+    episode_context: Any = None,
+    _execute: Callable | None = None,
+) -> dict[str, Any]:
+    # Preserve the legacy runner's _run_trusted_replay injection seam while
+    # keeping the actual dispatch and one-use guard owned here.
+    execute = _execute if _execute is not None else _run_trusted_replay
+    assert_final_replay_not_started(runtime)
+    if final_test_profile is not None or episode_context is not None:
+        if final_test_profile is None or episode_context is None or not command or final_submission is None:
+            raise ValueError("bound replay requires profile, context, command and frozen submission")
+        return execute_bound_replay(
+            runtime=runtime, command=command, timeout_s=timeout_s, evas_command=evas_command,
+            final_submission=final_submission, final_test_profile=final_test_profile,
+            context=episode_context, execute=execute,
+        )
+    return execute(runtime, command, timeout_s, evas_command, final_submission)
+
+
+def _run_trusted_replay(
+    runtime: Path, command: str | None, timeout_s: int, evas_command: str,
+    final_submission: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    result_path = runtime / "evidence" / "trusted_replay_result.json"
+    result_path.parent.mkdir(parents=True, exist_ok=True)
+    result_path.unlink(missing_ok=True)
+    test_manifest = protocol.hash_test_tree(runtime / "evaluator")
+    identity = protocol.evas_identity(shlex.split(evas_command))
+    submission_dir = runtime / "evidence" / "final_submission"
+    command_record = (
+        command_result(
+            command,
+            runtime,
+            timeout_s,
+            submission_dir,
+            {"VABENCH_EVAS_COMMAND": evas_command},
+        )
+        if command
+        else None
+    )
+    adapter_result = load_trusted_replay_adapter_result(runtime) if command else None
+    return protocol.trusted_replay(
+        command_record,
+        adapter_result,
+        test_manifest,
+        identity,
+        (final_submission or {}).get("tree_sha256"),
+    )

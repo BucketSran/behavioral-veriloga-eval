@@ -749,7 +749,7 @@ def test_score_report_resume_reuses_persisted_trusted_replay(
         )
     )
     monkeypatch.setattr(
-        SCORER.RUNNER,
+        SCORER.final_replay,
         "run_trusted_replay",
         lambda *args, **kwargs: pytest.fail("resume reran trusted replay"),
     )

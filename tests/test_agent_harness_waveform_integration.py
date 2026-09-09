@@ -125,7 +125,8 @@ def waveform_reader_case(executor, action, records):
     from runners.agent_harness.tools import waveform_summary
     root = Path(public_waveform.__file__).parent
     sources = {name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in (
-        "public_waveform.py", "mini_swe_vabench.py", "public_validation.py", "run_campaign.py")}
+        "public_waveform.py", "mini_swe_vabench.py", "public_validation.py", "run_campaign.py",
+        "submission_contract.py")}
     sources["waveform_summary.py"] = hashlib.sha256(Path(waveform_summary.__file__).read_bytes()).hexdigest()
     return {"runtime": executor.runtime, "profile": executor.profile,
         "manifest": {"condition": "Agentic", "attempt_id": executor.context.attempt_id,
@@ -136,6 +137,35 @@ def waveform_reader_case(executor, action, records):
             "environment": {"sandbox_backend": "docker", "image_id": executor.image_id}},
         "events": [{"event_type": "action_authorized", "payload": {"action_id": action.action_id,
             "tool_name": action.tool_name}}], "private": records}
+
+
+@pytest.mark.parametrize("historical", [False, True])
+def test_waveform_reader_preserves_pre_extraction_source_identity(public_case, monkeypatch, historical):  # noqa: F811
+    import public_waveform
+    from result_protocol import canonical_sha256
+
+    def original_contract_hash(value):
+        if isinstance(value, dict) and "contract_sources" in value:
+            value = {**value, "contract_sources": {
+                name: digest for name, digest in value["contract_sources"].items()
+                if name != "submission_contract.py"
+            }}
+        return canonical_sha256(value)
+
+    # Emulate an already-frozen pre-extraction profile; never rewrite source code.
+    with monkeypatch.context() as patch:
+        if historical:
+            patch.setattr(public_waveform, "canonical_sha256", original_contract_hash)
+        executor, _, _, action = tool_case(public_case, [])
+    case = waveform_reader_case(executor, action, [])
+    case["events"] = []
+    if historical:
+        case["manifest"]["source_sha256"].pop("submission_contract.py")
+    assert public_waveform.read_native_waveform_evidence(**case)["public_validation_calls"] == 0
+    # A removed/new/changed source is not silently accepted under the old profile.
+    case["manifest"]["source_sha256"]["submission_contract.py"] = "f" * 64
+    with pytest.raises(ValueError, match="profile mismatch"):
+        public_waveform.read_native_waveform_evidence(**case)
 
 
 @pytest.mark.parametrize("when", ["before_execution", "after_receipt"])

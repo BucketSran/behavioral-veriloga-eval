@@ -25,6 +25,10 @@ import run_campaign as runner  # noqa: E402
 import native_episode  # noqa: E402
 import public_validation  # noqa: E402
 import final_replay  # noqa: E402
+from native_contracts import (  # noqa: E402
+    backend_profile as _backend_profile,
+    submit_artifacts_tool_descriptor as _submit_artifacts_tool_descriptor,
+)
 from runners.agent_harness import (  # noqa: E402
     AgentAction,
     EpisodeContext,
@@ -73,62 +77,6 @@ def _redact(value, credential):
     if isinstance(value, list):
         return [_redact(item, credential) for item in value]
     return value
-
-
-def _backend_profile(episode_backend="native-mini-swe", proposal_format="native_tool_calls"):
-    if episode_backend not in {"native-mini-swe", "native-reasoning"}:
-        raise ValueError("unsupported native backend")
-    if proposal_format not in {"native_tool_calls", "strict_json"}:
-        raise ValueError("unsupported proposal format")
-    if episode_backend != "native-reasoning" and proposal_format != "native_tool_calls":
-        raise ValueError("strict_json requires native-reasoning")
-    profile = {
-        "schema_version": "vaevas-backend-profile-v1",
-        "backend_profile_id": "mini-swe/native-single-cell-v1",
-        "backend_family": "mini_swe",
-        "backend_version": mini.MINI_SWE_AGENT_VERSION,
-        "inference_mode": "single_trajectory",
-        "supported_proposal_formats": ["native_tool_calls"],
-        "preferred_proposal_format": "native_tool_calls",
-        "action_schema_id": "vaevas-action-v1",
-        "observation_schema_id": "vaevas-observation-v1",
-        "proposal_normalizer_id": "vaevas-proposal-normalizer-v1",
-        "model_interface": {
-            "protocol": "openai_compatible_chat_completions",
-            "supports_streaming": True,
-            "supports_native_tool_calls": True,
-            "supports_strict_json": False,
-        },
-        "state_scope": {
-            "memory_scope": "episode_local",
-            "shares_state_across_tasks": False,
-            "shares_state_across_conditions": False,
-        },
-        "requires_campaign_contracts": [
-            "model_identity",
-            "decoding_policy",
-            "turn_budget",
-            "wall_time_budget",
-            "condition_identity",
-        ],
-        "requires_environment_contracts": [
-            "clean_room_runtime",
-            "proposal_tool_allowlist",
-            "trajectory_sink",
-            "candidate_store",
-            "submission_freeze",
-            "final_judge",
-        ],
-    }
-    if episode_backend == "native-reasoning":
-        profile.update({
-            "backend_profile_id": "alphaapollo/reasoning-single-cell-v1",
-            "backend_family": "alphaapollo_reasoning", "backend_version": "1",
-            "supported_proposal_formats": ["native_tool_calls", "strict_json"],
-            "preferred_proposal_format": proposal_format,
-        })
-        profile["model_interface"]["supports_strict_json"] = True
-    return profile
 
 
 def validate_native_cell(cell: dict) -> str:
@@ -524,36 +472,6 @@ class _OneShotSubmissionEnvironment:
         return runner.RESULT_PROTOCOL.hash_test_tree(root)["tree_sha256"]
 
 
-def _submit_artifacts_tool_descriptor(runtime: Path) -> dict:
-    schema = runner.submit_artifacts_tool_schema(runtime)["function"]["parameters"]
-    return {
-        "schema_version": "vaevas-tool-descriptor-v1",
-        "tool_id": "native/submit-artifacts-v1",
-        "tool_name": "submit_artifacts",
-        "tool_version": "1",
-        "lifecycle": "active",
-        "model_visibility": "model_visible",
-        "allowed_conditions": ["OneShot"],
-        "budget_class": "submission",
-        "state_effect": "terminal_submission",
-        "candidate_effect": "freeze",
-        "argument_schema": schema,
-        "observation_schema": {
-            "type": "object",
-            "properties": {"output": {"type": "string"}},
-            "required": ["output"],
-            "additionalProperties": False,
-        },
-        "evidence_policy": {
-            "records_private_evidence": False,
-            "may_enter_model_observation": True,
-            "may_enter_shared_memory": False,
-            "requires_candidate_binding": True,
-        },
-        "handler_id": "native.submit_artifacts",
-    }
-
-
 def run_prepared_native_mini_swe(
     *,
     runtime: Path,
@@ -745,6 +663,10 @@ def run_prepared_native_mini_swe(
                     "native_episode.py",
                     "mini_swe_vabench.py",
                     "run_campaign.py",
+                    "submission_contract.py",
+                    "campaign_telemetry.py",
+                    "native_contracts.py",
+                    "final_replay.py",
                 )
             },
             "claim_scope": "development_only_opt_in_single_cell",
