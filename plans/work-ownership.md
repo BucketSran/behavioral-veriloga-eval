@@ -1,6 +1,21 @@
 # vaEVAS Development Work Ownership
 
-Updated: 2026-09-01
+Updated: 2026-09-09
+
+## Architecture navigation assignment — active
+
+Base `b21d8462e7`. The current main coordinator is the sole writer and Git owner
+for root/docs/package README navigation, `docs/ARCHITECTURE.md`,
+`docs/alphaapollo-migration/00_迁移主线.md`, the existing navigation test, and
+shared plan/log records. One independent reviewer may inspect the stable diff
+read-only; no delegated writer is authorized.
+
+Scope: distinguish current code structure from historical feature records,
+correct stale backend status, and replace duplicated status/code maps with
+links to their owners. No runtime/API/schema change, file relocation, paid run,
+credential read, release/EVAS change, old-tree write or upstream push.
+Acceptance: local navigation/layout regressions, exact diff review and
+independent read-only review. Earlier assignments below remain closed.
 
 ## Real-model diagnostic assignment — implementation closed
 

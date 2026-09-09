@@ -1,4 +1,29 @@
-# V4 Calibration Pilot
+# V4 Runtime and Evaluation Operations
+
+The `calibration_pilot` directory name is historical. It now contains active
+runtime assembly, public feedback, final evaluation and named experiments.
+Paths remain stable for existing callers; this is not a new launcher/package.
+
+## Module map
+
+| Responsibility | Owning files |
+| --- | --- |
+| Campaign definition and execution | [build_campaign.py](build_campaign.py), [experiment_policy.py](experiment_policy.py), [run_campaign.py](run_campaign.py) |
+| Legacy agent/runtime and reused bridges | [mini_swe_vabench.py](mini_swe_vabench.py) |
+| Native batch and fresh attempts | [run_native_batch.py](run_native_batch.py), [run_native_attempts.py](run_native_attempts.py) |
+| Native policy/environment/tool assembly | [run_native_mini_swe.py](run_native_mini_swe.py): mini-swe, Reasoning and OneShot despite its historical name |
+| Native episode and terminal judge wiring | [native_episode.py](native_episode.py) |
+| Public candidate feedback | [public_validation.py](public_validation.py), [public_waveform.py](public_waveform.py) |
+| Freeze, final replay and score verification | [result_protocol.py](result_protocol.py), [final_replay.py](final_replay.py), [score_campaign.py](score_campaign.py) |
+| Evolution branch/round/batch assembly | [run_native_evolution.py](run_native_evolution.py), [run_evolution_campaign.py](run_evolution_campaign.py), [evolution_batch.py](evolution_batch.py) |
+| Ledger and read-only report export | [result_ledger.py](result_ledger.py), [reporting_sources.py](reporting_sources.py), [result_adapter.py](result_adapter.py) |
+
+The shared contracts/controller/tools live in
+[`runners/agent_harness`](../../../runners/agent_harness/README.md), outside v4.
+`run_campaign.py` still exposes operations consumed by other scripts, including
+the scorer; this map describes current ownership, not a completed dependency
+inversion. Separate named experiment entrypoints are listed in the runner guide
+below. Spectre scoring remains conditional, not the routine development path.
 
 ## Start here
 

@@ -118,6 +118,8 @@ def test_historical_guides_redirect_current_work(name: str) -> None:
     (
         "README.md",
         "docs/README.md",
+        "docs/ARCHITECTURE.md",
+        "runners/agent_harness/README.md",
         "plans/current-plan.md",
         "benchmark-vabench-release-v4/runners/README.md",
         "benchmark-vabench-release-v4/operations/calibration_pilot/README.md",

@@ -1,5 +1,27 @@
 # Verification Log
 
+## 2026-09-09 - Architecture and owner-local navigation
+
+- Base: `b21d8462e7`. Fetched behavioral repository `origin` and `upstream`;
+  `main...origin/main` was 0/0 and `upstream/main...main` was 0/191. Fork main
+  contains the fetched upstream history; it is not identical to upstream.
+- EVAS working tree was clean at `6cb6fa7` on
+  `audit/evas-evaluator-compat`; its locally cached upstream/fork main refs
+  matched. No EVAS fetch, code edit or push was performed in this slice.
+- Extended the existing navigation check to include the architecture guide
+  and harness package README. Ran `.venv/bin/python -m pytest -q
+  tests/test_v4_r53_active_entrypoints.py tests/test_evas_output_cleanup.py
+  tests/test_task_count_filters.py`: **59 passed**. `git diff --check` passed.
+- Independent read-only reviewer `architecture_navigation_review` checked
+  module ownership, legacy/native control flow, candidate/final terminals and
+  waveform receipt boundaries against code. No blocking finding; corrected its
+  P3 distinction between entrypoint selection and the detailed command guide.
+  Coordinator reran the same 59 tests after correction: **59 passed**.
+- Runtime sources, schema, release and environment files are unchanged. No
+  model call, credential access, Docker/EVAS smoke or Spectre run was needed
+  or executed for this documentation-only change. Existing runtime evidence
+  is not presented as a fresh functional validation.
+
 ## 2026-09-01 - CNY 30 real-model differential and tool diagnostic
 
 - Preflight verified a repository-external owner-only credential file, CNY

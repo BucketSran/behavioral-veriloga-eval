@@ -22,19 +22,23 @@ successor revision and provenance.
 
 ## Start Here
 
+- [Architecture and code reading map](docs/ARCHITECTURE.md): what runs where,
+  the native episode flow, and the remaining structural debt.
 - [Agent contract](AGENTS.md): authority, isolation, evaluator and claim boundaries.
 - [Documentation index](docs/README.md): current guides versus historical records.
 - [Current plan](plans/current-plan.md): implemented scope and remaining work.
 - [Campaign runners](benchmark-vabench-release-v4/runners/README.md) and
-  [calibration / mini-swe operations](benchmark-vabench-release-v4/operations/calibration_pilot/README.md):
+  [runtime and evaluation operations](benchmark-vabench-release-v4/operations/calibration_pilot/README.md):
   executable operator entrypoints.
 - [AlphaApollo migration notes](docs/alphaapollo-migration/README.md):
   ideas, exact code changes, tests, and known differences.
 - [Verification log](logs/verification-log.md): dated local and hosted evidence.
 
-The legacy mini-swe backend remains the default. The native single-cell launcher
-is opt-in; AlphaApollo Reasoning/Evolution and complete native campaign coverage
-remain unfinished. Connectivity smokes do not establish model performance.
+Legacy mini-swe remains the default. Native mini-swe and Reasoning support the
+matched arms across DUT, bugfix and Testbench as opt-in paths; Evolution is a
+separate opt-in condition. Implementation and connectivity evidence do not
+establish model quality or the benefit of optional tools. See the current plan
+for the remaining experimental evidence gaps.
 
 ## Evaluation And Visibility
 

@@ -1,6 +1,10 @@
 # Documentation Index
 
-Updated: 2026-09-01
+Updated: 2026-09-09
+
+To understand the code, start with the [architecture map](ARCHITECTURE.md).
+It links the current runtime and harness owners; historical feature notes
+explain why those capabilities were added, not where to start every code change.
 
 ## Current Instructions
 
@@ -10,7 +14,7 @@ Read these for new work, in this order:
 2. [r53 manifest](../benchmark-vabench-release-v4/release/benchmarkv4-r53/MANIFEST.json)
    and [release certification](../benchmark-vabench-release-v4/R53_RELEASE_CERTIFICATION.md).
 3. [Campaign runner guide](../benchmark-vabench-release-v4/runners/README.md) and
-   [calibration / mini-swe guide](../benchmark-vabench-release-v4/operations/calibration_pilot/README.md).
+   [runtime and evaluation reference](../benchmark-vabench-release-v4/operations/calibration_pilot/README.md).
 4. [Current plan](../plans/current-plan.md) and
    [development ownership](../plans/work-ownership.md).
 5. [AlphaApollo migration notebook](alphaapollo-migration/README.md),

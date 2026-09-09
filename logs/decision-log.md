@@ -1,5 +1,21 @@
 # Decision Log
 
+## 2026-09-09 - Explain current architecture before moving runtime modules
+
+- Apply the user-selected `write-clear-code` methodology: owner-local module
+  maps, stable existing entrypoints, responsibility-based boundaries and one
+  maintained location for current status. Source and scope are recorded in
+  `docs/ARCHITECTURE.md`; no external business implementation is imported.
+- Correct the root README's obsolete claim that Reasoning/Evolution and native
+  campaign coverage are unfinished. Distinguish implemented wiring from model
+  quality and tool-utility evidence, which remain limited.
+- Preserve runtime paths and behavior. The historical `calibration_pilot` and
+  mini-swe launcher names, plus scorer-to-runner dependency, are real structural
+  debt, not fixed by this documentation change. A later extraction needs caller,
+  compatibility and source-identity analysis plus runtime verification.
+- Keep r53, EVAS 0.8.7, legacy default, public/final authority, experimental
+  denominators and paid-run boundaries unchanged. No new debug/MCP capability.
+
 ## 2026-09-01 - Close the CNY 30 one-use diagnostic without replacement runs
 
 - Allocate at most CNY 5.00 to the six-cell comparison and CNY 5.00 to each of
