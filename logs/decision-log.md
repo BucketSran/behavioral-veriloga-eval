@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-09-09 - Keep migration history separate from current navigation
+
+- Replace the migration index's rolling feature summaries with question-based
+  links to the existing feature ledger, current plan and dated experiment.
+- Replace the migration mainline's duplicate code/status table with the code
+  map added in `58d9d913a7`. Condense the current plan's closed cleanup summary.
+- Preserve every independent feature note, experiment, certification and Git
+  recovery point. This is reduced duplication, not deletion of runtime features
+  or evidence, and not a claim that the repository now contains fewer files.
+
 ## 2026-09-09 - Explain current architecture before moving runtime modules
 
 - Apply the user-selected `write-clear-code` methodology: owner-local module

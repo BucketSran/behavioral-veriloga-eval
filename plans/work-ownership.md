@@ -2,7 +2,7 @@
 
 Updated: 2026-09-09
 
-## Architecture navigation assignment — active
+## Architecture navigation assignment — closed
 
 Base `b21d8462e7`. The current main coordinator is the sole writer and Git owner
 for root/docs/package README navigation, `docs/ARCHITECTURE.md`,
@@ -16,6 +16,10 @@ links to their owners. No runtime/API/schema change, file relocation, paid run,
 credential read, release/EVAS change, old-tree write or upstream push.
 Acceptance: local navigation/layout regressions, exact diff review and
 independent read-only review. Earlier assignments below remain closed.
+The reviewer completed with no blocking findings; its wording correction was
+applied. The architecture map is in `58d9d913a7`; the follow-up removes duplicate
+migration/current-plan summaries without deleting historical feature evidence.
+No delegated writer is active. Main owns final records and fork publication.
 
 ## Real-model diagnostic assignment — implementation closed
 

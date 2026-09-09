@@ -1,5 +1,16 @@
 # Verification Log
 
+## 2026-09-09 - Deduplicate migration navigation
+
+- Follow-up to `58d9d913a7`: migration index, migration mainline and current plan
+  now link to their owners instead of repeating completed-feature summaries.
+- The independent review described below covered these navigation changes.
+  After the final wording/plan edits, the same three focused test files passed:
+  **59 passed**; `git diff --check` passed. Current plan remains below 150 lines.
+- No historical feature/experiment file was removed, and runtime sources and
+  schemas remain unchanged. This completes the navigation assignment, not the
+  deferred runtime refactoring or model-quality evidence work.
+
 ## 2026-09-09 - Architecture and owner-local navigation
 
 - Base: `b21d8462e7`. Fetched behavioral repository `origin` and `upstream`;

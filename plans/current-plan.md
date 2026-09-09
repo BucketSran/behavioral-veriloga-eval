@@ -1,6 +1,6 @@
 # vaEVAS Current Plan
 
-Updated: 2026-09-01. This is the single active queue, not an execution history.
+Updated: 2026-09-09. This is the single active queue, not an execution history.
 The [agent contract](../AGENTS.md) defines authority; the
 [verification log](../logs/verification-log.md) records exact tests and CI status.
 
@@ -36,17 +36,16 @@ These are implemented capabilities, not a to-do list to rebuild.
 
 ## Latest completed maintenance slice
 
-[Conservative mainline cleanup](mainline-scope-cleanup.md) is implemented and verified:
+The [architecture reading map](../docs/ARCHITECTURE.md) and owner-local module
+maps now distinguish the shared harness from v4 runtime assembly. Duplicate
+migration-index status summaries and the stale root backend status are removed.
+This is navigation cleanup, not runtime relocation or a new debug capability;
+the structural debt listed in the map remains a separate implementation scope.
 
-1. Retired the two synthetic-only training modules and their exclusive tests.
-   Recovery links and historical evidence remain; real trajectory capture/safe
-   export is unchanged.
-2. Consolidated current status here and documented existing entrypoint tiers.
-   Dated feature notes/audits remain; no new wrapper or dependency was added.
-3. Retained regressions and independent review pass. Focused commits, publication
-   status and explicit skips are recorded in the verification log.
-
-No implementation remains open in this slice; the next study is a separate decision.
+The earlier [mainline cleanup](mainline-scope-cleanup.md) is closed. Its retired
+synthetic-training prototypes, recovery links and verification remain in the
+dated record; real trajectory capture/safe export is unchanged. Neither cleanup
+authorizes the next paid study or a broader runtime refactor.
 
 ## Active study: evidence before more features
 
