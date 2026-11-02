@@ -61,3 +61,9 @@ The following canonical public behavior is normative for this derived form:
 
 Return the repaired bundle with exactly these paths: `calibration_affine_transform.va`.
 Every supplied `.va` file is editable; do not add or omit files.
+
+- gain_base + gain_span * clip01(V(gain_ctrl) / vhi)
+
+- the formula `only on each rising clock edge`: center + gain * (V(raw) - center) + offset
+
+- abs(transformed - V(raw)) / resid_fullscale

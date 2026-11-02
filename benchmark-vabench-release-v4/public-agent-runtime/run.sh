@@ -26,7 +26,7 @@ if [ "${VABENCH_SKILLS_DIR:-}" ]; then
     SKILLS_ARG="--mount=type=bind,src=$SKILLS_DIR,dst=/workspace/public/skills,readonly"
 fi
 
-IMAGE_TAG="${IMAGE_TAG:-vabench-agent-runtime:0.8.3}"
+IMAGE_TAG="${IMAGE_TAG:-vabench-agent-runtime:0.8.4}"
 DOCKER="${DOCKER:-docker}"
 NETWORK="${VABENCH_NETWORK:-none}"
 HOST_UID="${VABENCH_UID:-${SUDO_UID:-$(id -u)}}"

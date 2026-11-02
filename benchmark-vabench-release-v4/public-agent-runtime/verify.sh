@@ -3,9 +3,13 @@ set -eu
 
 cd "$(dirname "$0")"
 
-IMAGE_TAG="${IMAGE_TAG:-vabench-agent-runtime:0.8.3}"
+IMAGE_TAG="${IMAGE_TAG:-vabench-agent-runtime:0.8.4}"
+NOEXEC_IMAGE_TAG="${NOEXEC_IMAGE_TAG:-vabench-agent-runtime:0.8.4-noexec}"
 DOCKER="${DOCKER:-docker}"
-TMP_ROOT=$(mktemp -d)
+SHARED_TMP_PARENT="${VABENCH_DOCKER_SHARED_TMPDIR:-$PWD}"
+mkdir -p "$SHARED_TMP_PARENT"
+SHARED_TMP_PARENT=$(cd "$SHARED_TMP_PARENT" && pwd -P)
+TMP_ROOT=$(mktemp -d "$SHARED_TMP_PARENT/.vabench-runtime-verify.XXXXXX")
 trap 'rm -rf "$TMP_ROOT"' EXIT INT TERM
 
 mkdir -p "$TMP_ROOT/task" "$TMP_ROOT/submission" "$TMP_ROOT/work"
@@ -54,7 +58,7 @@ import csv
 import json
 
 identity = json.load(open("work/evas-identity.json", encoding="utf-8"))
-assert identity["package_version"] == "0.8.3"
+assert identity["package_version"] == "0.8.4"
 assert identity["rust_core_present"] is True
 assert identity["rust_core_loadable"] is True
 with open("/tmp/vabench-visible/evas-output/tran.csv", newline="", encoding="utf-8") as handle:
@@ -66,4 +70,30 @@ PY
         test ! -e /workspace/evaluator
     '
 
-echo "PASS: image, mounts, EVAS Rust core, and tran.csv access verified"
+"$DOCKER" run --rm \
+    --platform linux/amd64 \
+    --read-only \
+    --cap-drop=ALL \
+    --security-opt=no-new-privileges \
+    --network=none \
+    --tmpfs /tmp:rw,nosuid,nodev,size=256m,mode=1777 \
+    --tmpfs /home/agent:rw,nosuid,nodev,size=64m,mode=0700,uid=10001,gid=10001 \
+    --mount "type=bind,src=$TMP_ROOT/task,dst=/workspace/public/task,readonly" \
+    --mount "type=bind,src=$TMP_ROOT/submission,dst=/workspace/public/submission" \
+    --mount "type=bind,src=$TMP_ROOT/work,dst=/workspace/work" \
+    "$NOEXEC_IMAGE_TAG" /bin/bash -lc '
+        set -eu
+        test -r public/task/visible_test.scs
+        test ! -w public/task/visible_test.scs
+        test -w public/submission
+        test -w work
+        ! command -v evas >/dev/null
+        python3 - <<"PY"
+import importlib.util
+assert importlib.util.find_spec("evas") is None
+PY
+        test ! -e /opt/benchmark
+        test ! -e /workspace/evaluator
+    '
+
+echo "PASS: matched Agentic and Agent-NoExec images verified"

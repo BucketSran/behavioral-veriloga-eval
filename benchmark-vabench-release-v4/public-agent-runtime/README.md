@@ -28,8 +28,12 @@ cd benchmark-vabench-release-v4/public-agent-runtime
 
 `environment/requirements.lock` pins EVAS and every Python dependency by
 version and SHA-256. `environment/Dockerfile` pins the base image by digest.
-Record the image ID
-printed by `build.sh`; campaign records should use that immutable identity.
+`build.sh` creates the matched
+`vabench-agent-runtime:0.8.4` and
+`vabench-agent-runtime:0.8.4-noexec` images. The latter uses the same base,
+lockfile, and shell environment but removes the EVAS package and executable for
+the Agent-NoExec control arm. Record both image IDs printed by `build.sh`;
+campaign records should use those immutable identities.
 
 ## Verify
 
@@ -37,12 +41,19 @@ printed by `build.sh`; campaign records should use that immutable identity.
 ./verify.sh
 ```
 
+The verifier creates bind-mounted scratch directories below this runtime
+directory so Docker Desktop and Colima can access them. Set
+`VABENCH_DOCKER_SHARED_TMPDIR` to another Docker-shared host directory when
+needed.
+
 The verifier checks:
 
-- EVAS 0.8.3 is installed with a loadable Rust core;
+- EVAS 0.8.4 is installed with a loadable Rust core;
 - the public task mount is readable but not writable;
 - submission and work mounts are writable;
 - strict EVAS simulation produces a readable `tran.csv`;
+- the matched Agent-NoExec image exposes neither the `evas` command nor its
+  Python module;
 - the image does not expose `/opt/benchmark` or `/workspace/evaluator`.
 
 ## Run One Assigned Task

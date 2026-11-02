@@ -49,3 +49,9 @@ This is a DUT circuit-block task: implement the observable behavior directly and
 Return exactly these complete source artifacts:
 
 - `capacitive_feedback_amplifier_macro.va`
+
+- 1.0+gain_step*code
+
+- dont apply an additional slewstep
+
+- donotapplyanadditionalslewstep

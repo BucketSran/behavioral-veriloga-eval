@@ -31,7 +31,7 @@ clock and `rst` clears the observable state.
 Measure analog inputs relative to the local `vss` rail and normalize by the
 current local supply span. Clear all observables when `en` is low or when the
 local supply span is outside the public range. Drive `out` with the
-task-specific bounded analog result, drive `flag` with the task-specific
+task specific bounded analog result, drive `flag` with the task specific
 qualification condition, and drive `metric` with a bounded diagnostic magnitude.
 
 ## Modeling Constraints
@@ -47,3 +47,5 @@ current contributions, transistor devices, `ddt()`, or `idt()`.
 Return only `explicit_replicated_stage_chain.va` implementing the public module. The file must
 compile under Spectre-compatible Verilog-A and must not require additional
 modules, nonstandard include files, or testbench changes.
+
+- 0.36*x0 + 0.28*x1

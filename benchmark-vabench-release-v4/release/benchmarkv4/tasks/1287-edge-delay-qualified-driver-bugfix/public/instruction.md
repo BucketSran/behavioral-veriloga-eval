@@ -38,7 +38,7 @@ Preserve this exact artifact and module interface:
 
 The repaired bundle must satisfy every public property:
 
-- `P_MEASURE_ANALOG_INPUTS_RELATIVE_TO_THE`: restore: Measure analog inputs relative to the local `vss` rail and normalize by the current local supply span. Clear all observables when `en` is low or when the local supply span is outside the public range. The DUT updates its observable state on the public clock edge and clears state while reset is high. Drive `out` with the task-specific bounded analog result, drive `flag` with the task-specific qualification condition, and drive `metric` with a bounded diagnostic magnitude. Required traces: `time`, `clk`, `ctrl0`, `ctrl1`, `en`, `flag`, `in0`, `in1`, `in2`, `in3`, `metric`, `out`, `rst`, `vdd`, `vss`.
+- `P_MEASURE_ANALOG_INPUTS_RELATIVE_TO_THE`: restore: Measure analog inputs relative to the local `vss` rail and normalize by the current local supply span. Clear all observables when `en` is low or when the local supply span is outside the public range. The DUT updates its observable state on the public clock edge and clears state while reset is high. Drive `out` with the task specific bounded analog result, drive `flag` with the task specific qualification condition, and drive `metric` with a bounded diagnostic magnitude. Required traces: `time`, `clk`, `ctrl0`, `ctrl1`, `en`, `flag`, `in0`, `in1`, `in2`, `in3`, `metric`, `out`, `rst`, `vdd`, `vss`.
 - `P_BUILD_A_VOLTAGE_DOMAIN_ANALOG_MIXED`: restore: Build a voltage-domain analog/mixed-signal helper or monitor. Clock-edge qualified delay-style driver replacing specify/specparam timing with explicit event state. Required traces: `time`, `clk`, `ctrl0`, `ctrl1`, `en`, `flag`, `in0`, `in1`, `in2`, `in3`, `metric`, `out`, `rst`, `vdd`, `vss`.
 - `P_VTH_0_45_V_LOGIC_THRESHOLD`: restore: `vth = 0.45 V`: logic threshold for voltage-coded controls. Required traces: `time`, `clk`, `ctrl0`, `ctrl1`, `en`, `flag`, `in0`, `in1`, `in2`, `in3`, `metric`, `out`, `rst`, `vdd`, `vss`.
 - `P_VHI_0_9_V_HIGH_LEVEL`: restore: `vhi = 0.9 V`: high level for output observables. Required traces: `time`, `clk`, `ctrl0`, `ctrl1`, `en`, `flag`, `in0`, `in1`, `in2`, `in3`, `metric`, `out`, `rst`, `vdd`, `vss`.
@@ -51,7 +51,7 @@ The following canonical public behavior is normative for this derived form:
 Measure analog inputs relative to the local `vss` rail and normalize by the
 current local supply span. Clear all observables when `en` is low or when the
 local supply span is outside the public range. The DUT updates its observable state on the public clock edge and clears state while reset is high. Drive `out` with the
-task-specific bounded analog result, drive `flag` with the task-specific
+task specific bounded analog result, drive `flag` with the task specific
 qualification condition, and drive `metric` with a bounded diagnostic magnitude.
 
 
@@ -66,3 +66,5 @@ qualification condition, and drive `metric` with a bounded diagnostic magnitude.
 
 Return the repaired bundle with exactly these paths: `edge_delay_qualified_driver.va`.
 Every supplied `.va` file is editable; do not add or omit files.
+
+- x0 > x1

@@ -16,6 +16,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE = ROOT / "benchmark-vabench-release-v4" / "release" / "benchmarkv4"
 R49_RELEASE = ROOT / "benchmark-vabench-release-v4" / "release" / "benchmarkv4-r49"
+R51_RELEASE = ROOT / "benchmark-vabench-release-v4" / "release" / "benchmarkv4-r51"
 BUILD_CAMPAIGN = (
     ROOT
     / "benchmark-vabench-release-v4"
@@ -117,6 +118,18 @@ def load_run_campaign():
     return module
 
 
+def load_campaign_wrapper():
+    spec = importlib.util.spec_from_file_location(
+        "run_benchmarkv4_campaign", RUN_CAMPAIGN_WRAPPER
+    )
+    assert spec is not None
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
 def load_score_campaign():
     spec = importlib.util.spec_from_file_location("score_campaign_test", SCORE_CAMPAIGN)
     assert spec is not None and spec.loader is not None
@@ -186,7 +199,7 @@ def load_prepare_budget_reuse():
 
 def write_runtime_policy(runtime: Path, artifacts: list[str]) -> None:
     evaluator = runtime / "evaluator"
-    evaluator.mkdir(parents=True)
+    evaluator.mkdir(parents=True, exist_ok=True)
     (evaluator / "score_policy.json").write_text(
         json.dumps({"candidate_artifacts": artifacts}),
         encoding="utf-8",
@@ -649,6 +662,292 @@ def test_direct_parser_preserves_exact_body_and_records_evidence(tmp_path: Path)
     assert result["artifact_sha256"]["nested/model.va"] == hashlib.sha256(
         body.encode()
     ).hexdigest()
+
+
+def test_submit_artifacts_tool_schema_requires_the_complete_declared_bundle(
+    tmp_path: Path,
+) -> None:
+    runner = load_run_campaign()
+    runtime = tmp_path / "runtime"
+    write_runtime_policy(runtime, ["top.va", "blocks/child.va"])
+
+    schema = runner.submit_artifacts_tool_schema(runtime)
+
+    assert schema["function"]["name"] == "submit_artifacts"
+    artifacts = schema["function"]["parameters"]["properties"]["artifacts"]
+    assert artifacts["required"] == ["top.va", "blocks/child.va"]
+    assert artifacts["additionalProperties"] is False
+    assert set(artifacts["properties"]) == {"top.va", "blocks/child.va"}
+
+
+def test_submit_artifacts_writes_only_a_complete_declared_bundle(tmp_path: Path) -> None:
+    runner = load_run_campaign()
+    runtime = tmp_path / "runtime"
+    write_runtime_policy(runtime, ["top.va", "blocks/child.va"])
+    (runtime / "public" / "submission").mkdir(parents=True)
+
+    text, finalized = runner.execute_tool(
+        "submit_artifacts",
+        {
+            "artifacts": {
+                "top.va": "module top; endmodule\n",
+                "blocks/child.va": "module child; endmodule\n",
+            }
+        },
+        runtime,
+        30,
+        "evas",
+    )
+
+    result = json.loads(text)
+    assert finalized is True
+    assert result["status"] == "submitted"
+    assert result["saved_files"] == ["blocks/child.va", "top.va"]
+    assert (runtime / "public" / "submission" / "top.va").read_text(
+        encoding="utf-8"
+    ) == "module top; endmodule\n"
+
+    with pytest.raises(ValueError, match="missing_artifact_path:blocks/child.va"):
+        runner.execute_tool(
+            "submit_artifacts",
+            {"artifacts": {"top.va": "module top; endmodule\n"}},
+            runtime,
+            30,
+            "evas",
+        )
+
+
+def test_submit_artifacts_tool_uses_provider_neutral_auto_tool_choice() -> None:
+    runner = load_run_campaign()
+    client = runner.OpenAICompatible(
+        base_url="https://provider.invalid/v1",
+        model="test-model",
+        api_key="test-key",
+        timeout_s=30,
+        temperature=0.0,
+        stream=True,
+    )
+    captured: dict[str, object] = {}
+
+    def capture(payload, *, timeout_s):
+        captured.update(payload)
+        return {"choices": [{"message": {"role": "assistant", "content": ""}}]}
+
+    client._complete_stream = capture
+    tool = {
+        "type": "function",
+        "function": {
+            "name": "submit_artifacts",
+            "description": "transport",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    }
+
+    client.complete([{"role": "user", "content": "task"}], 4096, [tool])
+
+    assert captured["tool_choice"] == "auto"
+
+
+def test_provider_concurrency_limit_records_client_queue_time() -> None:
+    runner = load_run_campaign()
+
+    class Delegate:
+        def complete(self, *_args, **_kwargs):
+            return {"choices": [{"message": {"role": "assistant", "content": "ok"}}]}
+
+    client = runner.ConcurrencyLimitedClient(Delegate(), max_inflight=1)
+    response = client.complete([], 1, None)
+
+    assert response["_vaevas_transport"]["api_max_inflight"] == 1
+    assert response["_vaevas_transport"]["client_queue_wait_s"] >= 0.0
+
+
+def test_oneshot_text_fallback_normalizes_transport_without_reading_semantics(
+    tmp_path: Path,
+) -> None:
+    runner = load_run_campaign()
+    runtime = tmp_path / "runtime"
+    write_runtime_policy(runtime, ["model.va"])
+    (runtime / "public" / "submission").mkdir(parents=True)
+    text = "```verilog\nmodule model; endmodule\n```"
+
+    result = runner.extract_normalized_direct_submission(text, runtime)
+
+    assert result["submission_protocol_compliant"] is True
+    assert result["original_protocol_compliant"] is False
+    assert result["submission_transport"] == "runner_normalized_text"
+    assert result["extraction_protocol"] == "single_artifact_fenced_block"
+    assert (runtime / "public" / "submission" / "model.va").read_text(
+        encoding="utf-8"
+    ) == "module model; endmodule\n"
+
+
+def test_oneshot_arm_submits_with_one_transport_only_tool_call(
+    tmp_path: Path, r45_release: Path,
+) -> None:
+    runner = load_run_campaign()
+    cell = campaign_cell("G0", r45_release)
+    cell.update(
+        {
+            "experimental_arm": "OneShot",
+            "base_mode": "G0",
+            "executable_feedback": False,
+        }
+    )
+
+    class SubmitClient:
+        calls = 0
+        messages = None
+
+        def complete(self, messages, _max_tokens, tools, **_kwargs):
+            self.calls += 1
+            self.messages = messages
+            artifact_schema = tools[0]["function"]["parameters"]["properties"][
+                "artifacts"
+            ]
+            artifacts = {
+                path: f"// complete candidate for {path}\n"
+                for path in artifact_schema["required"]
+            }
+            return {
+                "id": "submit-response",
+                "model": "test-model",
+                "choices": [
+                    {
+                        "finish_reason": "tool_calls",
+                        "message": {
+                            "role": "assistant",
+                            "content": "",
+                            "tool_calls": [
+                                {
+                                    "id": "submit-call",
+                                    "type": "function",
+                                    "function": {
+                                        "name": "submit_artifacts",
+                                        "arguments": json.dumps(
+                                            {"artifacts": artifacts}
+                                        ),
+                                    },
+                                }
+                            ],
+                        },
+                    }
+                ],
+                "usage": {"completion_tokens": 32},
+            }
+
+    client = SubmitClient()
+    result = runner.run_cell(
+        cell, run_args(tmp_path / "run", r45_release), client
+    )
+
+    assert client.calls == 1
+    assert result["status"] == "submitted"
+    assert result["submission_protocol_compliant"] is True
+    assert result["extraction_protocol"] == "submit_artifacts_tool-v1"
+    assert result["submission_transport"] == "runner_managed"
+    assert result["artifact_gate"]["passed"] is True
+    prompt = (
+        tmp_path / "run" / cell["cell_id"] / "direct_prompt.txt"
+    ).read_text(encoding="utf-8")
+    assert "Call `submit_artifacts` exactly once" not in prompt
+    assert "<<<VABENCH_ARTIFACT path=" in prompt
+    assert client.messages[0] == {
+        "role": "system",
+        "content": runner.ONESHOT_TRANSPORT_INSTRUCTION,
+    }
+    assert client.messages[1] == {"role": "user", "content": prompt}
+
+
+def test_oneshot_arm_normalizes_redundant_submit_artifacts_wrapper(
+    tmp_path: Path, r45_release: Path,
+) -> None:
+    runner = load_run_campaign()
+    cell = campaign_cell("G0", r45_release)
+    cell.update(
+        {
+            "experimental_arm": "OneShot",
+            "base_mode": "G0",
+            "executable_feedback": False,
+        }
+    )
+
+    class MalformedSubmitClient:
+        def complete(self, _messages, _max_tokens, tools, **_kwargs):
+            artifact_schema = tools[0]["function"]["parameters"]["properties"][
+                "artifacts"
+            ]
+            artifacts = {
+                path: f"// complete candidate for {path}\n"
+                for path in artifact_schema["required"]
+            }
+            redundant = {
+                path: f"// conflicting redundant copy for {path}\n"
+                for path in artifact_schema["required"]
+            }
+            malformed = json.dumps(
+                {"artifacts": artifacts, **redundant}
+            ) + "}"
+            return {
+                "id": "malformed-submit-response",
+                "model": "test-model",
+                "choices": [
+                    {
+                        "finish_reason": "tool_calls",
+                        "message": {
+                            "role": "assistant",
+                            "content": "",
+                            "tool_calls": [
+                                {
+                                    "id": "malformed-submit-call",
+                                    "type": "function",
+                                    "function": {
+                                        "name": "submit_artifacts",
+                                        "arguments": malformed,
+                                    },
+                                }
+                            ],
+                        },
+                    }
+                ],
+                "usage": {"completion_tokens": 32},
+            }
+
+    result = runner.run_cell(
+        cell, run_args(tmp_path / "run", r45_release), MalformedSubmitClient()
+    )
+
+    assert result["status"] == "submitted"
+    assert result["submission_protocol_compliant"] is True
+    assert result["original_protocol_compliant"] is False
+    assert result["submission_transport"] == "runner_normalized_tool"
+    assert result["events"][-1]["argument_protocol_compliant"] is False
+    assert (
+        result["events"][-1]["argument_normalization"]
+        == "redundant_artifact_wrapper"
+    )
+
+
+def test_submit_artifacts_normalizer_rejects_ambiguous_content() -> None:
+    runner = load_run_campaign()
+    artifacts = {"model.va": "module model; endmodule\n"}
+
+    with pytest.raises(ValueError, match="unknown submit_artifacts wrapper fields"):
+        runner.decode_tool_arguments(
+            "submit_artifacts",
+            json.dumps(
+                {
+                    "artifacts": artifacts,
+                    "unexpected": "not a declared artifact path",
+                }
+            ) + "}",
+        )
+
+    with pytest.raises(ValueError, match="ambiguous trailing"):
+        runner.decode_tool_arguments(
+            "submit_artifacts",
+            json.dumps({"artifacts": artifacts}) + '{"other": true}',
+        )
 
 
 def test_usage_fallback_counts_reasoning_and_tool_arguments() -> None:
@@ -1148,6 +1447,92 @@ def test_agentic_run_cell_uses_mini_swe_bash_scaffold_by_default_path(
     assert result["experiment_result"]["final_submission"]["status"] == "available"
 
 
+def test_agent_noexec_cell_selects_noexec_image_and_disables_executable_feedback(
+    tmp_path: Path, r45_release: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    runner = load_run_campaign()
+    wrapper = load_campaign_wrapper()
+    base = load_build_campaign().build_campaign(
+        r45_release,
+        family_ids=["001"],
+        model_provider="test",
+        model="test-model",
+        per_turn_max_tokens=4096,
+        repetitions=1,
+    )
+    cell = next(
+        cell
+        for cell in wrapper.build_executable_feedback_control(base)["cells"]
+        if cell["task_id"] == "v4-001"
+        and cell["experimental_arm"] == "Agent-NoExec"
+    )
+    args = run_args(tmp_path / "run", r45_release)
+    args.agent_scaffold = "mini-swe"
+    args.mini_swe_sandbox = "none"
+    args.mini_swe_image = "with-evas"
+    args.mini_swe_noexec_image = "without-evas"
+    captured: dict = {}
+
+    def stop_after_capture(**kwargs):
+        captured.update(kwargs)
+        raise RuntimeError("captured")
+
+    monkeypatch.setattr(runner, "run_mini_swe_episode", stop_after_capture)
+
+    with pytest.raises(RuntimeError, match="captured"):
+        runner.run_cell(cell, args, FakeClient({"role": "assistant", "content": ""}))
+
+    assert captured["executable_feedback"] is False
+    assert captured["docker_image"] == "without-evas"
+
+
+def test_diagnostic_checker_feedback_is_opt_in_and_host_side(
+    tmp_path: Path, r45_release: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    runner = load_run_campaign()
+    cell = campaign_cell("G2", r45_release)
+    cell["checker_feedback"] = True
+    args = run_args(tmp_path / "run", r45_release)
+    args.agent_scaffold = "mini-swe"
+    args.mini_swe_sandbox = "none"
+    captured: dict = {}
+
+    def stop_after_capture(**kwargs):
+        captured.update(kwargs)
+        raise RuntimeError("captured")
+
+    monkeypatch.setattr(runner, "run_mini_swe_episode", stop_after_capture)
+
+    with pytest.raises(RuntimeError, match="captured"):
+        runner.run_cell(cell, args, FakeClient({"role": "assistant", "content": ""}))
+
+    assert callable(captured["checker_feedback"])
+    assert captured["runtime"].joinpath("evaluator").is_dir()
+    assert captured["runtime"].joinpath("public", "evaluator").exists() is False
+
+
+def test_public_agent_image_identity_is_checked_per_experimental_arm() -> None:
+    runner = load_run_campaign()
+    results = [
+        {
+            "cell": {"experimental_arm": "Agent-NoExec"},
+            "agent_scaffold": {"docker_image_id": "sha256:noexec"},
+        },
+        {
+            "cell": {"experimental_arm": "Agentic"},
+            "agent_scaffold": {"docker_image_id": "sha256:agentic"},
+        },
+    ]
+
+    summary = runner.summarize_public_agent_images(results)
+
+    assert summary["observed_image_ids_by_arm"] == {
+        "Agent-NoExec": ["sha256:noexec"],
+        "Agentic": ["sha256:agentic"],
+    }
+    assert summary["identity_consistent"] is True
+
+
 def test_mini_swe_r45_direct_evas_then_submit_keeps_scratch_outside_submission(
     tmp_path: Path, r45_release: Path
 ) -> None:
@@ -1331,13 +1716,17 @@ def test_scorer_accepts_complete_workspace_without_explicit_submit(
                 "output_tokens": 10,
                 "events": [],
                 "evas_usage": {
-                    "schema_version": "v4-direct-evas-usage-v1",
+                    "schema_version": "v4-direct-evas-usage-v2",
                     "calls_executed": 2,
                     "calls_succeeded": 1,
                     "calls_failed": 1,
                     "calls_timed_out": 0,
                     "calls_interrupted": 0,
                     "last_status": "succeeded",
+                    "unique_candidate_hashes": [],
+                    "calls_by_candidate_tree_hash": {},
+                    "modified_rerun_count": 0,
+                    "unchanged_repeat_count": 1,
                 },
                 "incidents": [
                     {
@@ -1533,6 +1922,317 @@ def test_campaign_wrapper_dry_run_exports_agentic_cells(
     assert campaign["execution_config"]["token_accounting"] == "telemetry_only"
     summary = json.loads((output / "run" / "SUMMARY.json").read_text(encoding="utf-8"))
     assert summary["statuses"] == {"prepared": 3}
+
+
+def test_executable_feedback_control_builds_three_matched_arms_for_last_50_families() -> None:
+    builder = load_build_campaign()
+    wrapper = load_campaign_wrapper()
+    campaign = builder.build_campaign(
+        R51_RELEASE,
+        family_ids=[str(family_id) for family_id in range(351, 401)],
+        model_provider="openai-compatible",
+        model="test-model",
+        per_turn_max_tokens=65536,
+        repetitions=1,
+    )
+
+    control = wrapper.build_executable_feedback_control(campaign)
+
+    assert control["comparison_profile"] == "executable-feedback-control-v1"
+    assert control["family_count"] == 50
+    assert control["task_count"] == 150
+    assert control["arm_count"] == 3
+    assert control["cell_count"] == 450
+    assert control["selection"]["family_ids"] == [
+        str(family_id) for family_id in range(351, 401)
+    ]
+    by_arm = {
+        arm: [cell for cell in control["cells"] if cell["experimental_arm"] == arm]
+        for arm in ("OneShot", "Agent-NoExec", "Agentic")
+    }
+    assert {arm: len(cells) for arm, cells in by_arm.items()} == {
+        "OneShot": 150,
+        "Agent-NoExec": 150,
+        "Agentic": 150,
+    }
+    assert {cell["mode"] for cell in by_arm["OneShot"]} == {"G0"}
+    assert {cell["process"] for cell in by_arm["OneShot"]} == {"direct_one_shot"}
+    assert {cell["mode"] for cell in by_arm["Agent-NoExec"]} == {"G2"}
+    assert {cell["mode"] for cell in by_arm["Agentic"]} == {"G2"}
+    assert {cell["process"] for cell in by_arm["Agent-NoExec"]} == {"agentic"}
+    assert {cell["process"] for cell in by_arm["Agentic"]} == {"agentic"}
+    assert {cell["executable_feedback"] for cell in by_arm["Agent-NoExec"]} == {False}
+    assert {cell["executable_feedback"] for cell in by_arm["Agentic"]} == {True}
+    assert len({cell["cell_id"] for cell in control["cells"]}) == 450
+    assert "revision_limit" not in control
+
+
+def test_executable_feedback_control_builds_three_matched_arms() -> None:
+    builder = load_build_campaign()
+    wrapper = load_campaign_wrapper()
+    campaign = builder.build_campaign(
+        R51_RELEASE,
+        family_ids=["351"],
+        model_provider="openai-compatible",
+        model="test-model",
+        per_turn_max_tokens=65536,
+        repetitions=1,
+    )
+
+    control = wrapper.build_executable_feedback_control(campaign)
+
+    assert control["comparison_profile"] == "executable-feedback-control-v1"
+    assert control["arm_count"] == 3
+    assert control["cell_count"] == 9
+    by_arm = {
+        arm: [cell for cell in control["cells"] if cell["experimental_arm"] == arm]
+        for arm in ("OneShot", "Agent-NoExec", "Agentic")
+    }
+    assert {arm: len(cells) for arm, cells in by_arm.items()} == {
+        "OneShot": 3,
+        "Agent-NoExec": 3,
+        "Agentic": 3,
+    }
+    assert {cell["mode"] for cell in control["cells"]} == {"G0", "G2"}
+    assert set(cell["executable_feedback"] for cell in control["cells"]) == {False, True}
+    paired = {
+        (cell["task_id"], cell["repetition"], cell["form"])
+        for cell in by_arm["Agentic"]
+    }
+    assert paired == {
+        (cell["task_id"], cell["repetition"], cell["form"])
+        for cell in by_arm["Agent-NoExec"]
+    }
+
+
+def test_summarize_evas_invocations_counts_modified_and_unchanged_repeat_by_hash() -> None:
+    runner = load_run_campaign()
+
+    invocations = [
+        {"candidate_tree_sha256": "a", "status": "succeeded"},
+        {"candidate_tree_sha256": "a", "status": "succeeded"},
+        {"candidate_tree_sha256": "b", "status": "failed"},
+        {"candidate_tree_sha256": "b", "status": "succeeded"},
+        {"candidate_tree_sha256": "d", "status": "failed"},
+        {"candidate_tree_sha256": "c", "status": "interrupted"},
+    ]
+
+    summary = runner.summarize_evas_invocations(invocations)
+
+    assert summary["schema_version"] == "v4-direct-evas-usage-v2"
+    assert summary["calls_executed"] == 6
+    assert summary["calls_by_candidate_tree_hash"] == {"a": 2, "b": 2, "c": 1, "d": 1}
+    assert summary["unique_candidate_hashes"] == ["a", "b", "c", "d"]
+    assert summary["modified_rerun_count"] == 3
+    assert summary["unchanged_repeat_count"] == 2
+
+
+def test_run_cell_carries_evas_hash_fields_for_telemetry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    runner = load_run_campaign()
+    cell = campaign_cell("G2", R49_RELEASE)
+    args = run_args(tmp_path / "run", R49_RELEASE)
+    args.agent_scaffold = "mini-swe"
+    args.mini_swe_sandbox = "none"
+
+    def fake_episode(**kwargs):
+        runtime = kwargs["runtime"]
+        (runtime / "evaluator").mkdir(parents=True, exist_ok=True)
+        write_runtime_policy(runtime, ["bbpd_ref.va"])
+        (runtime / "public" / "submission" / "bbpd_ref.va").write_text(
+            "module bbpd_ref; endmodule\\n", encoding="utf-8"
+        )
+        gate = runner.submission_artifact_gate(runtime)
+        return {
+            "scaffold": runner.MINI_SWE_SCAFFOLD_ID,
+            "scaffold_version": "2.4.5",
+            "bash_tool_schema_sha256": "bash-schema",
+            "system_prompt_sha256": "system-prompt",
+            "bash_contract_sha256": "bash-contract",
+            "exit_status": "Submitted",
+            "submitted": True,
+            "artifact_complete": True,
+            "artifact_gate": gate,
+            "artifact_sha256": gate["artifact_sha256"],
+            "output_tokens": 20,
+            "events": [],
+            "commands": [],
+            "evas_invocations": [
+                {
+                    "invocation_id": "fake-1",
+                    "shell_command": "evas simulate public/task/visible_test.scs",
+                    "shell_elapsed_s": 1.5,
+                    "candidate_tree_sha256": "hash-a",
+                    "returncode": 0,
+                    "status": "succeeded",
+                },
+                {
+                    "invocation_id": "fake-2",
+                    "shell_command": "evas simulate public/task/visible_test.scs",
+                    "shell_elapsed_s": 1.2,
+                    "candidate_tree_sha256": "hash-b",
+                    "returncode": 0,
+                    "status": "succeeded",
+                },
+            ],
+            "model_calls": 2,
+            "messages": [{"role": "assistant", "content": "done"}],
+            "agent_elapsed_s": 5400.0,
+            "trajectory_format": "mini-swe-agent-trajectory-v1",
+            "sandbox_backend": "none",
+            "network": False,
+            "evaluator_mounted": False,
+        }
+
+    monkeypatch.setattr(runner, "run_mini_swe_episode", fake_episode)
+    result = runner.run_cell(cell, args, FakeClient({"role": "assistant", "content": ""}))
+    usage = result["evas_usage"]
+    assert usage["schema_version"] == "v4-direct-evas-usage-v2"
+    assert usage["calls_by_candidate_tree_hash"] == {"hash-a": 1, "hash-b": 1}
+    assert usage["unique_candidate_hashes"] == ["hash-a", "hash-b"]
+    assert usage["modified_rerun_count"] == 1
+    assert usage["unchanged_repeat_count"] == 0
+
+
+def test_campaign_wrapper_accepts_deterministic_family_range_control_profile(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "control"
+    judge_command = "python3 /private/final_spectre_judge.py"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(RUN_CAMPAIGN_WRAPPER),
+            "--release",
+            str(R51_RELEASE),
+            "--family-range",
+            "351-351",
+            "--comparison-profile",
+            "executable-feedback-control",
+            "--output-root",
+            str(output),
+            "--model",
+            "test-model",
+            "--final-judge-command",
+            judge_command,
+            "--dry-run",
+        ],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr + completed.stdout
+    campaign = json.loads((output / "campaign.json").read_text(encoding="utf-8"))
+    assert campaign["selection"]["family_ids"] == ["351"]
+    assert campaign["comparison_profile"] == "executable-feedback-control-v1"
+    assert campaign["cell_count"] == 9
+    assert campaign["execution_config"]["termination_policy"] == "wall_time"
+    assert campaign["execution_config"]["token_accounting"] == "telemetry_only"
+    assert campaign["execution_config"]["final_judge_configured"] is True
+    assert campaign["execution_config"]["final_judge_command_sha256"] == hashlib.sha256(
+        judge_command.encode()
+    ).hexdigest()
+    assert "revision_limit" not in campaign["execution_config"]
+    noexec_cell = next(
+        cell for cell in campaign["cells"] if cell["experimental_arm"] == "Agent-NoExec"
+    )
+    noexec_runtime = output / "run" / noexec_cell["cell_id"]
+    assert not (noexec_runtime / "public" / "task" / "evas_runtime.json").exists()
+    noexec_prompt = (noexec_runtime / "agent_prompt.txt").read_text(encoding="utf-8")
+    assert "EVAS execution is not available" in noexec_prompt
+    arm_record = json.loads(
+        (noexec_runtime / "evidence" / "experimental_arm.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert arm_record["base_prompt_record_sha256"] == noexec_cell[
+        "prompt_record_sha256"
+    ]
+    assert arm_record["effective_prompt_sha256"] == hashlib.sha256(
+        noexec_prompt.encode()
+    ).hexdigest()
+    policy = json.loads(
+        (noexec_runtime / "MODEL_ACCESS_POLICY.json").read_text(encoding="utf-8")
+    )
+    assert "evas" not in policy["executables"]
+    assert policy["experimental_arm"] == "Agent-NoExec"
+    summary = json.loads((output / "run" / "SUMMARY.json").read_text(encoding="utf-8"))
+    assert summary["statuses"] == {"prepared": 9}
+
+
+def test_campaign_wrapper_can_select_oneshot_and_agentic_only(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "two-arm-control"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(RUN_CAMPAIGN_WRAPPER),
+            "--release",
+            str(R51_RELEASE),
+            "--family-range",
+            "351-351",
+            "--comparison-profile",
+            "executable-feedback-control",
+            "--experimental-arm",
+            "OneShot",
+            "--experimental-arm",
+            "Agentic",
+            "--output-root",
+            str(output),
+            "--model",
+            "test-model",
+            "--dry-run",
+        ],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr + completed.stdout
+    campaign = json.loads((output / "campaign.json").read_text(encoding="utf-8"))
+    assert campaign["cell_count"] == 6
+    assert campaign["filters"]["experimental_arms"] == ["Agentic", "OneShot"]
+    assert {cell["experimental_arm"] for cell in campaign["cells"]} == {
+        "OneShot",
+        "Agentic",
+    }
+    assert all(cell.get("waveform_analysis", False) is False for cell in campaign["cells"])
+    summary = json.loads((output / "run" / "SUMMARY.json").read_text(encoding="utf-8"))
+    assert summary["statuses"] == {"prepared": 6}
+
+
+def test_executable_feedback_control_rejects_native_scaffold(tmp_path: Path) -> None:
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(RUN_CAMPAIGN_WRAPPER),
+            "--release",
+            str(R51_RELEASE),
+            "--family-range",
+            "351-351",
+            "--comparison-profile",
+            "executable-feedback-control",
+            "--agent-scaffold",
+            "native",
+            "--output-root",
+            str(tmp_path / "invalid-control"),
+            "--model",
+            "test-model",
+            "--dry-run",
+        ],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+
+    assert completed.returncode != 0
+    assert "requires --agent-scaffold mini-swe" in completed.stderr
 
 
 def test_detached_campaign_launcher_survives_closed_caller_stdin(tmp_path: Path) -> None:
@@ -2157,13 +2857,13 @@ def test_testbench_oracle_failure_excerpt_keeps_error_before_counters() -> None:
     assert "solver_counter_250" not in excerpt
 
 
-def test_testbench_oracle_requires_r45_evas_version(monkeypatch) -> None:
+def test_testbench_oracle_requires_active_evas_version(monkeypatch) -> None:
     oracle = load_derived_testbench_oracle()
     monkeypatch.setenv("EVAS_ENGINE", "evas2")
     monkeypatch.setenv("VAEVAS_DEFAULT_EVAS_ENGINE", "evas2")
     runtime_report = "\n".join(
         [
-            "Version 0.8.3 -- Jul 2026",
+            "Version 0.8.4 -- Jul 2026",
             "evas_engine = evas-rust",
             "evas_rust_required = true",
             "evas_rust_full_model_required = true",
@@ -2173,10 +2873,10 @@ def test_testbench_oracle_requires_r45_evas_version(monkeypatch) -> None:
 
     valid, note = oracle._validate_required_evas_engine(runtime_report, "evas2")
     stale, stale_note = oracle._validate_required_evas_engine(
-        runtime_report.replace("Version 0.8.3", "Version 0.8.2"), "evas2"
+        runtime_report.replace("Version 0.8.4", "Version 0.8.3"), "evas2"
     )
 
     assert valid is True
-    assert "evas_version=0.8.3" in note
+    assert "evas_version=0.8.4" in note
     assert stale is False
-    assert "observed='0.8.2'" in stale_note
+    assert "observed='0.8.3'" in stale_note

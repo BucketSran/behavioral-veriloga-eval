@@ -140,7 +140,7 @@
     },
     {
       "id": "P_REQUIRE_CONSECUTIVE_IN_WINDOW_FEEDBACK_EDGE",
-      "observable_contract": "Require consecutive in-window feedback edge errors before lock asserts.",
+      "observable_contract": "Require consecutive in-window feedback edge errors and guard with `phase_error <= lock_window`.",
       "required_signals": [
         "time",
         "fb_clk",
@@ -166,7 +166,7 @@
     },
     {
       "id": "P_EXPOSE_PHASE_METRIC_AND_STATE_MON",
-      "observable_contract": "Expose phase_metric and state_mon as bounded voltage-coded observables.",
+      "observable_contract": "Expose `phase_error / metric_fullscale`, `good_count / lock_count`, and compare `phase_error` against `lock_window`.",
       "required_signals": [
         "time",
         "fb_clk",

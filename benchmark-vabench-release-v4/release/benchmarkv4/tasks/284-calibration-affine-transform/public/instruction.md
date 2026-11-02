@@ -37,3 +37,11 @@ Use voltage-domain behavioral Verilog-A only. Do not use user `task`/`endtask`, 
 ## Output Contract
 
 Return only `calibration_affine_transform.va` implementing the public module. The file must compile under Spectre-compatible Verilog-A and must not require additional modules, include files beyond standard disciplines, or testbench changes.
+
+- only on each rising clk crossing
+
+- gain_base + gain_span * clip01(V(gain_ctrl) / vhi)
+
+- the formula `only on each rising clock edge`: center + gain * (V(raw) - center) + offset
+
+- abs(transformed - V(raw)) / resid_fullscale

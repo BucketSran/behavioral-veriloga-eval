@@ -78,3 +78,9 @@ The required trace names are: `time`, `clk`, `en`, `gain_ctrl`, `offset_ctrl`, `
 
 Return exactly one artifact named `testbench.scs`. Do not return a DUT,
 checker, script, data file, waveform, or auxiliary deck.
+
+- gain_base + gain_span * clip01(V(gain_ctrl) / vhi)
+
+- the formula `only on each rising clock edge`: center + gain * (V(raw) - center) + offset
+
+- abs(transformed - V(raw)) / resid_fullscale

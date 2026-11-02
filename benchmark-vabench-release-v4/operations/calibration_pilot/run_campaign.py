@@ -15,6 +15,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import traceback
 from typing import Any
@@ -28,6 +29,7 @@ if str(HERE) not in sys.path:
 import result_protocol as RESULT_PROTOCOL  # noqa: E402
 from mini_swe_vabench import (  # noqa: E402
     DEFAULT_DOCKER_IMAGE,
+    DEFAULT_NOEXEC_DOCKER_IMAGE,
     MINI_SWE_SCAFFOLD_ID,
     default_sandbox_backend,
     run_mini_swe_episode,
@@ -122,6 +124,27 @@ PUBLIC_ESCAPE_RE = re.compile(
     r"\b(?:shell|system|exec|spawn|unix|socket|tcp|udp|https?|ftp|curl|wget|ocean|skill|ipcBeginProcess)\b",
     re.IGNORECASE,
 )
+AGENTIC_COMPONENT_START = '<<<VABENCH_COMPONENT id="agentic_wrapper.md">>>'
+AGENTIC_COMPONENT_END = "<<<END_VABENCH_COMPONENT>>>"
+NOEXEC_AGENTIC_WRAPPER = """\
+# vaBench Agent-NoExec Submission Contract
+
+Inspect the mounted public task inputs and write only the final candidate
+artifacts under `public/submission/`. Preserve exact file names, module names,
+ports, parameters, and required artifact paths.
+
+EVAS execution is not available in this experimental arm. No public simulator
+diagnostics or waveforms are provided. Reason from the public specification and
+task files, then run `vabench-submit` after the declared artifacts are complete.
+The final private Spectre judge is outside the model-visible workspace.
+"""
+ONESHOT_TRANSPORT_INSTRUCTION = """\
+Complete the task in the user message without changing its requested behavior.
+For final delivery, call `submit_artifacts` exactly once with the complete text
+of every artifact named by the function schema. Do not add undeclared paths.
+This function is only an output transport: it does not execute the candidate,
+reveal diagnostics, or provide checker feedback.
+"""
 
 
 class ProviderRequestTimeout(TimeoutError):
@@ -151,6 +174,30 @@ def read_json(path: Path) -> dict[str, Any]:
 def write_json(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def summarize_public_agent_images(results: list[dict[str, Any]]) -> dict[str, Any]:
+    image_ids_by_arm: dict[str, set[str]] = {}
+    for row in results:
+        scaffold = row.get("agent_scaffold")
+        if not isinstance(scaffold, dict):
+            continue
+        image_id = scaffold.get("docker_image_id")
+        if not image_id:
+            continue
+        arm = str((row.get("cell") or {}).get("experimental_arm") or "standard")
+        image_ids_by_arm.setdefault(arm, set()).add(str(image_id))
+    serialized = {
+        arm: sorted(image_ids)
+        for arm, image_ids in sorted(image_ids_by_arm.items())
+    }
+    return {
+        "observed_image_ids": sorted(
+            {image_id for image_ids in serialized.values() for image_id in image_ids}
+        ),
+        "observed_image_ids_by_arm": serialized,
+        "identity_consistent": all(len(image_ids) <= 1 for image_ids in serialized.values()),
+    }
 
 
 def resolve_pinned_evas_identity(command: str) -> dict[str, Any]:
@@ -253,6 +300,7 @@ def provider_response_metadata(response: dict[str, Any]) -> dict[str, Any]:
         "model": response.get("model"),
         "created": response.get("created"),
         "system_fingerprint": response.get("system_fingerprint"),
+        "transport": response.get("_vaevas_transport"),
     }
 
 
@@ -271,13 +319,36 @@ def model_event_hit_limit(event: dict[str, Any]) -> bool:
 
 def summarize_evas_invocations(invocations: list[dict[str, Any]]) -> dict[str, Any]:
     statuses = [str(row.get("status") or "unknown") for row in invocations]
+    hashes = [row.get("candidate_tree_sha256") for row in invocations]
+    calls_by_candidate_tree_hash: dict[str, int] = {}
+    modified_rerun_count = 0
+    unchanged_repeat_count = 0
+    for value in hashes:
+        if value is None:
+            continue
+        hash_value = str(value)
+        calls_by_candidate_tree_hash[hash_value] = (
+            calls_by_candidate_tree_hash.get(hash_value, 0) + 1
+        )
+    for index, current in enumerate(hashes[1:], start=1):
+        previous = hashes[index - 1]
+        if not isinstance(current, str) or not isinstance(previous, str):
+            continue
+        if current == previous:
+            unchanged_repeat_count += 1
+        else:
+            modified_rerun_count += 1
     return {
-        "schema_version": "v4-direct-evas-usage-v1",
+        "schema_version": "v4-direct-evas-usage-v2",
         "calls_executed": len(invocations),
         "calls_succeeded": statuses.count("succeeded"),
         "calls_failed": statuses.count("failed"),
         "calls_timed_out": statuses.count("timed_out"),
         "calls_interrupted": statuses.count("interrupted"),
+        "modified_rerun_count": modified_rerun_count,
+        "unchanged_repeat_count": unchanged_repeat_count,
+        "unique_candidate_hashes": sorted(calls_by_candidate_tree_hash),
+        "calls_by_candidate_tree_hash": calls_by_candidate_tree_hash,
         "last_status": statuses[-1] if statuses else None,
     }
 
@@ -433,9 +504,18 @@ def validate_campaign_cells(cells: list[dict[str, Any]], release: Path) -> None:
     task_rows = read_json(release / "TASK_INDEX.json")["tasks"]
     tasks = {str(row["task_id"]): row for row in task_rows}
     seen: set[str] = set()
+    arm_contract = {
+        "OneShot": ("G0", False, False),
+        "Agent-NoExec": ("G2", False, False),
+        "Agentic": ("G2", True, False),
+        "Agentic-Raw": ("G2", True, False),
+    }
     for cell in cells:
         cell_id = str(cell.get("cell_id") or "")
-        if not re.fullmatch(r"v4-[0-9]{3,4}-G[0-5]-r[0-9]{2,}", cell_id):
+        if not re.fullmatch(
+            r"v4-[0-9]{3,4}-G[0-5]-r[0-9]{2,}(?:-(?:oneshot|noexec|agentic|raw))?",
+            cell_id,
+        ):
             raise ValueError(f"invalid campaign cell_id: {cell_id!r}")
         if cell_id in seen:
             raise ValueError(f"duplicate campaign cell_id: {cell_id}")
@@ -447,6 +527,17 @@ def validate_campaign_cells(cells: list[dict[str, Any]], release: Path) -> None:
         expected_process = str(mode_specs[mode]["process"])
         if cell.get("process") != expected_process:
             raise ValueError(f"campaign process mismatch for {cell_id}")
+        arm = cell.get("experimental_arm")
+        if arm is not None:
+            if arm not in arm_contract:
+                raise ValueError(f"unknown experimental arm for {cell_id}: {arm!r}")
+            expected_mode, expected_feedback, _expected_waveform = arm_contract[arm]
+            if mode != expected_mode or cell.get("base_mode") != expected_mode:
+                raise ValueError(f"experimental arm mode mismatch for {cell_id}")
+            if cell.get("executable_feedback") is not expected_feedback:
+                raise ValueError(
+                    f"experimental arm executable-feedback mismatch for {cell_id}"
+                )
 
         task_id = str(cell.get("task_id") or "")
         task = tasks.get(task_id)
@@ -529,6 +620,10 @@ class OpenAICompatible:
         }
         if tools:
             payload["tools"] = tools
+            # Some reasoning-mode providers reject named/required tool choice
+            # even though they support ordinary function calls. Keep the
+            # transport tool provider-neutral and enforce its exact contract in
+            # the runner when a call is returned.
             payload["tool_choice"] = "auto"
         if self.stream:
             payload["stream"] = True
@@ -725,6 +820,29 @@ def parse_openai_sse_response(stdout: str, stderr: str = "") -> dict[str, Any]:
         "streaming_chunk_count": chunk_count,
     }
     return response
+
+
+class ConcurrencyLimitedClient:
+    """Bound provider in-flight requests independently of local cell workers."""
+
+    def __init__(self, delegate: OpenAICompatible, max_inflight: int):
+        self.delegate = delegate
+        self.max_inflight = max_inflight
+        self.semaphore = threading.BoundedSemaphore(max_inflight)
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self.delegate, name)
+
+    def complete(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
+        queued = time.monotonic()
+        with self.semaphore:
+            wait_s = time.monotonic() - queued
+            response = self.delegate.complete(*args, **kwargs)
+        response["_vaevas_transport"] = {
+            "api_max_inflight": self.max_inflight,
+            "client_queue_wait_s": wait_s,
+        }
+        return response
 
 
 TOOLS = [
@@ -1217,6 +1335,82 @@ def compact_feedback_result(result: dict[str, Any]) -> dict[str, Any]:
     return compact
 
 
+def run_canonical_checker_feedback(
+    runtime: Path,
+    *,
+    release: Path,
+    timeout_s: float,
+) -> dict[str, Any]:
+    env = os.environ.copy()
+    env.update(
+        {
+            "VABENCH_RUNTIME_DIR": str(runtime),
+            "VABENCH_RELEASE_DIR": str(release),
+            "VABENCH_ORACLE_TIMEOUT_S": str(max(1, int(timeout_s))),
+        }
+    )
+    started = time.monotonic()
+    try:
+        completed = subprocess.run(
+            [sys.executable, str(HERE / "feedback_adapter.py")],
+            cwd=REPO,
+            env=env,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=max(1.0, timeout_s),
+            check=False,
+        )
+    except subprocess.TimeoutExpired:
+        return {
+            "schema_version": "v4-checker-feedback-diagnostic-v1",
+            "status": "infrastructure_timeout",
+            "elapsed_s": time.monotonic() - started,
+            "diagnostics": ["canonical checker feedback timed out"],
+        }
+    combined = "\n".join(
+        part for part in (completed.stdout, completed.stderr) if part
+    )
+    return {
+        "schema_version": "v4-checker-feedback-diagnostic-v1",
+        "status": "pass" if completed.returncode == 0 else "fail",
+        "returncode": completed.returncode,
+        "elapsed_s": time.monotonic() - started,
+        "diagnostics": compact_text_lines(combined, limit=32),
+    }
+
+
+def decode_tool_arguments(
+    name: str, raw_arguments: str | None,
+) -> tuple[dict[str, Any], bool, str | None]:
+    raw = raw_arguments or "{}"
+    try:
+        decoded = json.loads(raw)
+        if not isinstance(decoded, dict):
+            raise ValueError("tool arguments must be a JSON object")
+        return decoded, True, None
+    except json.JSONDecodeError:
+        if name != "submit_artifacts":
+            raise
+
+    stripped = raw.lstrip()
+    decoded, end = json.JSONDecoder().raw_decode(stripped)
+    if not isinstance(decoded, dict):
+        raise ValueError("submit_artifacts arguments must be a JSON object")
+    trailing = stripped[end:].strip()
+    if not trailing or any(character not in "}]" for character in trailing):
+        raise ValueError("ambiguous trailing submit_artifacts content")
+    artifacts = decoded.get("artifacts")
+    if not isinstance(artifacts, dict):
+        raise ValueError("submit_artifacts requires an artifacts object")
+    redundant = {
+        key: value for key, value in decoded.items() if key != "artifacts"
+    }
+    if any(key not in artifacts for key in redundant):
+        raise ValueError("unknown submit_artifacts wrapper fields")
+    return {"artifacts": artifacts}, False, "redundant_artifact_wrapper"
+
+
 def execute_tool(
     name: str,
     arguments: dict[str, Any],
@@ -1281,6 +1475,41 @@ def execute_tool(
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(str(arguments["content"]), encoding="utf-8")
         return json.dumps({"written": relative.as_posix(), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}), False
+    if name == "submit_artifacts":
+        raw_artifacts = arguments.get("artifacts")
+        if not isinstance(raw_artifacts, dict):
+            raise ValueError("submit_artifacts requires an artifacts object")
+        expected = expected_candidate_artifacts(runtime)
+        observed = [str(path) for path in raw_artifacts]
+        diagnostics = [
+            *(f"missing_artifact_path:{path}" for path in expected if path not in observed),
+            *(
+                f"undeclared_artifact_path:{path}"
+                for path in observed
+                if path not in set(expected)
+            ),
+        ]
+        if diagnostics:
+            raise ValueError(", ".join(diagnostics))
+        mapping: dict[str, str] = {}
+        for path in expected:
+            content = raw_artifacts[path]
+            if not isinstance(content, str) or not content.strip():
+                raise ValueError(f"empty_or_nontext_artifact:{path}")
+            mapping[path] = content
+        saved = write_artifact_mapping(mapping, runtime)
+        gate = submission_artifact_gate(runtime)
+        if not gate["passed"]:
+            raise ValueError(", ".join(gate["diagnostics"]))
+        return json.dumps(
+            {
+                "schema_version": "v4-submit-artifacts-result-v1",
+                "status": "submitted",
+                "saved_files": saved,
+                "artifact_sha256": gate["artifact_sha256"],
+            },
+            sort_keys=True,
+        ), True
     if name == "run_evas":
         return json.dumps(run_public_evas(runtime, arguments, timeout_s, evas_command)), False
     if name == "finalize":
@@ -1408,6 +1637,13 @@ def active_tool_schemas(runtime: Path, mode: str) -> list[dict[str, Any]] | None
         policy_skills = set((policy.get("available_skills") or {}).keys())
         if listed_skills != policy_skills:
             raise ValueError("runtime skill manifest and model access policy disagree")
+    transport_tools = policy.get("transport_tools") or []
+    if transport_tools:
+        if transport_tools != ["submit_artifacts"]:
+            raise ValueError("runtime declares unsupported transport tools")
+        if policy.get("experimental_arm") != "OneShot":
+            raise ValueError("submit_artifacts is only available to the OneShot arm")
+        return [submit_artifacts_tool_schema(runtime)]
     if mode in AGENTIC:
         return [*TOOLS, *SKILL_TOOLS] if has_skills else TOOLS
     if has_skills:
@@ -1498,6 +1734,42 @@ def expected_candidate_artifacts(runtime: Path) -> list[str]:
         return []
     policy = read_json(policy_path)
     return [safe_relative(str(item)).as_posix() for item in policy.get("candidate_artifacts") or []]
+
+
+def submit_artifacts_tool_schema(runtime: Path) -> dict[str, Any]:
+    expected = expected_candidate_artifacts(runtime)
+    if not expected:
+        raise ValueError("submit_artifacts requires declared candidate artifacts")
+    return {
+        "type": "function",
+        "function": {
+            "name": "submit_artifacts",
+            "description": (
+                "Submit the complete final candidate bundle. This is a transport-only "
+                "output channel and returns no execution or checker feedback."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "artifacts": {
+                        "type": "object",
+                        "description": (
+                            "Complete text of every required artifact, keyed by its exact "
+                            "declared relative path."
+                        ),
+                        "properties": {
+                            path: {"type": "string", "minLength": 1}
+                            for path in expected
+                        },
+                        "required": expected,
+                        "additionalProperties": False,
+                    }
+                },
+                "required": ["artifacts"],
+                "additionalProperties": False,
+            },
+        },
+    }
 
 
 def validated_artifact_mapping(
@@ -1859,6 +2131,35 @@ def extract_direct_submission(text: str, runtime: Path) -> dict[str, Any]:
     }
 
 
+def extract_normalized_direct_submission(text: str, runtime: Path) -> dict[str, Any]:
+    strict_mapping, strict_protocol, strict_diagnostics = (
+        parse_direct_artifacts_detailed(text, runtime)
+    )
+    mapping = strict_mapping
+    protocol = strict_protocol
+    normalized = False
+    if mapping is None:
+        mapping, protocol = parse_recoverable_direct_artifacts(text, runtime)
+        normalized = mapping is not None
+    saved = write_artifact_mapping(mapping, runtime) if mapping is not None else []
+    gate = submission_artifact_gate(runtime) if mapping is not None else None
+    compliant = bool(mapping is not None and gate and gate["passed"])
+    return {
+        "saved_files": saved,
+        "extraction_protocol": protocol,
+        "submission_protocol_compliant": compliant,
+        "original_protocol_compliant": strict_mapping is not None,
+        "submission_transport": (
+            "runner_normalized_text" if normalized else "model_text"
+        ),
+        "response_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        "response_parser_version": DIRECT_PARSER_VERSION,
+        "parse_diagnostics": [] if compliant else strict_diagnostics,
+        "artifact_gate": gate,
+        "artifact_sha256": dict((gate or {}).get("artifact_sha256") or {}),
+    }
+
+
 def gate_agentic_submission(runtime: Path, result: dict[str, Any]) -> bool:
     gate = submission_artifact_gate(runtime)
     result["artifact_gate"] = gate
@@ -1891,6 +2192,60 @@ def export_runtime(cell: dict[str, Any], release: Path, output: Path, *, timeout
         raise RuntimeExportError(
             f"runtime exporter exited with status {completed.returncode}: {detail}"
         )
+    apply_experimental_arm_overlay(cell, output)
+
+
+def apply_experimental_arm_overlay(cell: dict[str, Any], runtime: Path) -> None:
+    arm = cell.get("experimental_arm")
+    if arm is None:
+        return
+    policy_path = runtime / "MODEL_ACCESS_POLICY.json"
+    policy = read_json(policy_path)
+    policy["experimental_arm"] = arm
+    policy["executable_feedback"] = bool(cell.get("executable_feedback"))
+    policy["transport_tools"] = ["submit_artifacts"] if arm == "OneShot" else []
+    if not cell.get("executable_feedback"):
+        policy["executables"] = [
+            executable
+            for executable in policy.get("executables") or []
+            if executable != "evas"
+        ]
+    write_json(policy_path, policy)
+    prompt_path = runtime / (
+        "agent_prompt.txt" if cell["process"] == "agentic" else "direct_prompt.txt"
+    )
+    if arm == "Agent-NoExec":
+        (runtime / "public" / "task" / "evas_runtime.json").unlink(missing_ok=True)
+        prompt = prompt_path.read_text(encoding="utf-8")
+        start = prompt.find(AGENTIC_COMPONENT_START)
+        end = prompt.find(AGENTIC_COMPONENT_END, start)
+        if start < 0 or end < 0:
+            raise RuntimeExportError(
+                "Agent-NoExec runtime is missing its agentic wrapper"
+            )
+        replacement = (
+            f'{AGENTIC_COMPONENT_START}\n\n{NOEXEC_AGENTIC_WRAPPER.rstrip()}\n\n'
+            f"{AGENTIC_COMPONENT_END}"
+        )
+        prompt_path.write_text(
+            prompt[:start] + replacement + prompt[end + len(AGENTIC_COMPONENT_END):],
+            encoding="utf-8",
+        )
+    effective_prompt = prompt_path.read_text(encoding="utf-8")
+    write_json(
+        runtime / "evidence" / "experimental_arm.json",
+        {
+            "schema_version": "v4-experimental-arm-v1",
+            "experimental_arm": arm,
+            "base_mode": cell["mode"],
+            "process": cell["process"],
+            "executable_feedback": bool(cell.get("executable_feedback")),
+            "base_prompt_record_sha256": cell["prompt_record_sha256"],
+            "effective_prompt_sha256": hashlib.sha256(
+                effective_prompt.encode("utf-8")
+            ).hexdigest(),
+        },
+    )
 
 
 def run_mini_swe_agentic_cell(
@@ -1915,6 +2270,12 @@ def run_mini_swe_agentic_cell(
 
     started = time.monotonic()
     try:
+        executable_feedback = bool(cell.get("executable_feedback", True))
+        docker_image = (
+            getattr(args, "mini_swe_image", DEFAULT_DOCKER_IMAGE)
+            if executable_feedback
+            else getattr(args, "mini_swe_noexec_image", DEFAULT_NOEXEC_DOCKER_IMAGE)
+        )
         episode = run_mini_swe_episode(
             runtime=runtime,
             prompt=prompt,
@@ -1925,8 +2286,23 @@ def run_mini_swe_agentic_cell(
             tool_timeout_s=float(args.tool_timeout_s),
             sandbox_backend=args.mini_swe_sandbox,
             evas_command=args.evas_command,
+            executable_feedback=executable_feedback,
+            checker_feedback=(
+                (
+                    lambda checker_runtime: run_canonical_checker_feedback(
+                        checker_runtime,
+                        release=Path(args.release),
+                        timeout_s=min(
+                            float(args.tool_timeout_s),
+                            max(1.0, float(args.agent_timeout_s)),
+                        ),
+                    )
+                )
+                if cell.get("checker_feedback")
+                else None
+            ),
             docker_command=getattr(args, "docker_command", "docker"),
-            docker_image=getattr(args, "mini_swe_image", DEFAULT_DOCKER_IMAGE),
+            docker_image=docker_image,
             submission_gate=submission_artifact_gate,
             usage_parser=provider_output_usage,
             response_metadata=provider_response_metadata,
@@ -2081,6 +2457,10 @@ def run_mini_swe_agentic_cell(
                     "docker_image_id",
                     "network",
                     "evaluator_mounted",
+                    "executable_feedback",
+                    "checker_feedback_enabled",
+                    "checker_feedback_calls",
+                    "installed_tools",
                     "resource_limits",
                 )
             },
@@ -2088,6 +2468,8 @@ def run_mini_swe_agentic_cell(
                 "backend": episode["sandbox_backend"],
                 "image": episode.get("docker_image"),
                 "image_id": episode.get("docker_image_id"),
+                "executable_feedback": episode.get("executable_feedback"),
+                "checker_feedback_enabled": episode.get("checker_feedback_enabled"),
             },
             "mini_swe_exit_status": exit_status,
             "model_calls": episode["model_calls"],
@@ -2164,10 +2546,18 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
         "available_skills": list_available_skills(runtime).get("skills") or {},
     }
     if mini_swe_agentic:
+        executable_feedback = bool(cell.get("executable_feedback", True))
         result["public_agent_environment"] = {
             "backend": getattr(args, "mini_swe_sandbox", None),
-            "image": getattr(args, "mini_swe_image", DEFAULT_DOCKER_IMAGE),
+            "image": (
+                getattr(args, "mini_swe_image", DEFAULT_DOCKER_IMAGE)
+                if executable_feedback
+                else getattr(
+                    args, "mini_swe_noexec_image", DEFAULT_NOEXEC_DOCKER_IMAGE
+                )
+            ),
             "image_id": None,
+        "executable_feedback": executable_feedback,
         }
     if args.dry_run:
         result["finished_at"] = now()
@@ -2194,7 +2584,12 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
         finalized = bool(checkpoint.get("finalized"))
         resumed_agent_elapsed_s = float(checkpoint.get("agent_elapsed_s") or 0.0)
     else:
-        messages = [{"role": "user", "content": prompt}]
+        messages = []
+        if cell.get("experimental_arm") == "OneShot":
+            messages.append(
+                {"role": "system", "content": ONESHOT_TRANSPORT_INSTRUCTION}
+            )
+        messages.append({"role": "user", "content": prompt})
         output_tokens = 0
         events = []
         finalized = False
@@ -2202,6 +2597,11 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
     per_turn_max_tokens = cell_per_turn_max_tokens(cell)
     tools_for_cell = active_tool_schemas(runtime, str(cell["mode"]))
     agent_deadline = agent_started_monotonic + max(0.0, args.agent_timeout_s - resumed_agent_elapsed_s)
+    submission_tool_normalized = any(
+        event.get("name") == "submit_artifacts"
+        and event.get("argument_protocol_compliant") is False
+        for event in events
+    )
 
     def current_agent_elapsed_s() -> float:
         return resumed_agent_elapsed_s + max(0.0, time.monotonic() - agent_started_monotonic)
@@ -2234,15 +2634,31 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
         return model_event_hit_limit(last_model)
 
     def process_tool_calls(calls: list[dict[str, Any]]) -> None:
-        nonlocal finalized
+        nonlocal finalized, submission_tool_normalized
         for call in calls:
             remaining = remaining_agent_s()
             if remaining <= 0:
                 return
             function = call["function"]
             arguments: dict[str, Any] = {}
+            argument_protocol_compliant = True
+            argument_normalization: str | None = None
             try:
-                arguments = json.loads(function.get("arguments") or "{}")
+                (
+                    arguments,
+                    argument_protocol_compliant,
+                    argument_normalization,
+                ) = decode_tool_arguments(
+                    str(function.get("name") or ""),
+                    function.get("arguments"),
+                )
+                submission_tool_normalized = (
+                    submission_tool_normalized
+                    or (
+                        function.get("name") == "submit_artifacts"
+                        and not argument_protocol_compliant
+                    )
+                )
                 text, done = execute_tool(
                     function["name"],
                     arguments,
@@ -2263,7 +2679,10 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
                 "type": "tool",
                 "name": function["name"],
                 "reference_tokens": delivered,
+                "argument_protocol_compliant": argument_protocol_compliant,
             }
+            if argument_normalization is not None:
+                tool_event["argument_normalization"] = argument_normalization
             if function["name"] == "read_skill":
                 tool_event.update({
                     "skill": str(arguments.get("skill") or ""),
@@ -2303,7 +2722,11 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
             save_conversation()
         elif messages[-1].get("role") == "assistant":
             content = str(messages[-1].get("content") or "")
-            direct_submission = extract_direct_submission(content, runtime)
+            direct_submission = (
+                extract_normalized_direct_submission(content, runtime)
+                if cell.get("experimental_arm") == "OneShot"
+                else extract_direct_submission(content, runtime)
+            )
             complete = bool(direct_submission["submission_protocol_compliant"])
             set_terminal_submission_status(complete, default_reason="completed")
             result.update({
@@ -2400,8 +2823,39 @@ def run_cell(cell: dict[str, Any], args: argparse.Namespace, client: OpenAICompa
             calls = choice.get("tool_calls") or []
             if calls:
                 process_tool_calls(calls)
+                if cell.get("experimental_arm") == "OneShot":
+                    complete = finalized and gate_agentic_submission(runtime, result)
+                    result.update({
+                        "status": "submitted" if complete else "invalid_submission",
+                        "termination_reason": (
+                            "completed" if complete else "invalid_submit_artifacts_call"
+                        ),
+                        "saved_files": (
+                            list(result["artifact_gate"]["observed_artifacts"])
+                            if complete
+                            else []
+                        ),
+                        "extraction_protocol": "submit_artifacts_tool-v1",
+                        "submission_transport": (
+                            "runner_normalized_tool"
+                            if submission_tool_normalized
+                            else "runner_managed"
+                        ),
+                        "original_protocol_compliant": (
+                            not submission_tool_normalized
+                        ),
+                        "response_parser_version": None,
+                        "parse_diagnostics": (
+                            [] if complete else ["invalid_submit_artifacts_call"]
+                        ),
+                    })
+                    break
                 continue
-            direct_submission = extract_direct_submission(content, runtime)
+            direct_submission = (
+                extract_normalized_direct_submission(content, runtime)
+                if cell.get("experimental_arm") == "OneShot"
+                else extract_direct_submission(content, runtime)
+            )
             complete = bool(direct_submission["submission_protocol_compliant"])
             hit_limit = model_event_hit_limit(model_event)
             result.update({
@@ -2512,6 +2966,7 @@ def main() -> int:
     )
     parser.add_argument("--docker-command", default="docker")
     parser.add_argument("--mini-swe-image", default=DEFAULT_DOCKER_IMAGE)
+    parser.add_argument("--mini-swe-noexec-image", default=DEFAULT_NOEXEC_DOCKER_IMAGE)
     parser.add_argument("--agent-timeout-s", type=int, default=DEFAULT_AGENT_TIMEOUT_S)
     parser.add_argument("--setup-timeout-s", type=int, default=DEFAULT_SETUP_TIMEOUT_S)
     parser.add_argument("--request-timeout-s", type=int, default=DEFAULT_REQUEST_TIMEOUT_S)
@@ -2523,6 +2978,14 @@ def main() -> int:
         help="Explicit pinned EVAS command; required unless --dry-run is used.",
     )
     parser.add_argument("--workers", type=int, default=1)
+    parser.add_argument(
+        "--api-max-inflight",
+        type=int,
+        help=(
+            "Maximum simultaneous provider requests. Defaults to --workers; "
+            "set independently to preserve local EVAS parallelism."
+        ),
+    )
     parser.add_argument("--stream", action="store_true", help="Use OpenAI-compatible SSE streaming responses.")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--resume", action="store_true")
@@ -2540,6 +3003,18 @@ def main() -> int:
         raise SystemExit(
             "campaign shared Docker image does not match --mini-swe-image: "
             f"expected={expected_mini_swe_image} observed={args.mini_swe_image}"
+        )
+    expected_noexec_image = (campaign.get("execution_config") or {}).get(
+        "mini_swe_noexec_image"
+    )
+    if (
+        expected_noexec_image
+        and args.mini_swe_noexec_image != expected_noexec_image
+    ):
+        raise SystemExit(
+            "campaign Agent-NoExec Docker image does not match "
+            "--mini-swe-noexec-image: "
+            f"expected={expected_noexec_image} observed={args.mini_swe_noexec_image}"
         )
     expected_evas_identity = (campaign.get("execution_config") or {}).get(
         "evas_identity"
@@ -2586,6 +3061,10 @@ def main() -> int:
         )
     if args.workers < 1:
         raise SystemExit("--workers must be at least 1")
+    if args.api_max_inflight is None:
+        args.api_max_inflight = args.workers
+    if args.api_max_inflight < 1:
+        raise SystemExit("--api-max-inflight must be at least 1")
     if min(
         args.agent_timeout_s,
         args.setup_timeout_s,
@@ -2597,10 +3076,19 @@ def main() -> int:
     key = "" if args.dry_run else load_key(args.api_key_file, args.api_key_env)
     if not args.dry_run:
         os.environ.pop(args.api_key_env, None)
-    client = None if args.dry_run else OpenAICompatible(
-        base_url=args.base_url, model=campaign["model"], api_key=key,
-        timeout_s=args.request_timeout_s, temperature=args.temperature, stream=args.stream,
-    )
+    client = None
+    if not args.dry_run:
+        client = ConcurrencyLimitedClient(
+            OpenAICompatible(
+                base_url=args.base_url,
+                model=campaign["model"],
+                api_key=key,
+                timeout_s=args.request_timeout_s,
+                temperature=args.temperature,
+                stream=args.stream,
+            ),
+            args.api_max_inflight,
+        )
     args.output.mkdir(parents=True, exist_ok=True)
     if args.workers == 1:
         results = [run_cell_preserving_failure(cell, args, client) for cell in cells]
@@ -2608,24 +3096,21 @@ def main() -> int:
         with ThreadPoolExecutor(max_workers=args.workers) as pool:
             results = list(pool.map(lambda cell: run_cell_preserving_failure(cell, args, client), cells))
     all_results = stored_results(args.output)
-    image_ids = sorted(
-        {
-            str((row.get("agent_scaffold") or {}).get("docker_image_id"))
-            for row in all_results
-            if isinstance(row.get("agent_scaffold"), dict)
-            and (row.get("agent_scaffold") or {}).get("docker_image_id")
-        }
-    )
+    image_summary = summarize_public_agent_images(all_results)
     summary = {
         "schema_version": "v4-calibration-run-summary-v1",
         "campaign": str(args.campaign),
         "dry_run": args.dry_run,
+        "concurrency": {
+            "cell_workers": args.workers,
+            "api_max_inflight": args.api_max_inflight,
+        },
         "evas_identity": args.evas_identity,
         "public_agent_environment": {
             "backend": args.mini_swe_sandbox if uses_mini_swe else None,
             "image": args.mini_swe_image if uses_mini_swe else None,
-            "observed_image_ids": image_ids,
-            "identity_consistent": len(image_ids) <= 1,
+            "noexec_image": args.mini_swe_noexec_image if uses_mini_swe else None,
+            **image_summary,
         },
         "result_count": len(all_results),
         "statuses": {},

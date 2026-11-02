@@ -27,7 +27,7 @@ All listed ports are electrical and must keep this order:
 
 ## Required Behavior
 - `P_RESET_CLEARS_STATE_AND_OBSERVABLES`: While rst is high at a rising clock edge, clear the stable count, out, err_metric, and progress.
-- `P_CORRECTED_OUTPUT_USES_SAMPLE_TARGET_AND_COEF`: At each enabled rising clock edge, compute the clipped coefficient and drive the clamped corrected sample from sample, target, and coef.
+- `P_CORRECTED_OUTPUT_USES_SAMPLE_TARGET_AND_COEF`: At each enabled positive clock edge, compute the clipped coefficient and drive the clamped corrected sample from sample, target, and coef.
 - `P_ERROR_METRIC_REPORTS_ABSOLUTE_ERROR`: Drive err_metric from the bounded absolute target-minus-sample error.
 - `P_PROGRESS_COUNTS_CONSECUTIVE_IN_WINDOW_SAMPLES`: Increment progress only for consecutive in-window sampled errors, clear it on an out-of-window sample, and saturate at ready_count.
 
@@ -42,3 +42,11 @@ The evaluator saves and may inspect these public trace signals: `time`, `clk`, `
 
 ## Output Contract
 Return only the Verilog-A source artifact(s) named in Section 1. The artifact(s) must compile without nonstandard include files, generated testbenches, undeclared helper modules outside the declared bundle, or changes to the public/evaluator decks.
+
+- V(target)-V(sample)
+
+- V(sample)+coeff*error
+
+- abs(error)/err_fullscale
+
+- stable_count/ready_count

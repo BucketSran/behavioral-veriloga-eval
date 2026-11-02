@@ -36,3 +36,9 @@ Use voltage-domain behavioral Verilog-A only. Do not use user `task`/`endtask`, 
 ## Output Contract
 
 Return only `event_reacquire_lock_detector.va` implementing the public module. The file must compile under Spectre-compatible Verilog-A and must not require additional modules, include files beyond standard disciplines, or testbench changes.
+
+- phase_error / metric_fullscale
+
+- good_count / lock_count
+
+- phase_error <= lock_window

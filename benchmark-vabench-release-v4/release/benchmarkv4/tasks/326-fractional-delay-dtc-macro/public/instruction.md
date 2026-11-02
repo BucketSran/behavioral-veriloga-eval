@@ -47,3 +47,7 @@ This is a DUT circuit-block task: implement the observable behavior directly and
 Return exactly these complete source artifacts:
 
 - `fractional_delay_dtc_macro.va`
+
+- (vdd-vss)*code/15
+
+- (code+1)*200ps

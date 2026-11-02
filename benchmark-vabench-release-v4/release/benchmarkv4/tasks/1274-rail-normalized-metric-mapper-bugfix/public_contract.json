@@ -124,7 +124,7 @@
   "properties": [
     {
       "id": "P_NORMALIZE_MEAS_RELATIVE_TO_THE_LOCAL",
-      "observable_contract": "Normalize meas relative to the local V(vdd,vss) span and vss rail.",
+      "observable_contract": "Compute `local_meas = V(meas) - V(vss)` and `local_meas / span`, then normalize by span.",
       "required_signals": [
         "time",
         "en",
@@ -163,7 +163,7 @@
     },
     {
       "id": "P_CLEAR_NORM_AND_VALID_WHILE_DISABLED",
-      "observable_contract": "Clear norm and valid while disabled or under the minimum supply span.",
+      "observable_contract": "Clear `norm` and `valid` whenever disabled or when above `span_max` is violated; keep checks `span_min <= span <= span_max`. Keep behavior that does not by itself clear clipped norm.",
       "required_signals": [
         "time",
         "en",

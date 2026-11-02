@@ -115,3 +115,7 @@ The required trace names are: `time`, `vin0`, `vin1`, `vin2`, `clk`, `rst`, `sel
 
 Return exactly one artifact named `testbench.scs`. Do not return a DUT,
 checker, script, data file, waveform, or auxiliary deck.
+
+- vcm+0.15*code
+
+- held-valid

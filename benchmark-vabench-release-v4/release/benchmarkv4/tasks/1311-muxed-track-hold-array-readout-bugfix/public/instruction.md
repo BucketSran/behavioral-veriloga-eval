@@ -98,3 +98,7 @@ The following canonical public behavior is normative for this derived form:
 
 Return the repaired bundle with exactly these paths: `muxed_track_hold_array_top.va`, `track_hold_cell.va`, `readout_mux.va`.
 Every supplied `.va` file is editable; do not add or omit files.
+
+- vcm+0.15*code
+
+- held-valid

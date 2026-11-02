@@ -169,6 +169,7 @@ def evaluate_cell(
         "task_id": cell["task_id"],
         "form": cell["form"],
         "mode": cell["mode"],
+        "experimental_arm": cell.get("experimental_arm"),
         "submission_status": result["status"],
         "termination_reason": result.get("termination_reason"),
         "submission_mode": result.get("submission_mode"),
@@ -242,50 +243,68 @@ def summarize(rows: list[dict[str, Any]], judge_kind: str) -> dict[str, Any]:
     for row in rows:
         grouped[f"form:{row['form']}"][row["judge_status"]] += 1
         grouped[f"mode:{row['mode']}"][row["judge_status"]] += 1
-    telemetry_by_mode = {}
-    for mode in sorted({str(row["mode"]) for row in rows}):
-        selected = [row for row in rows if row["mode"] == mode]
-        output = [int(row.get("output_tokens", row.get("working_tokens", 0)) or 0) for row in selected]
-        elapsed = [float(row["episode_elapsed_s"]) for row in selected if row.get("episode_elapsed_s") is not None]
-        telemetry_by_mode[mode] = {
-            "cell_count": len(selected),
-            "output_tokens_total": sum(output),
-            "output_tokens_median": statistics.median(output),
-            "working_tokens_total": sum(output),
-            "working_tokens_median": statistics.median(output),
-            "episode_elapsed_s_median": statistics.median(elapsed) if elapsed else None,
-            "model_calls_total": sum(int(row.get("telemetry", {}).get("model_calls", 0)) for row in selected),
-            "tool_calls_total": sum(int(row.get("telemetry", {}).get("tool_calls_total", 0)) for row in selected),
-            "evas_calls_total": sum(int(row.get("telemetry", {}).get("evas_calls", 0)) for row in selected),
-            "direct_evas_calls_total": sum(
-                int(row.get("evas_usage", {}).get("calls_executed", 0))
+        if row.get("experimental_arm"):
+            grouped[f"arm:{row['experimental_arm']}"][row["judge_status"]] += 1
+
+    def telemetry_by(field: str) -> dict[str, Any]:
+        telemetry = {}
+        values = sorted(
+            {str(row[field]) for row in rows if row.get(field) is not None}
+        )
+        for value in values:
+            selected = [row for row in rows if row.get(field) == value]
+            output = [
+                int(row.get("output_tokens", row.get("working_tokens", 0)) or 0)
                 for row in selected
-            ),
-            "direct_evas_successes_total": sum(
-                int(row.get("evas_usage", {}).get("calls_succeeded", 0))
+            ]
+            elapsed = [
+                float(row["episode_elapsed_s"])
                 for row in selected
-            ),
-            "direct_evas_failures_total": sum(
-                int(row.get("evas_usage", {}).get("calls_failed", 0))
-                for row in selected
-            ),
-            "direct_evas_timeouts_total": sum(
-                int(row.get("evas_usage", {}).get("calls_timed_out", 0))
-                for row in selected
-            ),
-            "legacy_feedback_calls_total": sum(
-                int(row.get("telemetry", {}).get("legacy_feedback_calls", 0))
-                for row in selected
-            ),
-            "provider_reasoning_tokens_total": sum(
-                int(row.get("telemetry", {}).get("provider_reasoning_tokens_total", 0))
-                for row in selected
-            ),
-            "budget_hit_model_calls": sum(
-                int(row.get("telemetry", {}).get("budget_hit_model_calls", 0))
-                for row in selected
-            ),
-        }
+                if row.get("episode_elapsed_s") is not None
+            ]
+            telemetry[value] = {
+                "cell_count": len(selected),
+                "output_tokens_total": sum(output),
+                "output_tokens_median": statistics.median(output),
+                "working_tokens_total": sum(output),
+                "working_tokens_median": statistics.median(output),
+                "episode_elapsed_s_median": statistics.median(elapsed) if elapsed else None,
+                "model_calls_total": sum(int(row.get("telemetry", {}).get("model_calls", 0)) for row in selected),
+                "tool_calls_total": sum(int(row.get("telemetry", {}).get("tool_calls_total", 0)) for row in selected),
+                "evas_calls_total": sum(int(row.get("telemetry", {}).get("evas_calls", 0)) for row in selected),
+                "direct_evas_calls_total": sum(
+                    int(row.get("evas_usage", {}).get("calls_executed", 0))
+                    for row in selected
+                ),
+                "direct_evas_successes_total": sum(
+                    int(row.get("evas_usage", {}).get("calls_succeeded", 0))
+                    for row in selected
+                ),
+                "direct_evas_failures_total": sum(
+                    int(row.get("evas_usage", {}).get("calls_failed", 0))
+                    for row in selected
+                ),
+                "direct_evas_timeouts_total": sum(
+                    int(row.get("evas_usage", {}).get("calls_timed_out", 0))
+                    for row in selected
+                ),
+                "legacy_feedback_calls_total": sum(
+                    int(row.get("telemetry", {}).get("legacy_feedback_calls", 0))
+                    for row in selected
+                ),
+                "provider_reasoning_tokens_total": sum(
+                    int(row.get("telemetry", {}).get("provider_reasoning_tokens_total", 0))
+                    for row in selected
+                ),
+                "budget_hit_model_calls": sum(
+                    int(row.get("telemetry", {}).get("budget_hit_model_calls", 0))
+                    for row in selected
+                ),
+            }
+        return telemetry
+
+    telemetry_by_mode = telemetry_by("mode")
+    telemetry_by_arm = telemetry_by("experimental_arm")
     return {
         "schema_version": "v4-calibration-score-report-v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -309,6 +328,7 @@ def summarize(rows: list[dict[str, Any]], judge_kind: str) -> dict[str, Any]:
         ),
         "breakdown": {key: dict(value) for key, value in sorted(grouped.items())},
         "telemetry_by_mode": telemetry_by_mode,
+        "telemetry_by_arm": telemetry_by_arm,
         "rows": rows,
     }
 

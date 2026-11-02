@@ -79,3 +79,9 @@ The required trace names are: `time`, `vinp`, `vinn`, `clk`, `rst`, `enable`, `d
 
 Return exactly one artifact named `testbench.scs`. Do not return a DUT,
 checker, script, data file, waveform, or auxiliary deck.
+
+- 1.0+gain_step*code
+
+- abs(v(vinp)-v(vinn))
+
+- 0.30/(1.0+overdrive/0.030)

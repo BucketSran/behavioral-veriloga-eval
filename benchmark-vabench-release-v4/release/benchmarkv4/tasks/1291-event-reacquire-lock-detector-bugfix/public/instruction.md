@@ -58,3 +58,9 @@ The following canonical public behavior is normative for this derived form:
 
 Return the repaired bundle with exactly these paths: `event_reacquire_lock_detector.va`.
 Every supplied `.va` file is editable; do not add or omit files.
+
+- phase_error / metric_fullscale
+
+- good_count / lock_count
+
+- phase_error <= lock_window

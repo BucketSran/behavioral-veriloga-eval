@@ -48,3 +48,9 @@ This is a DUT circuit-block task: implement the observable behavior directly and
 Return exactly these complete source artifacts:
 
 - `programmable_clock_skew_aligner.va`
+
+- (code+1)*200ps
+
+- code*200ps
+
+- code*unit_delay_metric

@@ -76,3 +76,13 @@ The required trace names are: `time`, `en`, `meas`, `norm`, `valid`, `vdd`, `vss
 
 Return exactly one artifact named `testbench.scs`. Do not return a DUT,
 checker, script, data file, waveform, or auxiliary deck.
+
+- local_meas = V(meas) - V(vss)
+
+- norm = vhi * clip01(local_meas / span)
+
+- span_min <= span <= span_max
+
+- above `span_max`
+
+- does not by itself clear clipped norm

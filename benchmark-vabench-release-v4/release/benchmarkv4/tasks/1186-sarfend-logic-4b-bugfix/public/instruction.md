@@ -64,3 +64,9 @@ On each rising `clks` crossing, publish the previous cycle DAC-P word on `dout0.
 
 Return the repaired bundle with exactly these paths: `sarfend_logic_4b.va`.
 Every supplied `.va` file is editable; do not add or omit files.
+
+- `dout3=dp4`, `dout2=dp3`, `dout1=dp2`, and `dout0=dp1`
+
+- `dp4=dm4=0` and `dp3=dm3=dp2=dm2=dp1=dm1=1`
+
+- consume the test override bits in the order `dtest3`, `dtest2`, `dtest1`, then `dtest0`

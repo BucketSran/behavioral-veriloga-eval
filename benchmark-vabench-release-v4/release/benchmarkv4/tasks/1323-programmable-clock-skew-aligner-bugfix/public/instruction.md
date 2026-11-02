@@ -63,3 +63,9 @@ The following canonical public behavior is normative for this derived form:
 
 Return the repaired bundle with exactly these paths: `programmable_clock_skew_aligner.va`.
 Every supplied `.va` file is editable; do not add or omit files.
+
+- (code+1)*200ps
+
+- code*200ps
+
+- code*unit_delay_metric

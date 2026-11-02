@@ -40,3 +40,13 @@ The evaluator saves and may inspect these public trace signals: `time`, `en`, `m
 
 ## Output Contract
 Return only the Verilog-A source artifact(s) named in Section 1. The artifact(s) must compile without nonstandard include files, generated testbenches, undeclared helper modules outside the declared bundle, or changes to the public/evaluator decks.
+
+- local_meas = V(meas) - V(vss)
+
+- norm = vhi * clip01(local_meas / span)
+
+- span_min <= span <= span_max
+
+- above `span_max`
+
+- does not by itself clear clipped norm

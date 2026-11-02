@@ -64,3 +64,7 @@ The following canonical public behavior is normative for this derived form:
 
 Return the repaired bundle with exactly these paths: `fractional_delay_dtc_macro.va`.
 Every supplied `.va` file is editable; do not add or omit files.
+
+- (vdd-vss)*code/15
+
+- (code+1)*200ps

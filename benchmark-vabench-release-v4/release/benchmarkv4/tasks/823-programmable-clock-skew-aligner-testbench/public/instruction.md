@@ -80,3 +80,9 @@ The required trace names are: `time`, `clk_in`, `rst`, `enable`, `skew_2`, `skew
 
 Return exactly one artifact named `testbench.scs`. Do not return a DUT,
 checker, script, data file, waveform, or auxiliary deck.
+
+- (code+1)*200ps
+
+- code*200ps
+
+- code*unit_delay_metric

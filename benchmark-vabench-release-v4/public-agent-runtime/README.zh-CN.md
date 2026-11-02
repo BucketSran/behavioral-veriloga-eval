@@ -29,7 +29,15 @@ sudo ./build.sh
 sudo ./verify.sh
 ```
 
-`verify.sh` 会实际运行一条 EVAS 仿真，并确认 Agent 能读取 `tran.csv`，而不只是得到 0/1。它还会检查题目只读、提交目录可写、EVAS 0.8.3 Rust core 可加载，以及镜像中没有预设的 evaluator 目录。
+默认情况下，验证脚本会在当前 runtime 目录下创建并自动清理 Docker bind mount
+所需的临时目录，以兼容 Docker Desktop 和 Colima。若需使用其他已共享的宿主机目录，
+可设置 `VABENCH_DOCKER_SHARED_TMPDIR`。
+
+`build.sh` 会生成配对的 `vabench-agent-runtime:0.8.4` 与
+`vabench-agent-runtime:0.8.4-noexec` 镜像。后者保留相同基础镜像、依赖锁、
+Shell 和 mini-SWE 运行环境，但移除 EVAS 包与命令，用于 Agent-NoExec 对照。
+
+`verify.sh` 会实际运行一条 EVAS 仿真，并确认 Agent 能读取 `tran.csv`，而不只是得到 0/1。它还会检查题目只读、提交目录可写、EVAS 0.8.4 Rust core 可加载、Agent-NoExec 镜像确实无法找到 EVAS 命令或 Python 模块，以及镜像中没有预设的 evaluator 目录。
 
 ## 3. 准备单题公开包
 

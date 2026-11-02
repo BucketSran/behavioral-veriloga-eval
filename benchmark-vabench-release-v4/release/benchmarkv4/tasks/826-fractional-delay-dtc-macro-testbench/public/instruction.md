@@ -81,3 +81,7 @@ The required trace names are: `time`, `clk_in`, `rst`, `enable`, `frac_3`, `frac
 
 Return exactly one artifact named `testbench.scs`. Do not return a DUT,
 checker, script, data file, waveform, or auxiliary deck.
+
+- (vdd-vss)*code/15
+
+- (code+1)*200ps

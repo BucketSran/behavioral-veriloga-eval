@@ -65,3 +65,9 @@ The following canonical public behavior is normative for this derived form:
 
 Return the repaired bundle with exactly these paths: `capacitive_feedback_amplifier_macro.va`.
 Every supplied `.va` file is editable; do not add or omit files.
+
+- 1.0+gain_step*code
+
+- dont apply an additional slewstep
+
+- donotapplyanadditionalslewstep

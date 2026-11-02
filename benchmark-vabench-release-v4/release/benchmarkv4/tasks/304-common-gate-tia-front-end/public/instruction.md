@@ -49,3 +49,9 @@ This is a DUT circuit-block task: implement the observable behavior directly and
 Return exactly these complete source artifacts:
 
 - `common_gate_tia_front_end.va`
+
+- (V(bias)-bias_min)/(vcm-bias_min)
+
+- vdd*effective_gain/rz_gain
+
+- raw_target

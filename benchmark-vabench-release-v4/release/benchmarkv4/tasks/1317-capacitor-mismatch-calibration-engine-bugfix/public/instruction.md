@@ -98,3 +98,7 @@ The following canonical public behavior is normative for this derived form:
 
 Return the repaired bundle with exactly these paths: `capacitor_mismatch_cal_engine_top.va`, `cal_code_accumulator.va`, `correction_metric_dac.va`.
 Every supplied `.va` file is editable; do not add or omit files.
+
+- cal_0+2*cal_1+4*cal_2+8*cal_3
+
+- code*corr_lsb

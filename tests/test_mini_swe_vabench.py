@@ -99,6 +99,15 @@ def artifact_gate(runtime: Path) -> dict:
     }
 
 
+def write_candidate_policy(runtime: Path, artifacts: list[str]) -> None:
+    evaluator = runtime / "evaluator"
+    evaluator.mkdir(parents=True, exist_ok=True)
+    (evaluator / "score_policy.json").write_text(
+        json.dumps({"candidate_artifacts": artifacts}),
+        encoding="utf-8",
+    )
+
+
 def test_mini_swe_bash_episode_runs_direct_evas_reads_output_and_submits(
     tmp_path: Path,
 ) -> None:
@@ -173,6 +182,117 @@ def test_mini_swe_bash_episode_runs_direct_evas_reads_output_and_submits(
     assert "time,vout" in (
         runtime / "public" / "evas-output" / "tran.csv"
     ).read_text()
+    assert (runtime / "evidence" / "trajectory.json").is_file()
+
+
+def test_mini_swe_optional_checker_feedback_runs_on_host_without_mounting_evaluator(
+    tmp_path: Path,
+) -> None:
+    module = load_module()
+    runtime = tmp_path / "runtime"
+    (runtime / "public" / "task").mkdir(parents=True)
+    (runtime / "public" / "task" / "instruction.md").write_text("public task")
+    (runtime / "public" / "submission").mkdir(parents=True)
+    (runtime / "evaluator").mkdir(parents=True)
+    (runtime / "evaluator" / "secret.txt").write_text("sealed")
+    fake_evas = tmp_path / "fake-evas"
+    fake_evas.write_text(
+        "#!/bin/bash\n"
+        "if [[ $1 == --version || $1 == --help ]]; then echo 'evas-test 1.0'; fi\n"
+    )
+    fake_evas.chmod(0o755)
+    feedback_calls = []
+
+    def checker_feedback(callback_runtime: Path) -> dict:
+        feedback_calls.append(callback_runtime)
+        return {
+            "status": "behavior_fail",
+            "diagnostics": [
+                "P_PHASE_CODE mismatch_count=1 expected=9 observed=8"
+            ],
+        }
+
+    provider = FakeProvider(
+        [
+            "printf 'module model; endmodule\\n' > public/submission/model.va",
+            "command -v vabench-check && vabench-check",
+            "vabench-submit",
+        ]
+    )
+
+    result = module.run_mini_swe_episode(
+        runtime=runtime,
+        prompt="Generate model.va.",
+        client=provider,
+        per_turn_max_tokens=4096,
+        agent_timeout_s=30,
+        request_timeout_s=10,
+        tool_timeout_s=10,
+        sandbox_backend="none",
+        evas_command=str(fake_evas),
+        checker_feedback=checker_feedback,
+        submission_gate=artifact_gate,
+        usage_parser=usage_parser,
+        response_metadata=response_metadata,
+        trajectory_path=runtime / "evidence" / "trajectory.json",
+    )
+
+    assert feedback_calls == [runtime.resolve()]
+    assert result["submitted"] is True
+    assert result["checker_feedback_enabled"] is True
+    assert result["checker_feedback_calls"] == 1
+    assert [row["kind"] for row in result["commands"]] == [
+        "bash",
+        "bash-checker",
+        "bash-submit",
+    ]
+    checker_observation = provider.calls[2]["messages"][-1]["content"]
+    assert "P_PHASE_CODE mismatch_count=1" in checker_observation
+    assert "sealed" not in checker_observation
+    assert result["evaluator_mounted"] is False
+
+
+def test_mini_swe_noexec_arm_uses_same_scaffold_without_evas_capability(
+    tmp_path: Path,
+) -> None:
+    module = load_module()
+    runtime = tmp_path / "runtime"
+    (runtime / "public" / "task").mkdir(parents=True)
+    (runtime / "public" / "task" / "instruction.md").write_text("public task")
+    (runtime / "public" / "submission").mkdir(parents=True)
+    provider = FakeProvider(
+        [
+            "command -v evas || true",
+            "printf 'module model; endmodule\\n' > public/submission/model.va",
+            "vabench-submit",
+        ]
+    )
+
+    result = module.run_mini_swe_episode(
+        runtime=runtime,
+        prompt="Generate model.va.",
+        client=provider,
+        per_turn_max_tokens=4096,
+        agent_timeout_s=30,
+        request_timeout_s=10,
+        tool_timeout_s=10,
+        sandbox_backend="none",
+        evas_command="",
+        executable_feedback=False,
+        submission_gate=artifact_gate,
+        usage_parser=usage_parser,
+        response_metadata=response_metadata,
+        trajectory_path=runtime / "evidence" / "trajectory.json",
+    )
+
+    first_observation = provider.calls[1]["messages"][-1]["content"]
+    assert "<output>\n\n</output>" in first_observation
+    assert result["submitted"] is True
+    assert result["scaffold"] == module.MINI_SWE_SCAFFOLD_ID
+    assert result["executable_feedback"] is False
+    assert result["evas_invocations"] == []
+    assert "VABENCH_EVAS:" not in json.dumps(result["messages"])
+    assert (runtime / "public" / "submission" / "model.va").is_file()
     assert (runtime / "evidence" / "trajectory.json").is_file()
 
 
@@ -479,7 +599,239 @@ def test_shared_docker_image_executes_real_adapter_contract(tmp_path: Path) -> N
         environment.close()
 
     assert result["returncode"] == 0
-    assert '"package_version":"0.8.3"' in result["output"].replace(" ", "")
+    assert '"package_version":"0.8.4"' in result["output"].replace(" ", "")
+    assert serialized["image_id"].startswith("sha256:")
+    assert (runtime / "public" / "submission" / "model.va").is_file()
+
+
+def test_mini_swe_candidate_hash_records_unchanged_repeats(tmp_path: Path) -> None:
+    module = load_module()
+    runtime = tmp_path / "runtime"
+    (runtime / "public" / "task").mkdir(parents=True)
+    (runtime / "public" / "submission").mkdir(parents=True)
+    write_candidate_policy(runtime, ["model.va"])
+    (runtime / "public" / "submission" / "model.va").write_text(
+        "module unchanged; endmodule\n",
+        encoding="utf-8",
+    )
+    fake_evas = tmp_path / "fake-evas"
+    fake_evas.write_text("#!/bin/bash\nexit 0\n", encoding="utf-8")
+    fake_evas.chmod(0o755)
+    environment = module.VaBenchBashEnvironment(
+        runtime,
+        timeout_s=10,
+        sandbox_backend="none",
+        evas_command=str(fake_evas),
+        submission_gate=artifact_gate,
+    )
+
+    first = environment.execute(
+        {"command": "evas -o /tmp/vabench-visible/evas-output --spectre-strict"}
+    )
+    second = environment.execute(
+        {"command": "evas -o /tmp/vabench-visible/evas-output --spectre-strict"}
+    )
+
+    assert first["returncode"] == 0
+    assert second["returncode"] == 0
+    assert len(environment.evas_invocations) == 2
+    initial_hash = module._candidate_tree_hash(runtime / "public", ["model.va"])
+    for row in environment.evas_invocations:
+        assert row["candidate_tree_sha256"] == initial_hash
+
+
+def test_mini_swe_candidate_hash_tracks_modifications(tmp_path: Path) -> None:
+    module = load_module()
+    runtime = tmp_path / "runtime"
+    (runtime / "public" / "task").mkdir(parents=True)
+    (runtime / "public" / "submission").mkdir(parents=True)
+    write_candidate_policy(runtime, ["model.va"])
+    submission = runtime / "public" / "submission"
+    (submission / "model.va").write_text("module before; endmodule\n", encoding="utf-8")
+    fake_evas = tmp_path / "fake-evas"
+    fake_evas.write_text("#!/bin/bash\nexit 0\n", encoding="utf-8")
+    fake_evas.chmod(0o755)
+    environment = module.VaBenchBashEnvironment(
+        runtime,
+        timeout_s=10,
+        sandbox_backend="none",
+        evas_command=str(fake_evas),
+        submission_gate=artifact_gate,
+    )
+
+    environment.execute({"command": "evas -o /tmp/vabench-visible/evas-output"})
+    first = environment.evas_invocations[-1]["candidate_tree_sha256"]
+    (submission / "model.va").write_text("module after; endmodule\n", encoding="utf-8")
+    environment.execute({"command": "evas -o /tmp/vabench-visible/evas-output"})
+    second = environment.evas_invocations[-1]["candidate_tree_sha256"]
+
+    assert first != second
+
+
+def test_mini_swe_candidate_hash_multi_file_and_no_hash_contamination(
+    tmp_path: Path,
+) -> None:
+    module = load_module()
+    runtime = tmp_path / "runtime"
+    (runtime / "public" / "task").mkdir(parents=True)
+    (runtime / "public" / "submission").mkdir(parents=True)
+    write_candidate_policy(runtime, ["model.va", "params.va"])
+    submission = runtime / "public" / "submission"
+    (submission / "model.va").write_text("module model; endmodule\n", encoding="utf-8")
+    (submission / "params.va").write_text("param a = 1;\n", encoding="utf-8")
+    fake_evas = tmp_path / "fake-evas"
+    fake_evas.write_text("#!/bin/bash\nexit 0\n", encoding="utf-8")
+    fake_evas.chmod(0o755)
+    environment = module.VaBenchBashEnvironment(
+        runtime,
+        timeout_s=10,
+        sandbox_backend="none",
+        evas_command=str(fake_evas),
+        submission_gate=artifact_gate,
+    )
+
+    baseline = module._candidate_tree_hash(runtime / "public", ["model.va", "params.va"])
+    environment.execute({"command": "evas -o /tmp/vabench-visible/evas-output"})
+    first = environment.evas_invocations[-1]["candidate_tree_sha256"]
+
+    (submission / "params.va").write_text("param a = 2;\n", encoding="utf-8")
+    environment.execute({"command": "evas -o /tmp/vabench-visible/evas-output"})
+    changed = environment.evas_invocations[-1]["candidate_tree_sha256"]
+
+    (runtime / "public" / "evas-output" / "noise.txt").write_text(
+        "noise\n", encoding="utf-8"
+    )
+    environment.execute({"command": "evas -o /tmp/vabench-visible/evas-output"})
+    noise_only = environment.evas_invocations[-1]["candidate_tree_sha256"]
+
+    assert first == baseline
+    assert changed != first
+    assert noise_only == changed
+
+
+def test_mini_swe_candidate_hash_unchanged_by_same_content_rewrite(
+    tmp_path: Path,
+) -> None:
+    module = load_module()
+    runtime = tmp_path / "runtime"
+    (runtime / "public" / "task").mkdir(parents=True)
+    (runtime / "public" / "submission").mkdir(parents=True)
+    write_candidate_policy(runtime, ["model.va"])
+    submission = runtime / "public" / "submission"
+    (submission / "model.va").write_text("module model; endmodule\n", encoding="utf-8")
+    fake_evas = tmp_path / "fake-evas"
+    fake_evas.write_text("#!/bin/bash\nexit 0\n", encoding="utf-8")
+    fake_evas.chmod(0o755)
+    environment = module.VaBenchBashEnvironment(
+        runtime,
+        timeout_s=10,
+        sandbox_backend="none",
+        evas_command=str(fake_evas),
+        submission_gate=artifact_gate,
+    )
+
+    environment.execute({"command": "evas -o /tmp/vabench-visible/evas-output"})
+    first = environment.evas_invocations[-1]["candidate_tree_sha256"]
+    (submission / "model.va").write_text("module model; endmodule\n", encoding="utf-8")
+    environment.execute({"command": "evas -o /tmp/vabench-visible/evas-output"})
+    second = environment.evas_invocations[-1]["candidate_tree_sha256"]
+
+    assert first == second
+
+
+def test_mini_swe_candidate_hash_stable_with_empty_or_missing_artifacts(tmp_path: Path) -> None:
+    module = load_module()
+    runtime = tmp_path / "runtime"
+    (runtime / "public" / "task").mkdir(parents=True)
+    (runtime / "public" / "submission").mkdir(parents=True)
+    fake_evas = tmp_path / "fake-evas"
+    fake_evas.write_text("#!/bin/bash\nexit 0\n", encoding="utf-8")
+    fake_evas.chmod(0o755)
+    environment = module.VaBenchBashEnvironment(
+        runtime,
+        timeout_s=10,
+        sandbox_backend="none",
+        evas_command=str(fake_evas),
+        submission_gate=artifact_gate,
+    )
+
+    environment.execute({"command": "evas -o /tmp/vabench-visible/evas-output"})
+    first = environment.evas_invocations[-1]["candidate_tree_sha256"]
+    environment.execute({"command": "evas -o /tmp/vabench-visible/evas-output"})
+    second = environment.evas_invocations[-1]["candidate_tree_sha256"]
+
+    assert first == second
+    assert first == module._candidate_tree_hash(runtime / "public", [])
+
+
+def test_mini_swe_candidate_hash_distinguishes_compound_command_rewrites(tmp_path: Path) -> None:
+    module = load_module()
+    runtime = tmp_path / "runtime"
+    (runtime / "public" / "task").mkdir(parents=True)
+    (runtime / "public" / "submission").mkdir(parents=True)
+    write_candidate_policy(runtime, ["model.va"])
+    submission = runtime / "public" / "submission"
+    (submission / "model.va").write_text("module first; endmodule\n", encoding="utf-8")
+    fake_evas = tmp_path / "fake-evas"
+    fake_evas.write_text("#!/bin/bash\nexit 0\n", encoding="utf-8")
+    fake_evas.chmod(0o755)
+    environment = module.VaBenchBashEnvironment(
+        runtime,
+        timeout_s=10,
+        sandbox_backend="none",
+        evas_command=str(fake_evas),
+        submission_gate=artifact_gate,
+    )
+
+    command = (
+        "evas -o /tmp/vabench-visible/evas-output && "
+        "printf 'module second; endmodule\n' > public/submission/model.va && "
+        "evas -o /tmp/vabench-visible/evas-output"
+    )
+    environment.execute({"command": command})
+
+    assert len(environment.evas_invocations) == 2
+    first, second = environment.evas_invocations
+    assert first["candidate_tree_sha256"] != second["candidate_tree_sha256"]
+
+
+def test_shared_noexec_image_has_no_evas_capability(tmp_path: Path) -> None:
+    if os.environ.get("VABENCH_TEST_DOCKER_RUNTIME") != "1":
+        pytest.skip("real shared-image test is enabled by public-agent-runtime CI")
+    module = load_module()
+    runtime = tmp_path / "runtime"
+    (runtime / "public" / "task").mkdir(parents=True)
+    (runtime / "public" / "task" / "instruction.md").write_text("public task")
+    (runtime / "public" / "submission").mkdir(parents=True)
+    environment = module.VaBenchBashEnvironment(
+        runtime,
+        timeout_s=30,
+        sandbox_backend="docker",
+        evas_command="",
+        executable_feedback=False,
+        docker_image=os.environ.get(
+            "VABENCH_TEST_NOEXEC_DOCKER_IMAGE", module.DEFAULT_NOEXEC_DOCKER_IMAGE
+        ),
+        submission_gate=artifact_gate,
+    )
+    try:
+        environment.preflight()
+        result = environment.execute(
+            {
+                "command": (
+                    "! command -v evas && "
+                    "python3 -c 'import importlib.util; "
+                    "assert importlib.util.find_spec(\"evas\") is None' && "
+                    "printf 'module model; endmodule\\n' > public/submission/model.va"
+                )
+            }
+        )
+        serialized = environment.serialize()["info"]["config"]["environment"]
+    finally:
+        environment.close()
+
+    assert result["returncode"] == 0
+    assert serialized["executable_feedback"] is False
     assert serialized["image_id"].startswith("sha256:")
     assert (runtime / "public" / "submission" / "model.va").is_file()
 

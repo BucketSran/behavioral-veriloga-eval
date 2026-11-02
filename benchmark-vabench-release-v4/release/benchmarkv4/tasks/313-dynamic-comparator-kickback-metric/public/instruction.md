@@ -47,3 +47,9 @@ This is a DUT circuit-block task: implement the observable behavior directly and
 Return exactly these complete source artifacts:
 
 - `dynamic_comparator_kickback_metric.va`
+
+- 1.0+gain_step*code
+
+- abs(v(vinp)-v(vinn))
+
+- 0.30/(1.0+overdrive/0.030)

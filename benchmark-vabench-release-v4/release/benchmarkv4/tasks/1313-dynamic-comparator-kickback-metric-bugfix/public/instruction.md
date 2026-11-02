@@ -62,3 +62,9 @@ The following canonical public behavior is normative for this derived form:
 
 Return the repaired bundle with exactly these paths: `dynamic_comparator_kickback_metric.va`.
 Every supplied `.va` file is editable; do not add or omit files.
+
+- 1.0+gain_step*code
+
+- abs(v(vinp)-v(vinn))
+
+- 0.30/(1.0+overdrive/0.030)

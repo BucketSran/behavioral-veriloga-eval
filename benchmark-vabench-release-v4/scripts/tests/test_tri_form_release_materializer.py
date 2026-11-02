@@ -812,17 +812,27 @@ def test_pre_r50_prompt_assets_remain_reproducible_as_legacy_inline_components(
     assert "skills" not in modes["G1"]
 
 
-def test_direct_wrapper_defines_unambiguous_artifact_protocol(tmp_path: Path) -> None:
-    install_prompt_assets(tmp_path)
+def test_direct_wrapper_defers_to_single_runtime_transport(tmp_path: Path) -> None:
+    install_prompt_assets(tmp_path, "r52")
+    wrapper = (tmp_path / "prompt_modes" / "wrappers" / "direct_wrapper.md").read_text(encoding="utf-8")
+    normalized = " ".join(wrapper.split())
+
+    assert "output transport provided by the evaluation runtime" in normalized
+    assert "Follow the runtime's transport-specific instruction exactly" in normalized
+    assert "Do not emit an alternate marker format" in normalized
+    assert "exact file names" in normalized
+    assert "explanatory prose" in normalized
+    assert "does not execute the candidate or provide checker feedback" in normalized
+    assert "VABENCH_ARTIFACT" not in wrapper
+
+
+def test_sealed_revisions_retain_marker_based_direct_wrapper(tmp_path: Path) -> None:
+    install_prompt_assets(tmp_path, "r51")
     wrapper = (tmp_path / "prompt_modes" / "wrappers" / "direct_wrapper.md").read_text(encoding="utf-8")
 
     assert '`<<<VABENCH_ARTIFACT path="`' in wrapper
-    assert "exact declared relative artifact" in wrapper
-    assert "exactly three `>` characters" in wrapper
     assert "`<<<END_VABENCH_ARTIFACT>>>`" in wrapper
-    assert "Only `VABENCH_ARTIFACT` is a valid submission marker" in wrapper
-    assert "Do not wrap the artifact body in Markdown code fences" in wrapper
-    assert "Do not include explanatory prose" in wrapper
+    assert "output transport provided by the evaluation runtime" not in wrapper
 
 
 def test_agentic_wrapper_discloses_evas_spectre_portability_boundary(

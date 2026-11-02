@@ -59,3 +59,13 @@ The evaluator saves and may inspect these public trace signals: `time`, `en`, `m
 
 Return the repaired bundle with exactly these paths: `rail_normalized_metric_mapper.va`.
 Every supplied `.va` file is editable; do not add or omit files.
+
+- local_meas = V(meas) - V(vss)
+
+- norm = vhi * clip01(local_meas / span)
+
+- span_min <= span <= span_max
+
+- above `span_max`
+
+- does not by itself clear clipped norm

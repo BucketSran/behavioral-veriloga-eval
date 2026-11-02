@@ -18,6 +18,7 @@ import shlex
 import shutil
 import signal
 import subprocess
+import sys
 import threading
 import time
 from types import SimpleNamespace
@@ -26,7 +27,8 @@ from typing import Any, Callable
 
 MINI_SWE_AGENT_VERSION = "2.4.5"
 MINI_SWE_SCAFFOLD_ID = "mini-swe-agent-2.4.5-vabench-docker-evas-v3"
-DEFAULT_DOCKER_IMAGE = "vabench-agent-runtime:0.8.3"
+DEFAULT_DOCKER_IMAGE = "vabench-agent-runtime:0.8.4"
+DEFAULT_NOEXEC_DOCKER_IMAGE = "vabench-agent-runtime:0.8.4-noexec"
 COMMAND_OUTPUT_CAPTURE_BYTES = 1 * 1024 * 1024
 COMMAND_OUTPUT_HEAD_BYTES = 64 * 1024
 MODEL_OUTPUT_BYTES = 12_000
@@ -35,6 +37,7 @@ SUBMISSION_QUOTA_BYTES = 64 * 1024 * 1024
 WORK_QUOTA_BYTES = 512 * 1024 * 1024
 # Bash reports file-size limits in 1024-byte blocks on the supported hosts.
 COMMAND_FILE_SIZE_BLOCKS = 64 * 1024
+CANDIDATE_ARTIFACT_MISSING = "<missing-candidate-artifact>"
 BASH_TOOL = {
     "type": "function",
     "function": {
@@ -56,6 +59,12 @@ SYSTEM_PROMPT = (
     "Use the bash tool to inspect the public task, create or edit only declared "
     "artifacts under public/submission/, invoke the pinned EVAS executable directly "
     "when useful, inspect its public output yourself, and submit."
+)
+
+CHECKER_FEEDBACK_SYSTEM_SUFFIX = (
+    " This diagnostic condition also provides vabench-check, which runs the "
+    "canonical behavioral checker on the current submission and returns only "
+    "property-level verdicts and diagnostics."
 )
 
 BASH_CONTRACT = r"""
@@ -81,6 +90,48 @@ Commands:
 - Follow public/task/evas_runtime.json and invoke `evas` directly. The sandboxed
   launcher keeps its documented `/tmp/vabench-visible/evas-output` destination
   inside this task container; inspect logs and tran.csv there yourself.
+- `vabench-submit` is a real command in PATH. Run it after every declared artifact
+  is complete. A rejected submission returns diagnostics and the episode continues.
+
+The container has no network. Do not create symlinks or modify public/task/.
+</vabench_bash_contract>
+""".strip()
+
+CHECKER_FEEDBACK_CONTRACT = r"""
+<vabench_checker_feedback_contract>
+This is an explicitly oracle-assisted diagnostic condition, not the primary
+Agentic condition. `vabench-check` evaluates the current declared artifacts
+with the canonical behavioral checker and returns a compact property-level
+verdict. Invoke it at least once before submission; you may revise and invoke
+it again. Evaluator files, checker source, gold implementations, and private
+traces remain unavailable in the shell.
+</vabench_checker_feedback_contract>
+""".strip()
+
+NOEXEC_SYSTEM_PROMPT = (
+    "You are a behavioral Verilog-A engineer operating in an isolated shell. "
+    "Use the bash tool to inspect the public task, create or edit only declared "
+    "artifacts under public/submission/, reason from the public specification and "
+    "files without executable simulator feedback, and submit."
+)
+
+NOEXEC_BASH_CONTRACT = r"""
+<vabench_bash_contract>
+This is an interactive bash-only episode. Every assistant turn must contain at
+least one bash tool call.
+
+Workspace:
+- public/task/ is read-only public task material.
+- public/skills/ is read-only and exists only in skill-enabled modes; read
+  public/skills/<id>/SKILL.md before applying a skill.
+- public/submission/ is the only writable candidate-artifact directory.
+- work/ is writable scratch space and is never scored.
+- evaluator, gold implementations, checker source, private mutations, final
+  score cases, and EVAS execution are not available in this shell.
+
+Commands:
+- Use ordinary non-interactive shell commands to inspect public/task/ and edit
+  public/submission/.
 - `vabench-submit` is a real command in PATH. Run it after every declared artifact
   is complete. A rejected submission returns diagnostics and the episode continues.
 
@@ -164,6 +215,57 @@ def _skill_tree_sha(root: Path) -> str:
             digest.update(b"\0")
             digest.update(item.read_bytes())
             digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def _normalize_candidate_artifact(raw: str) -> str:
+    path = Path(raw.replace("\\", "/"))
+    if path.is_absolute() or ".." in path.parts:
+        raise ValueError(f"invalid candidate artifact path: {raw!r}")
+    if path.parts[:2] == ("public", "submission"):
+        path = Path(*path.parts[2:])
+    elif path.parts[:1] == ("submission",):
+        path = Path(*path.parts[1:])
+    if not path.parts:
+        raise ValueError(f"invalid candidate artifact path: {raw!r}")
+    return path.as_posix()
+
+
+def _load_candidate_artifacts(runtime: Path) -> list[str]:
+    policy_path = runtime / "evaluator" / "score_policy.json"
+    if not policy_path.is_file():
+        return []
+    try:
+        payload = json.loads(policy_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    candidate_artifacts = payload.get("candidate_artifacts")
+    if not isinstance(candidate_artifacts, list):
+        return []
+    return sorted(
+        {
+            _normalize_candidate_artifact(str(raw))
+            for raw in candidate_artifacts
+            if isinstance(raw, str) and raw.strip()
+        }
+    )
+
+
+def _candidate_tree_hash(root: Path, candidate_artifacts: list[str]) -> str:
+    digest = hashlib.sha256()
+    payload_lines: list[str] = []
+    for artifact in candidate_artifacts:
+        resolved = root / "submission" / artifact
+        if resolved.is_file():
+            payload_lines.append(
+                f"{artifact} {hashlib.sha256(resolved.read_bytes()).hexdigest()}"
+            )
+        else:
+            payload_lines.append(f"{artifact} {CANDIDATE_ARTIFACT_MISSING}")
+    payload = "\n".join(sorted(payload_lines)) + ("\n" if payload_lines else "")
+    if not payload:
+        return digest.hexdigest()
+    digest.update(payload.encode("utf-8"))
     return digest.hexdigest()
 
 
@@ -395,10 +497,12 @@ class VaBenchBashEnvironment:
         timeout_s: float,
         sandbox_backend: str,
         evas_command: str,
+        executable_feedback: bool = True,
         docker_command: str = "docker",
         docker_image: str = "",
         deadline_monotonic: float | None = None,
         submission_gate: Callable[[Path], dict[str, Any]],
+        checker_feedback: Callable[[Path], dict[str, Any]] | None = None,
     ) -> None:
         self.runtime = runtime.resolve()
         self.workspace = (self.runtime / "public").resolve()
@@ -420,11 +524,16 @@ class VaBenchBashEnvironment:
         if not public_alias.exists() and not public_alias.is_symlink():
             public_alias.symlink_to(".", target_is_directory=True)
         self.submit_sentinel = scratch_root / ".tmp" / "submission-request"
+        self.checker_sentinel = scratch_root / ".tmp" / "checker-request"
         self.evas_command = evas_command
+        self.executable_feedback = bool(executable_feedback)
+        self.checker_feedback = checker_feedback
+        self.checker_feedback_calls = 0
         self.docker_command = docker_command
         self.docker_image = docker_image
         self.docker_image_id: str | None = None
         self._docker_container: str | None = None
+        self.candidate_artifacts = _load_candidate_artifacts(self.runtime)
         self._docker_name = (
             "vabench-"
             + hashlib.sha256(str(self.runtime).encode()).hexdigest()[:12]
@@ -438,6 +547,10 @@ class VaBenchBashEnvironment:
         self._submitted_exception: type | None = None
 
     def _install_shell_tools(self) -> None:
+        self.evas_read_roots: list[Path] = []
+        if not self.executable_feedback:
+            self._install_submit_tool()
+            return
         if self.config.sandbox_backend == "docker":
             if not self.docker_image:
                 raise ValueError("Docker backend requires a shared environment image")
@@ -476,8 +589,30 @@ class VaBenchBashEnvironment:
             "#!/bin/bash\n"
             "set -e\n"
             "invocation_id=\"${BASHPID:-$$}-${RANDOM}\"\n"
+            "workspace_root=\"$(pwd)\"\n"
             f"telemetry_prefix={shlex.quote(telemetry_prefix)}\n"
-            "printf '\\036%s:%s:START\\n' \"$telemetry_prefix\" \"$invocation_id\" >&9\n"
+            "candidate_tree_sha256() {\n"
+            "  local payload=\"\"\n"
+            "  local artifact\n"
+            "  local resolved\n"
+            "  local artifact_hash\n"
+            "  for artifact in ${VABENCH_CANDIDATE_ARTIFACTS:-}; do\n"
+            "    [[ -z \"$artifact\" ]] && continue\n"
+            "    resolved=\"${workspace_root}/public/submission/${artifact}\"\n"
+            "    if [[ -f \"$resolved\" ]]; then\n"
+            "      artifact_hash=\"$(sha256sum \"$resolved\" | awk '{print $1}')\"\n"
+            "    else\n"
+            "      artifact_hash=" + shlex.quote(CANDIDATE_ARTIFACT_MISSING) + "\n"
+            "    fi\n"
+            "    payload+=\"${artifact} ${artifact_hash}\"$'\\n'\n"
+            "  done\n"
+            "  if [[ -z \"$payload\" ]]; then\n"
+            "    printf '%s' \"$VABENCH_CANDIDATE_ARTIFACT_HASH\"\n"
+            "    return\n"
+            "  fi\n"
+            "  printf '%s' \"$payload\" | sort | sha256sum | awk '{print $1}'\n"
+            "}\n"
+            "printf '\\036%s:%s:START:%s\\n' \"$telemetry_prefix\" \"$invocation_id\" \"$(candidate_tree_sha256)\" >&9\n"
             "finish_telemetry() {\n"
             "  rc=$?\n"
             "  printf '\\036%s:%s:END:%s\\n' \"$telemetry_prefix\" \"$invocation_id\" \"$rc\" >&9\n"
@@ -503,6 +638,12 @@ class VaBenchBashEnvironment:
             encoding="utf-8",
         )
         evas_wrapper.chmod(0o755)
+
+        self._install_submit_tool()
+        if self.checker_feedback is not None:
+            self._install_checker_tool()
+
+    def _install_submit_tool(self) -> None:
         submit = self.tools_dir / "vabench-submit"
         submit.write_text(
             "#!/bin/bash\n"
@@ -511,6 +652,16 @@ class VaBenchBashEnvironment:
             encoding="utf-8",
         )
         submit.chmod(0o755)
+
+    def _install_checker_tool(self) -> None:
+        checker = self.tools_dir / "vabench-check"
+        checker.write_text(
+            "#!/bin/bash\n"
+            "set -e\n"
+            ": > \"${VABENCH_CHECKER_SENTINEL:?}\"\n",
+            encoding="utf-8",
+        )
+        checker.chmod(0o755)
 
     @staticmethod
     def _evas_read_roots(executable: Path, arguments: list[str]) -> list[Path]:
@@ -572,6 +723,13 @@ class VaBenchBashEnvironment:
                         "image_id": self.docker_image_id,
                         "network": False,
                         "evaluator_mounted": False,
+                        "executable_feedback": self.executable_feedback,
+                        "checker_feedback_enabled": self.checker_feedback is not None,
+                        "installed_tools": sorted(
+                            path.name
+                            for path in self.tools_dir.iterdir()
+                            if path.is_file() and os.access(path, os.X_OK)
+                        ),
                         "resource_limits": {
                             "command_output_capture_bytes": COMMAND_OUTPUT_CAPTURE_BYTES,
                             "command_file_size_blocks": COMMAND_FILE_SIZE_BLOCKS,
@@ -594,11 +752,15 @@ class VaBenchBashEnvironment:
         # readable when sandbox-exec would deny the actual filesystem access.
         # Probe a real directory read so macOS and namespace-based backends are
         # validated against the isolation property we rely on.
+        executable_probe = (
+            "command -v evas >/dev/null && evas --version >/dev/null"
+            if self.executable_feedback
+            else "! command -v evas >/dev/null"
+        )
         argv = self._sandbox_argv(
             "test -r public/task/instruction.md "
             "&& { test ! -d public/skills || test -r public/skills/SNAPSHOT_MANIFEST.json; } "
-            "&& command -v evas >/dev/null "
-            "&& evas --version >/dev/null "
+            f"&& {executable_probe} "
             "&& ! /bin/ls ../evaluator >/dev/null 2>&1"
         )
         probe = subprocess.run(
@@ -648,7 +810,17 @@ class VaBenchBashEnvironment:
                 "--env",
                 "TMPDIR=/tmp",
                 "--env",
+                "VABENCH_EVAS_OUTPUT_ROOT=/workspace/work/evas-output",
+                "--env",
                 "VABENCH_SUBMIT_SENTINEL=/workspace/work/.tmp/submission-request",
+                "--env",
+                "VABENCH_CHECKER_SENTINEL=/workspace/work/.tmp/checker-request",
+                "--env",
+                f"VABENCH_CANDIDATE_ARTIFACTS={' '.join(self.candidate_artifacts)}",
+                "--env",
+                "VABENCH_CANDIDATE_ARTIFACT_HASH=" + _candidate_tree_hash(
+                    self.workspace, self.candidate_artifacts
+                ),
                 self._docker_container,
                 "/usr/bin/timeout",
                 "--signal=TERM",
@@ -791,6 +963,20 @@ class VaBenchBashEnvironment:
         )
 
     def _submit(self) -> dict[str, Any]:
+        if self.checker_feedback is not None and self.checker_feedback_calls == 0:
+            return {
+                "output": json.dumps(
+                    {
+                        "status": "submission_rejected",
+                        "diagnostics": [
+                            "diagnostic arm requires at least one vabench-check call"
+                        ],
+                    },
+                    sort_keys=True,
+                ),
+                "returncode": 2,
+                "exception_info": "",
+            }
         gate = self.submission_gate(self.runtime)
         if not gate.get("passed"):
             return {
@@ -815,9 +1001,31 @@ class VaBenchBashEnvironment:
             }
         )
 
+    def _check(self) -> dict[str, Any]:
+        if self.checker_feedback is None:
+            return {
+                "output": json.dumps({"status": "checker_feedback_unavailable"}),
+                "returncode": 127,
+                "exception_info": "",
+            }
+        started = time.monotonic()
+        feedback = self.checker_feedback(self.runtime)
+        self.checker_feedback_calls += 1
+        return {
+            "output": json.dumps(feedback, sort_keys=True),
+            "returncode": 0,
+            "exception_info": "",
+            "elapsed_s": time.monotonic() - started,
+        }
+
     def _shell_env(self) -> dict[str, str]:
         if self.config.sandbox_backend == "docker":
-            return dict(os.environ)
+            env = dict(os.environ)
+            env["VABENCH_CANDIDATE_ARTIFACTS"] = " ".join(self.candidate_artifacts)
+            env["VABENCH_CANDIDATE_ARTIFACT_HASH"] = _candidate_tree_hash(
+                self.runtime / "public", self.candidate_artifacts
+            )
+            return env
         return {
             "PATH": f"{self.tools_dir}:/usr/bin:/bin:/usr/sbin:/sbin",
             "HOME": str(self.workspace),
@@ -826,6 +1034,11 @@ class VaBenchBashEnvironment:
             "LC_ALL": "C.UTF-8",
             "VABENCH_EVAS_OUTPUT_ROOT": str(self.workspace / "evas-output"),
             "VABENCH_SUBMIT_SENTINEL": str(self.submit_sentinel),
+            "VABENCH_CHECKER_SENTINEL": str(self.checker_sentinel),
+            "VABENCH_CANDIDATE_ARTIFACTS": " ".join(self.candidate_artifacts),
+            "VABENCH_CANDIDATE_ARTIFACT_HASH": _candidate_tree_hash(
+                self.workspace, self.candidate_artifacts
+            ),
         }
 
     @staticmethod
@@ -972,7 +1185,7 @@ class VaBenchBashEnvironment:
     ) -> str:
         marker = re.compile(
             rf"\x1eVABENCH_EVAS:{re.escape(self._evas_telemetry_token)}:"
-            r"(?P<invocation_id>[^:\r\n]+):(?P<event>START|END)(?::(?P<returncode>-?\d+))?\r?\n?"
+            r"(?P<invocation_id>[^:\r\n]+):(?P<event>START|END)(?::(?P<data>[^\r\n]*))?\r?\n?"
         )
         active: dict[str, dict[str, Any]] = {}
         order: list[str] = []
@@ -981,6 +1194,7 @@ class VaBenchBashEnvironment:
             if match.group("event") == "START":
                 if invocation_id not in active:
                     active[invocation_id] = {
+                        "candidate_tree_sha256": match.group("data") or None,
                         "invocation_id": invocation_id,
                         "shell_command": command,
                         "shell_elapsed_s": elapsed_s,
@@ -990,7 +1204,11 @@ class VaBenchBashEnvironment:
             row = active.get(invocation_id)
             if row is None:
                 continue
-            returncode = int(match.group("returncode") or 0)
+            data = match.group("data") or ""
+            if data.isdigit():
+                returncode = int(data)
+            else:
+                returncode = None
             row["returncode"] = returncode
             row["status"] = "succeeded" if returncode == 0 else "failed"
         for invocation_id in order:
@@ -1008,6 +1226,10 @@ class VaBenchBashEnvironment:
         kind = "bash"
         try:
             output = self._run_sandboxed(command)
+            if self.checker_sentinel.is_file():
+                self.checker_sentinel.unlink(missing_ok=True)
+                kind = "bash-checker"
+                output = self._check()
             if self.submit_sentinel.is_file():
                 self.submit_sentinel.unlink(missing_ok=True)
                 kind = "bash-submit"
@@ -1206,6 +1428,8 @@ def run_mini_swe_episode(
     tool_timeout_s: float,
     sandbox_backend: str,
     evas_command: str,
+    executable_feedback: bool = True,
+    checker_feedback: Callable[[Path], dict[str, Any]] | None = None,
     docker_command: str = "docker",
     docker_image: str = DEFAULT_DOCKER_IMAGE,
     submission_gate: Callable[[Path], dict[str, Any]],
@@ -1221,6 +1445,8 @@ def run_mini_swe_episode(
         timeout_s=min(float(tool_timeout_s), float(agent_timeout_s)),
         sandbox_backend=sandbox_backend,
         evas_command=evas_command,
+        executable_feedback=executable_feedback,
+        checker_feedback=checker_feedback,
         docker_command=docker_command,
         docker_image=docker_image,
         deadline_monotonic=deadline,
@@ -1238,10 +1464,15 @@ def run_mini_swe_episode(
             response_metadata=response_metadata,
         )
         model.bind_mini_swe_protocol(observation_formatter, FormatError)
+        system_prompt = SYSTEM_PROMPT if executable_feedback else NOEXEC_SYSTEM_PROMPT
+        bash_contract = BASH_CONTRACT if executable_feedback else NOEXEC_BASH_CONTRACT
+        if checker_feedback is not None:
+            system_prompt += CHECKER_FEEDBACK_SYSTEM_SUFFIX
+            bash_contract += "\n\n" + CHECKER_FEEDBACK_CONTRACT
         agent = DefaultAgent(
             model,
             environment,
-            system_template=SYSTEM_PROMPT,
+            system_template=system_prompt,
             instance_template="{{task}}",
             step_limit=0,
             cost_limit=0.0,
@@ -1252,7 +1483,7 @@ def run_mini_swe_episode(
             max_consecutive_format_errors=0,
             output_path=trajectory_path,
         )
-        task = prompt.rstrip() + "\n\n" + BASH_CONTRACT
+        task = prompt.rstrip() + "\n\n" + bash_contract
         outcome = agent.run(task)
         gate = submission_gate(runtime)
         serialized = agent.serialize()
@@ -1260,9 +1491,12 @@ def run_mini_swe_episode(
         return {
             "scaffold": MINI_SWE_SCAFFOLD_ID,
             "scaffold_version": MINI_SWE_AGENT_VERSION,
+            "executable_feedback": executable_feedback,
+            "checker_feedback_enabled": checker_feedback is not None,
+            "checker_feedback_calls": environment.checker_feedback_calls,
             "bash_tool_schema_sha256": _json_digest(BASH_TOOL),
-            "system_prompt_sha256": hashlib.sha256(SYSTEM_PROMPT.encode()).hexdigest(),
-            "bash_contract_sha256": hashlib.sha256(BASH_CONTRACT.encode()).hexdigest(),
+            "system_prompt_sha256": hashlib.sha256(system_prompt.encode()).hexdigest(),
+            "bash_contract_sha256": hashlib.sha256(bash_contract.encode()).hexdigest(),
             "exit_status": outcome.get("exit_status"),
             "submission": outcome.get("submission", ""),
             "submitted": bool(explicit_submission and gate.get("passed")),

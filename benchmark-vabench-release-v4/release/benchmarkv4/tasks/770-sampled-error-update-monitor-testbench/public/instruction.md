@@ -48,7 +48,7 @@ hierarchical/private nodes, or use checker/gold/internal files.
 Create stimulus and save traces sufficient for the fixed evaluator oracle to check:
 
 - `P_RESET_CLEARS_STATE_AND_OBSERVABLES`: exercise and make observable: While rst is high at a rising clock edge, clear the stable count, out, err_metric, and progress. Required traces: `clk`, `coef`, `err_metric`, `out`, `progress`, `rst`, `sample`, `target`, `time`.
-- `P_CORRECTED_OUTPUT_USES_SAMPLE_TARGET_AND_COEF`: exercise and make observable: At each enabled rising clock edge, compute the clipped coefficient and drive the clamped corrected sample from sample, target, and coef. Required traces: `clk`, `coef`, `err_metric`, `out`, `progress`, `rst`, `sample`, `target`, `time`.
+- `P_CORRECTED_OUTPUT_USES_SAMPLE_TARGET_AND_COEF`: exercise and make observable: At each enabled positive clock edge, compute the clipped coefficient and drive the clamped corrected sample from sample, target, and coef. Required traces: `clk`, `coef`, `err_metric`, `out`, `progress`, `rst`, `sample`, `target`, `time`.
 - `P_ERROR_METRIC_REPORTS_ABSOLUTE_ERROR`: exercise and make observable: Drive err_metric from the bounded absolute target-minus-sample error. Required traces: `clk`, `coef`, `err_metric`, `out`, `progress`, `rst`, `sample`, `target`, `time`.
 - `P_PROGRESS_COUNTS_CONSECUTIVE_IN_WINDOW_SAMPLES`: exercise and make observable: Increment progress only for consecutive in-window sampled errors, clear it on an out-of-window sample, and saturate at ready_count. Required traces: `clk`, `coef`, `err_metric`, `out`, `progress`, `rst`, `sample`, `target`, `time`.
 
@@ -56,7 +56,7 @@ Create stimulus and save traces sufficient for the fixed evaluator oracle to che
 The following canonical public behavior is normative for this derived form:
 
 - `P_RESET_CLEARS_STATE_AND_OBSERVABLES`: While rst is high at a rising clock edge, clear the stable count, out, err_metric, and progress.
-- `P_CORRECTED_OUTPUT_USES_SAMPLE_TARGET_AND_COEF`: At each enabled rising clock edge, compute the clipped coefficient and drive the clamped corrected sample from sample, target, and coef.
+- `P_CORRECTED_OUTPUT_USES_SAMPLE_TARGET_AND_COEF`: At each enabled positive clock edge, compute the clipped coefficient and drive the clamped corrected sample from sample, target, and coef.
 - `P_ERROR_METRIC_REPORTS_ABSOLUTE_ERROR`: Drive err_metric from the bounded absolute target-minus-sample error.
 - `P_PROGRESS_COUNTS_CONSECUTIVE_IN_WINDOW_SAMPLES`: Increment progress only for consecutive in-window sampled errors, clear it on an out-of-window sample, and saturate at ready_count.
 
@@ -77,3 +77,11 @@ The required trace names are: `time`, `clk`, `coef`, `err_metric`, `out`, `progr
 
 Return exactly one artifact named `testbench.scs`. Do not return a DUT,
 checker, script, data file, waveform, or auxiliary deck.
+
+- V(target)-V(sample)
+
+- V(sample)+coeff*error
+
+- abs(error)/err_fullscale
+
+- stable_count/ready_count

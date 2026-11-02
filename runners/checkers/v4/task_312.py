@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import math
+from bisect import bisect_left
 
 from ..api import Checker
 from .stimulus_relative import crossings, require_signals, sample
@@ -25,12 +26,23 @@ VDD = 0.9
 VSS = 0.0
 VCM = 0.45
 SKEW_LIMIT = 40e-3
+PROBE_SUPPORT_S = 0.24e-9
+MIN_LOW_SKEW_CHECKS = 4
 
 
 def _sample(rows: list[dict[str, float]], signal: str, time_s: float) -> float:
     value = sample(rows, signal, time_s)
     assert value is not None
     return float(value)
+
+
+def _has_probe_support(times: list[float], time_s: float) -> bool:
+    index = bisect_left(times, time_s)
+    return any(
+        abs(times[candidate] - time_s) <= PROBE_SUPPORT_S
+        for candidate in (index - 1, index)
+        if 0 <= candidate < len(times)
+    )
 
 
 def _transition_value(
@@ -76,13 +88,15 @@ def check_v4_312_interleaved_adc_skew_monitor(rows: list[dict[str, float]]) -> t
     consecutive = 0
     checked = skew_errors = mag_errors = alarm_errors = 0
     reset_clear = late_reset_clear = late_reset_violation = disabled_clear = False
-    high_skew_seen = low_skew_seen = alarm_seen = False
+    high_skew_seen = alarm_seen = False
+    high_skew_checks = low_skew_checks = 0
     first_high_alarm_low_seen = False
     first_mismatch = ""
     saw_active = False
     event_index = 0
     tick_index = max(0, math.ceil((float(rows[0]["time"]) - TIME_EPS_S) / TICK_S))
     stop_time = float(rows[-1]["time"])
+    times = [float(row["time"]) for row in rows]
 
     def update_ready_target(event_time_s: float) -> None:
         nonlocal ready_start, ready_target, ready_start_time
@@ -172,10 +186,12 @@ def check_v4_312_interleaved_adc_skew_monitor(rows: list[dict[str, float]]) -> t
         expected_mag = 0.5 * (abs(expected_sa - VCM) + abs(expected_sb - VCM))
         if expected_skew > SKEW_LIMIT:
             consecutive += 1
+            high_skew_checks += 1
             high_skew_seen = True
         else:
             consecutive = 0
-            low_skew_seen = True
+            if _has_probe_support(times, probe_time):
+                low_skew_checks += 1
         expected_alarm = consecutive >= 2
         if expected_skew > SKEW_LIMIT and consecutive == 1 and not observed_alarm:
             first_high_alarm_low_seen = True
@@ -213,7 +229,7 @@ def check_v4_312_interleaved_adc_skew_monitor(rows: list[dict[str, float]]) -> t
         and not late_reset_violation
         and disabled_clear
         and high_skew_seen
-        and low_skew_seen
+        and low_skew_checks >= MIN_LOW_SKEW_CHECKS
         and alarm_seen
         and first_high_alarm_low_seen
         and skew_errors == 0
@@ -224,7 +240,9 @@ def check_v4_312_interleaved_adc_skew_monitor(rows: list[dict[str, float]]) -> t
         f"v4_312 checked={checked} reset_clear={reset_clear} late_reset_clear={late_reset_clear} "
         f"late_reset_violation={late_reset_violation} "
         f"disabled_clear={disabled_clear} "
-        f"high_skew={high_skew_seen} low_skew={low_skew_seen} alarm_seen={alarm_seen} "
+        f"high_skew={high_skew_seen} low_skew={low_skew_checks >= MIN_LOW_SKEW_CHECKS} "
+        f"high_skew_checks={high_skew_checks} low_skew_checks={low_skew_checks} "
+        f"alarm_seen={alarm_seen} "
         f"first_high_alarm_low={first_high_alarm_low_seen} "
         f"skew_errors={skew_errors} mag_errors={mag_errors} alarm_errors={alarm_errors}"
     )

@@ -302,6 +302,24 @@ def test_task312_reference_result_is_independent_of_solver_row_density(step_ns: 
     assert "alarm_errors=0" in note
 
 
+def test_task312_rejects_sparse_low_skew_coverage() -> None:
+    rows = _synthetic_rows(0.02, alarm_after_one=False)
+    low_probe_times_ns = [13.75 + 0.5 * index for index in range(9)]
+    sparse_rows = [
+        row
+        for row in rows
+        if all(abs(row["time"] / NS - probe_ns) > 0.241 for probe_ns in low_probe_times_ns)
+    ]
+
+    ok, note = check_v4_312_interleaved_adc_skew_monitor(sparse_rows)
+
+    assert not ok, note
+    assert "low_skew=False" in note
+    assert "low_skew_checks=0" in note
+    assert "skew_errors=0" in note
+    assert "alarm_errors=0" in note
+
+
 @pytest.mark.parametrize("step_ns", [0.02, 0.37])
 def test_task312_rejects_alarm_after_one_tick_on_different_grids(step_ns: float) -> None:
     ok, note = check_v4_312_interleaved_adc_skew_monitor(

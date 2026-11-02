@@ -147,7 +147,7 @@
   "properties": [
     {
       "id": "P_ON_EACH_RISING_CLOCK_CROSSING_COMPUTE",
-      "observable_contract": "On each rising clock crossing, compute a local affine calibration transform from raw, gain_ctrl, and offset_ctrl while reset is low and enable is high.",
+      "observable_contract": "On only on each rising clk crossing, compute a local affine calibration transform from raw, gain_ctrl, and offset_ctrl while reset is low and enable is high.",
       "required_signals": [
         "time",
         "clk",
@@ -192,7 +192,7 @@
     },
     {
       "id": "P_EXPOSE_A_BOUNDED_RESIDUAL_METRIC_FOR",
-      "observable_contract": "Expose a bounded residual metric for the transform magnitude.",
+      "observable_contract": "Expose a bounded residual metric `clip01(abs(transformed - V(raw)) / resid_fullscale`.)",
       "required_signals": [
         "time",
         "clk",

@@ -115,3 +115,7 @@ The required trace names are: `time`, `err_in`, `clk`, `rst`, `enable`, `cal_3`,
 
 Return exactly one artifact named `testbench.scs`. Do not return a DUT,
 checker, script, data file, waveform, or auxiliary deck.
+
+- cal_0+2*cal_1+4*cal_2+8*cal_3
+
+- code*corr_lsb

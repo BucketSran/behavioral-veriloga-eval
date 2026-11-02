@@ -76,7 +76,55 @@ The runner uses wall-clock time as the primary episode stopping rule. The
 `--per-turn-max-tokens` value is passed to the provider as a per-call
 `max_tokens` cap and is reported as telemetry; accumulated token usage does not
 terminate an episode. Provider context-window failures and single-call output
-limit stops are recorded as separate termination reasons.
+limit stops are recorded as separate termination reasons. There is no fixed
+revision-count or tool-call-count budget.
+
+`--workers` controls concurrent cells and local work. Use
+`--api-max-inflight` to cap provider requests independently after running
+`operations/calibration_pilot/calibrate_provider_concurrency.py`. Provider
+timing, timeout, transport-tool, and error-attribution requirements are defined
+in
+[`operations/calibration_pilot/PROVIDER_EVALUATION_PROTOCOL.md`](../operations/calibration_pilot/PROVIDER_EVALUATION_PROTOCOL.md).
+
+## Executable-feedback control
+
+`--comparison-profile executable-feedback-control` creates three matched arms:
+
+- `OneShot`: G0 direct one-shot generation;
+- `Agent-NoExec`: the G2 mini-SWE scaffold and public workspace, with EVAS,
+  public simulator diagnostics, and waveforms absent;
+- `Agentic`: the same G2 mini-SWE scaffold and public workspace, with pinned
+  EVAS execution, diagnostics, and waveforms available.
+
+Agent-NoExec uses the paired
+`vabench-agent-runtime:0.8.4-noexec` image. The image has the same base,
+dependency lock, shell, and mini-SWE controller, but the `evas-sim` package,
+`evas` executable, runtime descriptor, and EVAS-specific prompt contract are
+removed. All arms use the same configured private final judge outside the
+model-visible container. The campaign records the judge-command hash and the
+single controlled difference.
+
+The last 50 complete families are selected deterministically with
+`--family-range 351-400`; unlike `--sample-families 50`, this is not random:
+
+```bash
+python3 benchmark-vabench-release-v4/runners/run_benchmarkv4_campaign.py \
+  --release benchmark-vabench-release-v4/release/benchmarkv4-r51 \
+  --family-range 351-400 \
+  --comparison-profile executable-feedback-control \
+  --model MODEL_ID \
+  --base-url API_BASE_URL \
+  --api-key-file /path/to/key.txt \
+  --evas-command "$(pwd)/.venv/bin/evas" \
+  --final-judge-command "python3 /path/to/private_spectre_adapter.py" \
+  --agent-timeout-s 5400 \
+  --per-turn-max-tokens 65536 \
+  --workers 12 \
+  --output-root /path/to/output
+```
+
+With all three task forms, one repetition contains 50 families, 150 tasks, and
+450 cells.
 
 Dry-run preflight without API credentials:
 

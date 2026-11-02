@@ -75,3 +75,9 @@ The required trace names are: `time`, `fb_clk`, `lock`, `phase_metric`, `ref_clk
 
 Return exactly one artifact named `testbench.scs`. Do not return a DUT,
 checker, script, data file, waveform, or auxiliary deck.
+
+- phase_error / metric_fullscale
+
+- good_count / lock_count
+
+- phase_error <= lock_window

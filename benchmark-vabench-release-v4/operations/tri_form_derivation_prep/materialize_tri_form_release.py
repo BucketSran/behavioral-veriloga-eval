@@ -51,6 +51,7 @@ PROMPT_ASSETS = PREP_ROOT / "prompt_assets"
 SKILLS_ROOT = PACKAGE_ROOT.parent / "skills"
 SKILL_IDS = ("veriloga", "vabench-feedback")
 REAL_SKILL_REVISIONS = frozenset({"r50", "r51"})
+LEGACY_MARKER_WRAPPER_REVISIONS = frozenset(DEFAULT_OUTPUTS)
 REAL_SKILL_MODES = {
     "G0": {"process": "direct_one_shot", "skills": [], "evas_cli": False},
     "G1": {"process": "direct_one_shot", "skills": ["veriloga"], "evas_cli": False},
@@ -1219,7 +1220,14 @@ def install_prompt_assets(
     if missing_sources:
         raise SystemExit(f"prompt component source(s) missing: {missing_sources}")
     for component_id in component_metadata:
-        source = sources[component_id]
+        source = (
+            PROMPT_ASSETS / "wrappers" / "direct_wrapper_legacy_markers.md"
+            if (
+                component_id == "direct_wrapper.md"
+                and release_revision in LEGACY_MARKER_WRAPPER_REVISIONS
+            )
+            else sources[component_id]
+        )
         destination = (
             output
             / "prompt_modes"

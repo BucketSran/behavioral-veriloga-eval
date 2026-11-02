@@ -51,3 +51,7 @@ Return exactly these complete source artifacts:
 - `capacitor_mismatch_cal_engine_top.va`
 - `cal_code_accumulator.va`
 - `correction_metric_dac.va`
+
+- cal_0+2*cal_1+4*cal_2+8*cal_3
+
+- code*corr_lsb

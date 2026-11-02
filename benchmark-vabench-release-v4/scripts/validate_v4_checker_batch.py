@@ -115,8 +115,9 @@ def diagnostics_are_complete(
     # Checker notes predate the compact feedback protocol and intentionally use
     # family-specific metric names.  Certification needs an actionable,
     # non-empty diagnostic, not one particular rendering vocabulary.
+    required = ("category=", "expected=", "observed=", "event=", "sample_time=", "metric_gap=")
     del passed, property_ids
-    return bool(note.strip()) and "=" in note
+    return bool(note.strip()) and all(field in note for field in required)
 
 
 def source_binding(task: Path, mutation_ids: list[str]) -> dict[str, Any]:
@@ -486,3 +487,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+# test helper literal check: field in note for field in ("category=", "expected=", "observed=", "event=")

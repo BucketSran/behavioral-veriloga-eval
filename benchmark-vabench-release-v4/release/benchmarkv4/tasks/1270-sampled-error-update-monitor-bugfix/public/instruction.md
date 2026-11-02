@@ -34,7 +34,7 @@ Preserve this exact artifact and module interface:
 The repaired bundle must satisfy every public property:
 
 - `P_RESET_CLEARS_STATE_AND_OBSERVABLES`: restore: While rst is high at a rising clock edge, clear the stable count, out, err_metric, and progress. Required traces: `clk`, `coef`, `err_metric`, `out`, `progress`, `rst`, `sample`, `target`, `time`.
-- `P_CORRECTED_OUTPUT_USES_SAMPLE_TARGET_AND_COEF`: restore: At each enabled rising clock edge, compute the clipped coefficient and drive the clamped corrected sample from sample, target, and coef. Required traces: `clk`, `coef`, `err_metric`, `out`, `progress`, `rst`, `sample`, `target`, `time`.
+- `P_CORRECTED_OUTPUT_USES_SAMPLE_TARGET_AND_COEF`: restore: At each enabled positive clock edge, compute the clipped coefficient and drive the clamped corrected sample from sample, target, and coef. Required traces: `clk`, `coef`, `err_metric`, `out`, `progress`, `rst`, `sample`, `target`, `time`.
 - `P_ERROR_METRIC_REPORTS_ABSOLUTE_ERROR`: restore: Drive err_metric from the bounded absolute target-minus-sample error. Required traces: `clk`, `coef`, `err_metric`, `out`, `progress`, `rst`, `sample`, `target`, `time`.
 - `P_PROGRESS_COUNTS_CONSECUTIVE_IN_WINDOW_SAMPLES`: restore: Increment progress only for consecutive in-window sampled errors, clear it on an out-of-window sample, and saturate at ready_count. Required traces: `clk`, `coef`, `err_metric`, `out`, `progress`, `rst`, `sample`, `target`, `time`.
 
@@ -42,7 +42,7 @@ The repaired bundle must satisfy every public property:
 The following canonical public behavior is normative for this derived form:
 
 - `P_RESET_CLEARS_STATE_AND_OBSERVABLES`: While rst is high at a rising clock edge, clear the stable count, out, err_metric, and progress.
-- `P_CORRECTED_OUTPUT_USES_SAMPLE_TARGET_AND_COEF`: At each enabled rising clock edge, compute the clipped coefficient and drive the clamped corrected sample from sample, target, and coef.
+- `P_CORRECTED_OUTPUT_USES_SAMPLE_TARGET_AND_COEF`: At each enabled positive clock edge, compute the clipped coefficient and drive the clamped corrected sample from sample, target, and coef.
 - `P_ERROR_METRIC_REPORTS_ABSOLUTE_ERROR`: Drive err_metric from the bounded absolute target-minus-sample error.
 - `P_PROGRESS_COUNTS_CONSECUTIVE_IN_WINDOW_SAMPLES`: Increment progress only for consecutive in-window sampled errors, clear it on an out-of-window sample, and saturate at ready_count.
 
@@ -60,3 +60,11 @@ The evaluator saves and may inspect these public trace signals: `time`, `clk`, `
 
 Return the repaired bundle with exactly these paths: `sampled_error_update_monitor.va`.
 Every supplied `.va` file is editable; do not add or omit files.
+
+- V(target)-V(sample)
+
+- V(sample)+coeff*error
+
+- abs(error)/err_fullscale
+
+- stable_count/ready_count

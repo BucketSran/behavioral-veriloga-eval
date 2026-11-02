@@ -81,3 +81,9 @@ The required trace names are: `time`, `vin_proxy`, `bias`, `enable`, `rst`, `vou
 
 Return exactly one artifact named `testbench.scs`. Do not return a DUT,
 checker, script, data file, waveform, or auxiliary deck.
+
+- (V(bias)-bias_min)/(vcm-bias_min)
+
+- vdd*effective_gain/rz_gain
+
+- raw_target

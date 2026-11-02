@@ -14,7 +14,7 @@ from pathlib import PurePosixPath
 from typing import Any
 
 
-REQUIRED_EVAS_VERSION = "0.8.3"
+REQUIRED_EVAS_VERSION = "0.8.4"
 
 
 class CaseOutcome(str, Enum):

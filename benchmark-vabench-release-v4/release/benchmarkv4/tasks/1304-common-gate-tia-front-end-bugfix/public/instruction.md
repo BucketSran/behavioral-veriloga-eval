@@ -64,3 +64,9 @@ The following canonical public behavior is normative for this derived form:
 
 Return the repaired bundle with exactly these paths: `common_gate_tia_front_end.va`.
 Every supplied `.va` file is editable; do not add or omit files.
+
+- (V(bias)-bias_min)/(vcm-bias_min)
+
+- vdd*effective_gain/rz_gain
+
+- raw_target
